@@ -7,16 +7,10 @@
       </el-descriptions-item>
       <el-descriptions-item v-if="pic.VisibleName">
         <template slot="label">{{pic.VisibleName}}</template>
-        <img :src="'data:image/png;base64,'+pic.Value" alt="照片" style="width: 180px;">
+        <img :src="'data:image/png;base64,'+pic.Value" alt="照片" style="width: 100px;">
       </el-descriptions-item>
     </el-descriptions>
-    <!-- <el-descriptions class="margin-top" :column="3" border v-if="data">
-      <el-descriptions-item>
-        <template slot="label">{{pic.VisibleName}}</template>
-        <img :src="'data:image/png;base64,'+pic.Value" alt="照片" style="width: 180px;">
-      </el-descriptions-item>
-    </el-descriptions> -->
-    <el-result icon="success" title="信息已确认" v-show="confirmed"></el-result>
+    <el-result icon="success" title="学籍信息已确认" v-show="confirmed"></el-result>
     <el-button
       type="primary"
       @click="submit()"
@@ -24,7 +18,7 @@
       v-show="!confirmed"
       :disabled="btnDisabled"
     >确认信息</el-button>
-    <el-button type="info" plain @click="queSubmit()" v-show="!confirmed">错误反馈</el-button>
+    <el-button type="info" plain @click="dialog = true" v-show="!confirmed">错误反馈</el-button>
     <el-drawer
       title="学籍信息错误反馈提示"
       :visible.sync="dialog"
@@ -58,17 +52,17 @@
 export default {
   data() {
     return {
-      dialog: false,
-      loading: false,
-      confirmed: "",
-      btnDisabled: true,
-      dialogTableVisible: false,
-      data: {},
-      pic: {},
-      blockDataInfo: []
+      dialog: false,//错误反馈显示
+      loading: false,//form加载
+      confirmed: "",//学籍确认状态
+      btnDisabled: true,//确认信息按钮禁用
+      dialogTableVisible: false,//交易详情显示
+      data: {},//学籍信息数据,除去照片信息
+      pic: {},//学籍信息的照片信息数据
+      blockDataInfo: []//交易详情信息数据
     };
   },
-  props: ["sendDataToChid2"],
+  props: ["xjConfirmed"],//拿到infoConfirmed页面学籍确认状态
   methods: {
     //获取文件
     // Base64ToBlob(dataurl) {
@@ -87,6 +81,7 @@ export default {
     //   theBlob.name = fileName;
     //   return theBlob;
     // },
+    //将文件Url转为文件
     dataURLtoFile(dataurl, filename) {
       let arr = dataurl.split(","),
         bstr = atob(arr[0]),
@@ -97,10 +92,7 @@ export default {
       }
       return new File([u8arr], filename, { type: "enc" });
     },
-    //反馈
-    queSubmit() {
-      this.dialog = true;
-    },
+    //利用a标签下载文件
     downloadFile(Url, filename) {
       const eleLink = document.createElement("a");
       eleLink.download = filename;
@@ -121,9 +113,7 @@ export default {
     },
     //确认学籍
     submit() {
-      this.$confirm(
-        "请确认当前系统内的学籍信息准确无误, 是否继续确认?",
-        "提示",
+      this.$confirm( "请确认当前系统内的学籍信息准确无误, 是否继续确认?", "提示",
         {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
@@ -132,6 +122,7 @@ export default {
       )
         .then(() => {
           this.loading = true;
+          //先new一个文件
           this.axios({
             method: "post",
             url:
@@ -141,30 +132,25 @@ export default {
               Authorization: "token " + JSON.parse(localStorage.getItem("jw_student_file")).token
             }
           })
-            .then(response => {
+            .then((response) => {
+              // 成功后确认学籍信息
               var data = new FormData();
-              data.append(
-                "dataFile",
-                this.dataURLtoFile(response.data.data.DataFile, "学业文件")
-              );
+              data.append( "dataFile", this.dataURLtoFile(response.data.data.DataFile, "学业文件") );
               data.append("condMap", "{\"SchoolCode\": 1,\"StaffID\": " + JSON.parse(localStorage.getItem("jw_student_file")).staffID + "}");
               this
                 .axios({
                   method: "put",
-                  url:
-                    "https://api.hduhelp.com/gormja_wrapper/confirm?topic=profile",
-                  headers: {
-                    Authorization: "token " + JSON.parse(localStorage.getItem("jw_student_file")).token
-                  },
+                  url: "https://api.hduhelp.com/gormja_wrapper/confirm?topic=profile",
+                  headers: { Authorization: "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
                   data
                 })
                 .then((response2) => {
+                  // 整理交易详情信息,放到blockDataInfo[]
                   var block = response2.data.data.TransactionDetail.detail.result[0]
                   var blockName = Object.keys(block)
                   const translation = {
                     blockHash: "区块哈希",
                     blockNumber: "交易号",
-                    // hash: "交易号",
                     blockTimestamp: "区块时间",
                     blockWriteTime: "写入时间",
                     hash: "交易内容"
@@ -175,23 +161,17 @@ export default {
                       name: translation[blockName[i]]
                     })
                   }
-                  console.log(this.blockData);
-                  console.log(this.blockDataInfo);
+                  //改变数据库中学籍确认状态
                   this.axios({
                     method: "post",
                     url: "https://api.limkim.xyz/changeXj",
                     data: { staffID: JSON.parse(localStorage.getItem("jw_student_file")).staffID, confirmed: true }
                   })
-                    .then((response) => {
-                      this.file = this.dataURLtoFile(
-                        response2.data.data.DataFile,
-                        "学业文件"
-                      );
+                    .then(() => {
+                      //最后更新页面中的全局file
+                      this.file = this.dataURLtoFile( response2.data.data.DataFile, "学业文件" );
                       var Url = URL.createObjectURL(this.file);
-                      this
-                        .$confirm(
-                          "学籍信息确认成功！请务必下载并保存好您的学业文件,以免档案丢失将无法正常使用本系统",
-                          "提示",
+                      this.$confirm( "学籍信息确认成功！请务必下载并保存好您的学业文件,以免档案丢失将无法正常使用本系统", "提示",
                           {
                             confirmButtonText: "确定并下载",
                             cancelButtonText: "查看此次交易详情",
@@ -224,12 +204,12 @@ export default {
                       this.loading = false
                     });
                 })
-                .catch(error => {
+                .catch(() => {
                   this.$message.error("出错啦,请稍后再试");
                   this.loading = false;
                 });
             })
-            .catch(error => {
+            .catch(() => {
               this.$message.error("出错啦,请稍后再试");
               this.loading = false;
             });
@@ -243,8 +223,8 @@ export default {
     }
   },
   mounted() {
-    //拿学籍信息
-    if (JSON.stringify(this.data) === "{}" && JSON.parse(localStorage.getItem("jw_student_file")).staffID !== null) {
+    //加载页面的时候拿学籍信息
+    if (JSON.stringify(this.data) === "{}" && JSON.parse(localStorage.getItem("jw_student_file")).staffID !== undefined) {
       this.loading = true;
       this.axios({
         method: "post",
@@ -259,16 +239,16 @@ export default {
         })
       })
         .then((response) => {
-          this.confirmed = this.sendDataToChid2;
+          this.confirmed = this.xjConfirmed;
           this.$emit("func2", this.confirmed);
           this.pic = response.data.data[0].Value.Photo;
-          delete response.data.data[0].Value.Photo;
+          delete response.data.data[0].Value.Photo;//将照片信息单独拿出放到pic
           this.data = response.data.data[0].Value;
           this.loading = false;
           this.btnDisabled = false;
         })
-        .catch(error => {
-          this.confirmed = this.sendDataToChid2;
+        .catch(() => {
+          this.confirmed = this.xjConfirmed;
           this.$emit("func2", this.confirmed);
           this.$message.error("获取学籍信息出错啦,请稍后再试");
           this.loading = false;

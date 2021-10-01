@@ -25,8 +25,8 @@
       <router-view
         @func="getFile"
         @func2="getConfirmed"
-        :sendDataToChid="sendDataToChid"
-        :sendDataToChid2="sendDataToChid2"
+        :globalFile="file"
+        :xjConfirmed="xjConfirmed"
       ></router-view>
     </el-form>
   </div>
@@ -35,13 +35,12 @@
 export default {
   data() {
     return {
-      activeIndex: "1",
-      loading: false,
-      diaLoading: false,
-      confirmed: ""
+      activeIndex: "1",//上边导航默认选中值
+      loading: false,//form加载
+      confirmed: ""//学籍确认状态
     };
   },
-  props: ["sendDataToChid", "sendDataToChid2", "wh"],
+  props: ["file", "xjConfirmed", "wh"],//拿到student页面传来的数据
   methods: {
     getFile(file) {
       this.$emit("func", file)
@@ -83,14 +82,14 @@ export default {
       }
     },
   },
-  watch: {   //监听路由变化
+  watch: {//监听路由变化
     $route() {
       this.redirect()
     },
   },
   mounted() {
     document.querySelector(".el-form").style.maxHeight = this.wh - 190 + "px";
-    this.confirmed = this.sendDataToChid2;
+    this.confirmed = this.xjConfirmed;
     this.redirect();
   },
 };

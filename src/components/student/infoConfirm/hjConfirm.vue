@@ -1,10 +1,10 @@
 <template>
   <el-form ref="form" class="form1" v-loading="loading">
-    <el-tag type="success" v-show="file != ''" :disable-transitions="true">
-      <i class="el-icon-check"></i> 学业文件已上传
+    <el-tag style="margin: 10px 0 0 0" type="success" v-show="file != ''" :disable-transitions="true">
+      <i class="el-icon-success"></i> 学业文件已上传
     </el-tag>
-    <el-tag type="info" v-show="file === ''" :disable-transitions="true">
-      <i class="el-icon-close"></i> 学业文件未上传
+    <el-tag style="margin: 10px 0 0 0" type="info" v-show="file === ''" :disable-transitions="true">
+      <i class="el-icon-error"></i> 学业文件未上传
     </el-tag>
     <el-upload
       ref="file-upload"
