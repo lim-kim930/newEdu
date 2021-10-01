@@ -19,7 +19,7 @@
       >
         <el-menu-item index="1" style="font-size: 18px">学籍确认</el-menu-item>
         <el-menu-item index="2" style="font-size: 18px" :disabled="!confirmed">学业确认</el-menu-item>
-        <el-menu-item index="3" style="font-size: 18px" :disabled="!confirmed">获奖情况确认</el-menu-item>
+        <el-menu-item index="3" style="font-size: 18px" :disabled="!confirmed">综合素质确认</el-menu-item>
         <el-menu-item index="4" style="font-size: 18px" :disabled="!confirmed">毕业确认</el-menu-item>
       </el-menu>
       <router-view

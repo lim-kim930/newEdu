@@ -56,6 +56,18 @@
             <span class="title">交易哈希</span>
             <span id="hash_content">{{blockData.blockHash}}</span>
           </div>
+          <div class="name">
+            <span class="title">姓名</span>
+            <span class="content">{{profileData.Name}}</span>
+          </div>
+          <div class="sex">
+            <span class="title">性别</span>
+            <span class="content">{{profileData.Sex}}</span>
+          </div>
+          <div class="nation">
+            <span class="title">民族</span>
+            <span class="content">{{profileData.Nation}}</span>
+          </div>
           <div class="classCode">
             <span class="title">班级代码</span>
             <span class="content">{{profileData.ClassCode}}</span>
@@ -64,7 +76,8 @@
             <span class="title">班级名称</span>
             <span class="content">{{profileData.ClassName}}</span>
           </div>
-          <div class="pic"></div>
+          <div class="pic" :style="{background: 'url('+ profileData.Photo +') no-repeat' }"></div>
+          
           <div class="schoolCode">
             <span class="title">学校代码</span>
             <span class="content">{{profileData.SchoolCode}}</span>
@@ -80,6 +93,14 @@
           <div class="unitName">
             <span class="title">学院名称</span>
             <span class="content">{{profileData.UnitName}}</span>
+          </div>
+          <div class="majorCode">
+            <span class="title">专业代码</span>
+            <span class="content">{{profileData.MajorCode}}</span>
+          </div>
+          <div class="majorName">
+            <span class="title">专业名称</span>
+            <span class="content">{{profileData.MajorName}}</span>
           </div>
           <div class="score" v-bind:style="{height: score_height}">
             <span
@@ -111,6 +132,7 @@
                   <span class="course_name_value" :title="item.name">{{item.name}}</span><span class="course_score_value">{{item.score}}</span><span class="course_gp_value">{{item.gp}}</span>
                 </span>
               </div>
+              dddd
             </div>
           </div>
           <div class="info" v-bind:style="{top: info_top}">
@@ -142,6 +164,7 @@
 <script>
 import { removeWatermark, setWaterMark } from "../../watermark.js"
 import html2canvas from "html2canvas"
+import {Base64} from "js-base64"
 export default {
   data() {
     return {
@@ -254,8 +277,13 @@ export default {
           if (response.data.data.ShareFile.data_map.profile != undefined) {
             var profile = response.data.data.ShareFile.data_map.profile[Object.keys(response.data.data.ShareFile.data_map.profile)[0]];
             var profileName = Object.keys(profile);
-            for (var i = 0; i < profileName.length; i++)
-              this.profileData[profileName[i]] = profile[profileName[i]]
+            for (var i = 0; i < profileName.length; i++){
+              if(profileName[i] === "Photo")
+                this.profileData[profileName[i]] = "data:image/png;base64," + Base64.decode(profile[profileName[i]])
+              else
+                this.profileData[profileName[i]] = profile[profileName[i]]
+              console.log(this.profileData);
+            }
           }
           var count = 2;
           if (response.data.data.ShareFile.data_map.score != undefined) {
@@ -289,6 +317,7 @@ export default {
           this.title = "为您核验到以下信息: "
           this.emptyShow = false;
           this.tableShow = true;
+          this.loading = false
           setTimeout(() => {
             this.saveImg(".table")
           }, 50)
@@ -486,7 +515,7 @@ export default {
 }
 .title {
   margin: 0;
-  width: 174px;
+  width: 87px;
   height: 60px;
   line-height: 60px;
   color: black;
@@ -522,70 +551,86 @@ export default {
 }
 .content {
   display: inline-block;
-  width: 317px;
+  width: 158px;
   height: 60px;
   text-align: center;
   border-bottom: 1px solid #ccc;
   line-height: 60px;
   box-sizing: border-box;
+  border-right: 1px solid #ccc;
 }
-.classCode {
+.hash .title {
+  width: 174px;
+}
+.name {
   top: 60px;
 }
-.className {
-  left: 492px;
+.sex {
   top: 60px;
-  border-left: 1px solid #ccc;
+  left: 246px;
+}
+.nation {
+  top: 60px;
+  left: 492px
+}
+.staffID {
+  left: 738px;
+  top: 60px;
+}
+.staffID .content {
+  border-right: none;
 }
 .pic {
   left: 984px;
-  /* background-color: pink; */
   width: 180px;
   height: 240px;
   border-left: 1px solid #ccc;
-  background: linear-gradient(
-    -45deg,
-    rgba(212, 212, 212, 0.5) 0,
-    rgba(212, 212, 212, 0.5) 25%,
-    transparent 25%,
-    transparent 50%,
-    rgba(212, 212, 212, 0.5) 50%,
-    rgba(212, 212, 212, 0.5) 75%,
-    transparent 75%,
-    transparent
-  );
-  background-size: 30px 30px;
+  background-size: 180px !important;
 }
-.schoolCode {
+.className {
   top: 120px;
 }
-.staffID {
+.classCode {
   top: 120px;
-  border-left: 1px solid #ccc;
+  left: 246px;
+}
+.majorCode {
+  top: 120px;
   left: 492px;
+}
+.majorName {
+  top: 120px;
+  left: 738px;
+}
+.majorName .content {
+  border-right: none;
 }
 .unitCode {
   top: 180px;
 }
-.unitCode .title {
-  height: 61px;
-}
-.unitCode .content {
-  width: 151px;
+.unitCode .content,
+.unitCode .title,
+.schoolCode .content,
+.schoolCode .title {
   border-bottom: none;
 }
 .unitName {
   top: 180px;
-  left: 326px;
-  border-left: 1px solid #ccc;
+  left: 246px;
 }
 .unitName .title {
   border-bottom: none;
 }
 .unitName .content {
-  width: 359px;
+  width: 404px;
   border-bottom: none;
 }
+.schoolCode {
+  top: 180px;
+  left: 738px;
+  border-right: none;
+}
+
 .score {
   top: 240px;
 }
@@ -594,6 +639,7 @@ export default {
   /* height: 500px; */
   line-height: 50px;
   text-align: center;
+  border-top: 1px solid #ccc;
   padding: 0 40px;
 }
 .score .score_content {

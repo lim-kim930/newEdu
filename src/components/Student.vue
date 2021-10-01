@@ -9,7 +9,8 @@
       <div class="user">
         <el-dropdown style="height: 50px; cursor: pointer; line-height: 80px">
           <el-badge
-            :value="15"
+            :value="received + sent"
+            :hidden="received + sent === 0"
             class="item"
             style="width: 30px; height: 30px; margin-right: 20px; line-height: 30px !important"
           >
@@ -18,11 +19,11 @@
           <el-dropdown-menu slot="dropdown">
             <el-dropdown-item class="clearfix">
               已发送
-              <el-badge class="mark" :value="12" />
+              <el-badge class="mark" :value="sent" :hidden="sent === 0" />
             </el-dropdown-item>
             <el-dropdown-item class="clearfix">
               收信箱
-              <el-badge class="mark" :value="3" />
+              <el-badge class="mark" :value="received" :hidden="received === 0" />
             </el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
@@ -103,6 +104,8 @@ export default {
       loading: false,
       uName: "",
       file: "",
+      received: 0,
+      sent: 0,
       confirmed: true,
       wh: ""
     };

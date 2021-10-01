@@ -5,7 +5,17 @@
         <template slot="label">{{item.VisibleName}}</template>
         {{item.Value}}
       </el-descriptions-item>
+      <el-descriptions-item v-if="pic.VisibleName">
+        <template slot="label">{{pic.VisibleName}}</template>
+        <img :src="'data:image/png;base64,'+pic.Value" alt="照片" style="width: 180px;">
+      </el-descriptions-item>
     </el-descriptions>
+    <!-- <el-descriptions class="margin-top" :column="3" border v-if="data">
+      <el-descriptions-item>
+        <template slot="label">{{pic.VisibleName}}</template>
+        <img :src="'data:image/png;base64,'+pic.Value" alt="照片" style="width: 180px;">
+      </el-descriptions-item>
+    </el-descriptions> -->
     <el-result icon="success" title="信息已确认" v-show="confirmed"></el-result>
     <el-button
       type="primary"
@@ -54,6 +64,7 @@ export default {
       btnDisabled: true,
       dialogTableVisible: false,
       data: {},
+      pic: {},
       blockDataInfo: []
     };
   },
@@ -250,6 +261,8 @@ export default {
         .then((response) => {
           this.confirmed = this.sendDataToChid2;
           this.$emit("func2", this.confirmed);
+          this.pic = response.data.data[0].Value.Photo;
+          delete response.data.data[0].Value.Photo;
           this.data = response.data.data[0].Value;
           this.loading = false;
           this.btnDisabled = false;

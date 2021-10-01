@@ -13,6 +13,7 @@
         <el-dropdown style="height: 50px; line-height: 80px" @command="handleCommand">
           <el-badge
             :value="received + sent"
+            :hidden="received + sent === 0"
             class="item"
             style="width: 30px; height: 30px; margin-right: 20px; line-height: 30px !important; cursor: pointer;"
           >
@@ -21,11 +22,11 @@
           <el-dropdown-menu slot="dropdown">
             <el-dropdown-item command="received" class="clearfix">
               收信箱
-              <el-badge class="mark" :value="received" v-show="received !== 0"/>
+              <el-badge class="mark" :value="received" :hidden="received === 0"/>
             </el-dropdown-item>
             <el-dropdown-item command="sent" class="clearfix">
               已发送
-              <el-badge class="mark" :value="sent" v-show="sent !== 0"/>
+              <el-badge class="mark" :value="sent" :hidden="sent === 0"/>
             </el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>

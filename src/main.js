@@ -3,8 +3,8 @@ import Vue from "vue"
 // 在这里，如果要在webpack中使用.vue组件，必须先安装对应的loader加载器，否则webpack处理不了这种文件
 // vue-loader
 // import APP from "../src/components/Sign.vue"
-// import APP from "../src/components/Student.vue"
-import APP from "../src/components/Company.vue"
+import APP from "../src/components/Student.vue"
+// import APP from "../src/components/Company.vue"
 // import APP3 from '../src/components/App3.vue'
 // import APP4 from '../src/components/App4.vue'
 // 导入路由模块
@@ -19,8 +19,8 @@ Vue.prototype.axios = axios
 // Vue.prototype.FormData = FormData;
 
 //引入Clipboard2
-// import VueClipboard from "vue-clipboard2"
-// Vue.use(VueClipboard)
+import VueClipboard from "vue-clipboard2"
+Vue.use(VueClipboard)
 
 // 安装路由
 Vue.use(VueRouter)

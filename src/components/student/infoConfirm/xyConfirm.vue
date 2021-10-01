@@ -1,5 +1,14 @@
 <template>
   <el-form ref="form" class="form1" v-loading="loading" element-loading-text="拼命加载中">
+    <span>请选择类型:</span>
+    <el-select v-model="typeValue" placeholder="请选择" style="width: 150px; margin: 15px;">
+      <el-option
+        v-for="item in typeOptions"
+        :key="item.value"
+        :label="item.label"
+        :value="item.label"
+      ></el-option>
+    </el-select>
     <span>请选择学年:</span>
     <el-select v-model="yearValue" placeholder="请选择" style="width: 150px; margin: 15px;">
       <el-option
@@ -18,7 +27,7 @@
         :value="item.value"
       ></el-option>
     </el-select>
-    <el-button type="primary" icon="el-icon-search" @click="getScore()" :loading="secLoading">查询</el-button>
+    <el-button type="primary" icon="el-icon-search" @click="typeValue === '学期成绩'?getScore():getScore2()" :loading="secLoading">查询</el-button>
     <el-tag type="success" v-show="file != ''" :disable-transitions="true">
       <i class="el-icon-check"></i> 学业文件已上传
     </el-tag>
@@ -55,14 +64,21 @@
       v-show="file != ''"
       style="margin-left: 10px;"
     >下载文件</el-button>
-    <el-table :data="tableData" border style="width: 100%; margin-top: 0;">
+    <el-table v-show="typeValue==='学期成绩'" :data="tableData" border style="width: 100%; margin-top: 0;">
       <el-table-column prop="Value.CourseName.Value" label="课程" width="220"></el-table-column>
-      <el-table-column prop="Value.CourseCode.Value" label="课程代码"></el-table-column>
+      <el-table-column prop="Value.CourseCode.Value" label="选课号"></el-table-column>
       <el-table-column prop="Value.Score.Value" label="成绩" width="180"></el-table-column>
       <el-table-column prop="Value.GP.Value" label="绩点"></el-table-column>
     </el-table>
-    <el-result icon="success" title="信息已确认" v-show="confirmed"></el-result>
-    <el-button type="primary" @click="submit()" plain v-show="!confirmed" :disabled="disabled">确认信息</el-button>
+    <el-table v-show="typeValue==='等级考试'" :data="tableData2" border style="width: 100%; margin-top: 0;">
+      <el-table-column prop="ExamName.Value" label="考试名称"></el-table-column>
+      <el-table-column prop="Score.Value" label="考试成绩"></el-table-column>
+      <el-table-column prop="RegID.Value" label="准考证号"></el-table-column>
+      <el-table-column prop="ExamDate.Value" label="考试日期"></el-table-column>
+    </el-table>
+    <el-result icon="success" title="信息已确认" v-show="typeValue === '学期成绩'&&confirmed"></el-result>
+    <el-result icon="success" title="信息已确认" v-show="typeValue === '等级考试'&&confirmed2"></el-result>
+    <el-button type="primary" @click="typeValue === '学期成绩'?submit():submit2()" plain v-show="!confirmed" :disabled="disabled">确认信息</el-button>
     <el-button type="info" @click="queSubmit()" plain v-show="!confirmed">错误反馈</el-button>
     <el-drawer
       title="学业信息错误反馈提示"
@@ -99,6 +115,15 @@ export default {
   data() {
     return {
       tableData: [],
+      tableData2: [],
+      typeOptions: [{
+        value: "0",
+        label: "学期成绩"
+      }, {
+        value: "1",
+        label: "等级考试"
+      }],
+      typeValue: "学期成绩",
       yearOptions: [{
         value: "0",
         label: "2019 - 2020"
@@ -123,6 +148,7 @@ export default {
       loading: false,
       secLoading: false,
       confirmed: false,
+      confirmed2: false,
       disabled: true,
       file: "",
       dialogTableVisible: false,
@@ -135,17 +161,22 @@ export default {
       console.log(params.file);
       this.file = params.file;
       this.$emit("func", params.file);
-      this.getScore();
+      if(this.typeValue === "学期成绩")
+        this.getScore();
+      else
+        this.getScore2();
     },
     reupload() {
       this.$refs["file-upload"].clearFiles();
       this.file = "";
       sessionStorage.removeItem("terms");
+      sessionStorage.removeItem("level");
       this.disabled = true;
       this.$emit("func", "");
     },
     change(response, file, fileList) {
       sessionStorage.removeItem("terms");
+      sessionStorage.removeItem("level");
       // sessionStorage.setItem("arc_file", JSON.stringify(file))
       // this.fileList.push({
       //   name: file.name
@@ -286,6 +317,124 @@ export default {
           this.secLoading = false;
         })
     },
+    getScore2() {
+      if (this.yearValue == "" || this.termValue == "") {
+        this.$message({
+          message: "请选择要查询的学年以及学期",
+          type: "warning"
+        });
+        return
+      }
+      this.tableData2 = [];
+      this.loading = true;
+      this.secLoading = true;
+      this.axios({
+        method: "post",
+        url: "https://api.hduhelp.com/gormja_wrapper/lookup?topic=level_exam",
+        headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
+        data: {
+          SchoolCode: 1,
+          StaffID: JSON.parse(localStorage.getItem("jw_student_file")).staffID,
+          SchoolYear: this.yearValue.replace(/\s+/g, ""),
+          Semester: +this.termValue
+        }
+      })
+        .then((response) => {
+          if (response.data.data.length === 0) {
+            this.$alert("没有查询到您该学期的等级考试信息", "警告", {
+              confirmButtonText: "确定",
+              type: "warning",
+            });
+            this.tableData2 = ""
+            this.disabled = true;
+            this.secLoading = false;
+            this.loading = false;
+            this.confirmed2 = false;
+          }
+          else {
+            if (this.file != "") {
+              if (sessionStorage.getItem("level") === null) {
+                var data = new FormData();
+                data.append("dataFile", this.file);
+                // 拿到学生档案明文
+                this.axios({
+                  method: "post",
+                  url: "https://api.hduhelp.com/gormja_wrapper/dataFile/get?staffID=" + JSON.parse(localStorage.getItem("jw_student_file")).staffID,
+                  headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
+                  data,
+                })
+                  .then((response2) => {
+                    var terms = []
+                    if (JSON.stringify(response2.data.data.Body.data_map) != "{}" && response2.data.data.Body.data_map.level_exam != undefined) {
+                      console.log(555555555);
+                      var courses = Object.keys(response2.data.data.Body.data_map.level_exam)
+                      console.log(courses);
+                      for (var i = 0; i < courses.length; i++) {
+                        var term = response2.data.data.Body.data_map.level_exam[courses[i]].SchoolYear+"-"+response2.data.data.Body.data_map.level_exam[courses[i]].Semester
+                        console.log(term);
+                        if (terms.indexOf(term) === -1) {
+                          terms.push(term)
+                          if (terms.indexOf(this.yearValue.replace(/\s+/g, "") + "-" + this.termValue) != -1)
+                            this.confirmed2 = true
+                          else
+                            this.confirmed2 = false
+                        }
+                      }
+                    }
+                    sessionStorage.setItem("level", JSON.stringify(terms))
+                    response.data.data.forEach(item => {
+                      this.tableData2.push(item.Value)
+                    });
+                    this.loading = false
+                    this.secLoading = false
+                    this.disabled = false
+                  })
+                  .catch((error) => {
+                    this.$message.error("出错啦,请稍后再试")
+                    response.data.data.forEach(item => {
+                      this.tableData2.push(item.Value)
+                    });
+                    this.loading = false
+                    this.secLoading = false
+                    this.disabled = true
+                  });
+              }
+              else {
+                var terms = JSON.parse(sessionStorage.getItem("level"))
+                if (terms.indexOf(this.yearValue.replace(/\s+/g, "") + "-" + this.termValue) != -1)
+                  this.confirmed2 = true
+                else
+                  this.confirmed2 = false
+                response.data.data.forEach(item => {
+                  this.tableData2.push(item.Value)
+                });
+                this.loading = false
+                this.secLoading = false
+                this.disabled = false
+              }
+            }
+            else {
+              response.data.data.forEach(item => {
+                this.tableData2.push(item.Value)
+              });
+              console.log(this.tableData2);
+              this.loading = false
+              this.secLoading = false
+              this.disabled = true
+              this.confirmed2 = false
+            }
+            console.log(this.tableData2);
+          }
+        })
+        .catch((err) => {
+          this.$alert("出错啦,请稍后再试", "警告", {
+            confirmButtonText: "确定",
+            type: "warning",
+          });
+          this.loading = false;
+          this.secLoading = false;
+        })
+    },
     submit() {
       this.$confirm(
         "请确认当前系统内的本学期学业信息准确无误, 是否继续确认?",
@@ -339,8 +488,8 @@ export default {
                         blockWriteTime: "写入时间",
                         hash: "交易内容"
                       }
+                      this.blockDataInfo = []
                       for (var i = 0; i < blockName.length; i++) {
-                        this.blockDataInfo = []
                         this.blockDataInfo.push({
                           value: block[blockName[i]],
                           name: translation[blockName[i]]
@@ -349,6 +498,7 @@ export default {
                       console.log(this.blockDataInfo);
                       sessionStorage.removeItem("terms");
                       this.file = this.dataURLtoFile(response.data.data.DataFile, "学业文件");
+                      this.$emit("func", this.file);
                       this.$confirm("学业信息确认成功！继续确认请点击任意空白区域", "提示", {
                         confirmButtonText: "下载新的学业文件",
                         cancelButtonText: "查看此次交易详情",
@@ -398,7 +548,87 @@ export default {
           });
         });
     },
+    submit2() {
+    this.$confirm(
+        "请确认当前系统内的本学期等级考试信息准确无误, 是否继续确认?",
+        "提示",
+        {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+        }
+      )
+        .then(() => {
+          var data = new FormData()
+                  data.append("dataFile", this.file);
+                  data.append("condMap", "{\"SchoolCode\": 1,\"StaffID\": " + JSON.parse(localStorage.getItem("jw_student_file")).staffID + ", \"SchoolYear\":\"" + this.yearValue.replace(/\s+/g, "") + "\", \"Semester\":" + +this.termValue + "}");
+                  console.log(data.get("condMap"));
+                  this.loading = true;
+                  this.axios({
+                    method: "put",
+                    url: "https://api.hduhelp.com/gormja_wrapper/confirm?topic=level_exam",
+                    headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
+                    data,
+                  })
+                    .then((response) => {
+                      var block = response.data.data.TransactionDetail.detail.result[0]
+                      var blockName = Object.keys(block)
+                      const translation = {
+                        blockHash: "区块哈希",
+                        blockNumber: "交易号",
+                        // hash: "交易号",
+                        blockTimestamp: "区块时间戳",
+                        blockWriteTime: "写入时间",
+                        hash: "交易内容"
+                      }
+                      this.blockDataInfo = []
+                      for (var i = 0; i < blockName.length; i++) {
+                        this.blockDataInfo.push({
+                          value: block[blockName[i]],
+                          name: translation[blockName[i]]
+                        })
+                      }
+                      console.log(this.blockDataInfo);
+                      sessionStorage.removeItem("terms");
+                      this.file = this.dataURLtoFile(response.data.data.DataFile, "学业文件");
+                      this.$emit("func", this.file);
+                      this.$confirm("信息确认成功！继续确认请点击任意空白区域", "提示", {
+                        confirmButtonText: "下载新的学业文件",
+                        cancelButtonText: "查看此次交易详情",
+                        distinguishCancelAndClose: true,
+                        beforeClose: (action, instance, done) => {
+                          if (action === "cancel")
+                            this.dialogTableVisible = true
+                          if (action === "confirm" || action === "close")
+                            done()
+                        },
+                        dangerouslyUseHTMLString: true,
+                        type: "success"
+                      }).then(() => {
+                        this.downloadFile("学业文件.enc")
+                      }).catch(() => {
+                        this.$message({
+                          type: "info",
+                          message: "请在结束确认时下载最新的学业文件",
+                        });
+                      });
+                      this.loading = false;
+                      this.confirmed2 = true;
+                    })
+                    .catch((error) => {
+                      this.$message.error("出错啦,请稍后再试");
+                      this.loading = false;
+                    });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "操作已取消",
+          });
+        });
+    },
   },
+  
   mounted() {
     // var that = this;
     // this.loading = true;
