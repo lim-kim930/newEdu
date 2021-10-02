@@ -26,7 +26,6 @@
         @click="onSubmit()"
         style="width: 100%"
         :loading="btnLoad"
-        :disabled="disabled"
       >登录</el-button>
     </el-form-item>
     <div class="footer">
@@ -37,7 +36,6 @@
         href="http://wpa.qq.com/msgrd?v=3&uin=1625753207&site=qq&menu=yes&hm"
       >遇到问题?</el-link>
       <el-link type="info" @click="test()" style="color: #1890ff; margin-left: 5%;" :underline="false">测试登录</el-link>
-      <!-- 153 -->
       <el-link
         type="info"
         @click="byHDU()"
@@ -51,13 +49,12 @@
 export default {
   data() {
     return {
-      code: "",
-      btnLoad: false,
-      disabled: false,
+      code: "",//密钥
+      btnLoad: false,//登录按钮加载
     };
   },
   methods: {
-    test() {
+    test() {//测试登录，使用指定的学号和token
       localStorage.setItem("jw_student_file", JSON.stringify({"token":"52bae146-f956-42f5-b3af-b9378710954a","staffID":"18271126"}))
       window.location.href = "https://limkim.xyz/newEdu/student"
     },
@@ -70,6 +67,7 @@ export default {
       var reader = new FileReader();
       reader.readAsText(input.files[0], "utf8");
       reader.onload = () => {
+        //判断企业密钥文件可用性
         var token = JSON.parse(reader.result);
         if (
           token.FileID === undefined ||
