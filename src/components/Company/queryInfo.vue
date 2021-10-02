@@ -8,7 +8,7 @@
       element-loading-text="拼命加载中"
       style="margin: 30px 10px; border-radius: 10px;"
     >
-      <el-form status-iconc lass="ruleForm" v-bind:style="{height: form_height}">
+      <el-form status-iconc lass="ruleForm" :style="{height: form_height}">
         <span style="font-size: 18px; display: inline-block; margin-bottom: 40px">
           {{title}}
           <el-popover
@@ -43,13 +43,13 @@
         <div
           id="mycanvas"
           v-show="!tableShow"
-          v-bind:style="{background: 'url('+ url +') no-repeat', height: table_height}"
+          :style="{background: 'url('+ url +') no-repeat', height: table_height}"
           @contextmenu.prevent
         ></div>
         <div
           class="table"
           v-show="tableShow"
-          v-bind:style="{height: table_height}"
+          :style="{height: table_height}"
           style="width: 1166px;"
         >
           <div class="hash">
@@ -102,45 +102,78 @@
             <span class="title">专业名称</span>
             <span class="content">{{profileData.MajorName}}</span>
           </div>
-          <div class="score" v-bind:style="{height: score_height}">
+          <div class="score" :style="{height: score_height}">
             <span
               class="title"
-              v-bind:style="{height: score_height, paddingTop: title_paddingTop}"
+              :style="{height: score_height, paddingTop: title_paddingTop}"
             >成绩单</span>
-            <div class="score_content" v-bind:style="{height: score_height}">
-              <div class="part1" v-bind:style="{height: score_height}">
+            <div class="score_content" :style="{height: score_height}">
+              <div class="part1" :style="{height: score_height}">
                 <span class="course_name">课程名</span><span class="course_score">成绩</span><span class="course_gp">绩点</span>
-                <span class="score_value" v-for="item in scoreDataPart1" v-bind:key="item.id">
-                  <span class="course_name_value" :title="item.name">{{item.name}}</span><span class="course_score_value">{{item.score}}</span><span class="course_gp_value">{{item.gp}}</span>
+                <span class="score_value" v-for="item in scoreDataPart1" :key="item.id">
+                  <span class="course_name_value" :style="{lineHeight: item.name.length<=8?'40px':item.name.length<=16?'20px':'13px'}" :title="item.name">{{item.name}}</span><span class="course_score_value">{{item.score}}</span><span class="course_gp_value">{{item.gp}}</span>
                 </span>
               </div>
-              <div class="part2" v-bind:style="{height: score_height}">
+              <div class="part2" :style="{height: score_height}">
                 <span class="course_name">课程名</span><span class="course_score">成绩</span><span class="course_gp">绩点</span>
-                <span class="score_value" v-for="item in scoreDataPart2" v-bind:key="item.id">
-                  <span class="course_name_value" :title="item.name">{{item.name}}</span><span class="course_score_value">{{item.score}}</span><span class="course_gp_value">{{item.gp}}</span>
+                <span class="score_value" v-for="item in scoreDataPart2" :key="item.id">
+                  <span class="course_name_value" :style="{lineHeight: item.name.length<=8?'40px':item.name.length<=16?'20px':'13px'}" :title="item.name">{{item.name}}</span><span class="course_score_value">{{item.score}}</span><span class="course_gp_value">{{item.gp}}</span>
                 </span>
               </div>
-              <div class="part3" v-bind:style="{height: score_height}">
+              <div class="part3" :style="{height: score_height}">
                 <span class="course_name">课程名</span><span class="course_score">成绩</span><span class="course_gp">绩点</span>
-                <span class="score_value" v-for="item in scoreDataPart3" v-bind:key="item.id">
-                  <span class="course_name_value" :title="item.name">{{item.name}}</span><span class="course_score_value">{{item.score}}</span><span class="course_gp_value">{{item.gp}}</span>
+                <span class="score_value" v-for="item in scoreDataPart3" :key="item.id">
+                  <span class="course_name_value" :style="{lineHeight: item.name.length<=8?'40px':item.name.length<=16?'20px':'14px'}" :title="item.name">{{item.name}}</span><span class="course_score_value">{{item.score}}</span><span class="course_gp_value">{{item.gp}}</span>
                 </span>
               </div>
-              <div class="part4" v-bind:style="{height: score_height}">
+              <div class="part4" :style="{height: score_height}">
                 <span class="course_name">课程名</span><span class="course_score">成绩</span><span class="course_gp">绩点</span>
-                <span class="score_value" v-for="item in scoreDataPart4" v-bind:key="item.id">
-                  <span class="course_name_value" :title="item.name">{{item.name}}</span><span class="course_score_value">{{item.score}}</span><span class="course_gp_value">{{item.gp}}</span>
+                <span class="score_value" v-for="item in scoreDataPart4" :key="item.id">
+                  <span class="course_name_value" :style="{lineHeight: item.name.length<=8?'40px':item.name.length<=16?'20px':'14px'}" :title="item.name">{{item.name}}</span><span class="course_score_value">{{item.score}}</span><span class="course_gp_value">{{item.gp}}</span>
                 </span>
               </div>
-              dddd
             </div>
           </div>
-          <div class="info" v-bind:style="{top: info_top}">
+          <div class="level" :style="{top: level_top, height: level_height}">
+            <span
+              class="title"
+              :style="{height: level_height, paddingTop: level_paddingTop}"
+            >等级考试</span>
+            <div class="level_content" :style="{height: level_height}">
+                <span class="level_name">考试名称</span><span class="level_score">考试成绩</span><span class="level_year">考试时间</span>
+                <span class="level_value" v-for="item in levelData" :key="item.id">
+                  <span class="level_name_value" >{{item.name}}</span><span class="level_score_value">{{item.score}}</span><span class="level_year_value">{{item.date}}</span>
+                </span>
+            </div>
+          </div>
+          <div class="reward" :style="{top: reward_top, height: reward_height}">
+            <span
+              class="title"
+              :style="{height: reward_height, paddingTop: reward_paddingTop}"
+            >综合素质</span>
+            <div class="reward_content" :style="{height: reward_height}">
+                <div class="rewardPart">
+                  <h4>个人荣誉</h4>
+                  <span class="reward_name">奖项名称</span><span class="reward_level">奖项等级</span><span class="reward_year">获奖年份</span>
+                  <span class="reward_value" v-for="item in rewardData" :key="item.id">
+                    <span class="reward_name_value" >{{item.name}}</span><span class="reward_level_value">{{item.level}}</span><span class="reward_year_value">{{item.date}}</span>
+                  </span>
+                </div>
+                <div class="racePart">
+                  <h4>个人荣誉</h4>
+                  <span class="race_name">项目名称</span><span class="race_level">奖项等级</span><span class="race_year">获奖时间</span>
+                  <span class="race_value" v-for="item in racedData" :key="item.id">
+                    <span class="race_name_value" >{{item.name}}</span><span class="race_score_value">{{item.level}}</span><span class="race_year_value">{{item.date}}</span>
+                  </span>
+                </div>
+            </div>
+          </div>
+          <div class="info" :style="{top: info_top}">
             <span class="title">注意事项</span>
             <div class="info_content">
-              <span>1.该信息仅用于企业核验,禁止他用</span>
-              <span>1.该信息仅用于企业核验,禁止他用</span>
-              <span>1.该信息仅用于企业核验,禁止他用</span>
+              <span>1.该信息仅供高校学业核验系统核验使用,禁止他用</span>
+              <span>1.该信息仅供高校学业核验系统核验使用,禁止他用</span>
+              <span>1.该信息仅供高校学业核验系统核验使用,禁止他用</span>
             </div>
             <div class="end_time">
               <span>有效期至:</span>
@@ -182,12 +215,21 @@ export default {
       scoreDataPart2: [],
       scoreDataPart3: [],
       scoreDataPart4: [],
+      levelData: [],
+      rewardData: [],
+      raceData: [],
       form_height: "500px",
       score_height: "",
       title_height: "",
       title_paddingTop: "",
       score_content_height: "",
       table_height: "",
+      level_top: "",
+      level_paddingTop: "",
+      level_height: "",
+      reward_top: "",
+      reward_paddingTop: "",
+      reward_height: "",
       info_top: "",
       input: "",
       url: "",
@@ -226,11 +268,6 @@ export default {
         this.scoreDataPart4 = [];
         this.loading = false;
         this.btnShow = true;
-        // var a = document.createElement("a");//创建一个a标签 用来下载
-        // a.download = "营销图"; //设置下载的图片名称
-        // var event = new MouseEvent("click");//增加一个点击事件
-        // a.href = url;//此处的url为base64格式的图片资源
-        // a.dispatchEvent(event); //触发a的单击事件 即可完成下载
       });
     },
     query() {
@@ -272,8 +309,6 @@ export default {
               name: translation[blockName[i]]
             })
           }
-          // console.log(this.blockData);
-          // console.log(this.blockDataInfo);
           if (response.data.data.ShareFile.data_map.profile != undefined) {
             var profile = response.data.data.ShareFile.data_map.profile[Object.keys(response.data.data.ShareFile.data_map.profile)[0]];
             var profileName = Object.keys(profile);
@@ -297,30 +332,80 @@ export default {
               }
               this["scoreDataPart" + flag].push({
                 name: score[scoreCode[i]].CourseName,
-                score: score[scoreCode[i]].Score,
+                score: score[scoreCode[i]].ScoreMakeup === ""?score[scoreCode[i]].ScoreFinal:score[scoreCode[i]].ScoreMakeup,
                 gp: score[scoreCode[i]].GP
               });
               flag++;
             }
           }
+          var count2 = 1;
+          if (response.data.data.ShareFile.data_map.level_exam != undefined) {
+            var level_exam = response.data.data.ShareFile.data_map.level_exam;
+            var level_examCode = Object.keys(level_exam);
+            for (var i = 0; i < level_examCode.length; i++) {
+              this.levelData.push({
+                name: level_exam[level_examCode[i]].ExamName,
+                score: level_exam[level_examCode[i]].Score,
+                date: level_exam[level_examCode[i]].ExamDate,
+              });
+              count2++;
+            }
+          }
+          var count3 = 2;
+          if (response.data.data.ShareFile.data_map.reward != undefined) {
+            var reward = response.data.data.ShareFile.data_map.reward;
+            var rewardCode = Object.keys(reward);
+            for (var i = 0; i < rewardCode.length; i++) {
+              this.rewardData.push({
+                name: reward[rewardCode[i]].RewardName,
+                level: reward[rewardCode[i]].RewardLevel,
+                date: reward[rewardCode[i]].SchoolYear,
+              });
+              count3++;
+            }
+          }
+          var count4 = 2;
+          if (response.data.data.ShareFile.data_map.race_reward != undefined) {
+            var race_reward = response.data.data.ShareFile.data_map.race_reward;
+            var race_rewardCode = Object.keys(race_reward);
+            for (var i = 0; i < race_rewardCode.length; i++) {
+              this.raceData.push({
+                name: race_reward[race_rewardCode[i]].RewardName,
+                level: race_reward[race_rewardCode[i]].RewardLevel,
+                date: race_reward[race_rewardCode[i]].SchoolYear,
+              });
+              count4++;
+            }
+          }
           if (count < 4)
             count = 4
+          if (count2 < 5)
+            count2 = 5
+          count3 = count3>=count4?count3:count4
+          if (count3 < 5)
+            count3 = 5
           this.form_height = "750px"
           this.score_height = count * 41 + "px"
           this.title_height = count * 41 + "px"
           this.title_paddingTop = (count * 41 / 2 - 82) + "px"
           this.score_content_height = (count * 41 + 1) + "px"
-          this.table_height = (count * 41 + 500) + "px"
-          this.info_top = (count * 41 + 240) + "px"
-          setWaterMark("仅供教务系统核验使用", "有效期至:" + this.profileData.expired_at, (500 + count * 41))
+          this.table_height = ((count+count2+count3) * 41 + 500) + "px"
+          this.level_top = (count * 41 + 240) + "px"
+          this.level_paddingTop = (count2 * 41 / 2 - 100) + "px"
+          this.level_height = count2 * 41 + "px"
+          this.reward_top = (count * 41 + 240) + count2 * 41 + "px"
+          this.reward_paddingTop = (count3 * 41 / 2 - 100) + "px"
+          this.reward_height = count3 * 41 + "px"
+          this.info_top = ((count+count2+count3) * 41 + 240) + "px"
+          setWaterMark("仅供高校学业核验系统核验使用", "有效期至:" + this.profileData.expired_at, (500 + count * 41))
           this.creat22();
           this.title = "为您核验到以下信息: "
           this.emptyShow = false;
           this.tableShow = true;
           this.loading = false
-          setTimeout(() => {
-            this.saveImg(".table")
-          }, 50)
+          // setTimeout(() => {
+          //   this.saveImg(".table")
+          // }, 50)
         })
         .catch(error => {
           this.$message.error("出错啦,请稍后再试");
@@ -577,7 +662,9 @@ export default {
   left: 738px;
   top: 60px;
 }
-.staffID .content {
+.staffID .content,
+.majorName .content,
+.schoolCode .content {
   border-right: none;
 }
 .pic {
@@ -602,9 +689,6 @@ export default {
   top: 120px;
   left: 738px;
 }
-.majorName .content {
-  border-right: none;
-}
 .unitCode {
   top: 180px;
 }
@@ -628,7 +712,6 @@ export default {
 .schoolCode {
   top: 180px;
   left: 738px;
-  border-right: none;
 }
 
 .score {
@@ -651,6 +734,10 @@ export default {
   border-bottom: 1px solid #ccc;
   box-sizing: border-box;
 }
+/* .score_content {
+  display:flex !important;
+  align-items:center;
+} */
 .score_content span {
   display: inline-block;
   margin: 0;
@@ -678,12 +765,12 @@ export default {
   border-left: 1px solid rgb(230, 230, 230);
   background-color: #fff;
   color: rgb(126, 126, 126);
-  /* line-height: 50px; */
+  /* line-height: 40px !important; */
   font-size: 14px;
   box-sizing: content-box;
   overflow: hidden;
-  /* white-space: nowrap;
-  text-overflow: ellipsis;
+  /* white-space: pre-wrap; */
+  /* text-overflow: ellipsis;
   -o-text-overflow: ellipsis; */
   margin: 0;
 }
@@ -721,6 +808,126 @@ export default {
 .part4 {
   border-right: none !important;
   margin-left: 798px !important;
+}
+.level .title,
+.reward .title {
+  width: 100px;
+  /* height: 500px; */
+  line-height: 50px;
+  text-align: center;
+  padding: 0 40px;
+}
+.level .level_content,
+.reward .reward_content {
+  position: relative;
+  width: 1064px;
+  margin-left: 100px;
+  /* height: 500px; */
+  overflow: hidden;
+  border-bottom: 1px solid rgb(230, 230, 230);
+  box-sizing: border-box;
+}
+.level .level_name,
+.level .level_score,
+.level .level_year,
+.reward .reward_name,
+.reward .reward_level,
+.reward .reward_year,
+.reward .race_name,
+.reward .race_level,
+.reward .race_year {
+  display: inline-block;
+  margin: 0;
+  height: 40px;
+  width: 354px;
+  text-align: center;
+  line-height: 40px;
+  border-bottom: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  background-color: rgb(249, 249, 249);
+  box-sizing: content-box;
+}
+.reward .reward_name,
+.reward .reward_level,
+.reward .reward_year,
+.reward .race_name,
+.reward .race_level,
+.reward .race_year {
+  width: 176px;
+}
+.level .level_year,
+.reward .reward_year {
+  border-right: none;
+}
+.level .level_value,
+.reward .reward_value {
+  float: left;
+  display: block;
+  width: 100%;
+  height: 41px;
+  border-bottom: 1px solid rgb(230, 230, 230) !important;
+}
+.reward .reward_value {
+  width: 532px;
+}
+.level_value span,
+.reward_value span {
+  display: inline-block;
+  margin: 0;
+  height: 40px;
+  line-height: 40px;
+  width: 354px;
+  text-align: center;
+  border-right: 1px solid rgb(230, 230, 230);
+  overflow: hidden;
+  box-sizing: content-box;
+}
+.reward_value span {
+  width: 176px;
+}
+.level_value .level_year_value,
+.reward_value .reward_year_value {
+  border-right: none;
+}
+.rewardPart,
+.racePart {
+  width: 532px;
+}
+.rewardPart {
+  border-right: 1px solid rgb(134, 134, 134);
+}
+.racePart {
+  margin-left: 532px;
+}
+.reward h4 {
+  display: inline-block;
+  width: 532px;
+  height: 40px;
+  line-height: 40px;
+  text-align: center;
+  background-color: rgb(249, 249, 249);
+  border-bottom: 1px solid #ccc;
+}
+.reward .reward_name,
+.reward .reward_name_value,
+.reward .race_name,
+.reward .race_name_value {
+  width: 269px;
+}
+.reward .reward_level,
+.reward .reward_year,
+.reward .reward_level_value,
+.reward .reward_year_value,
+.reward .race_level,
+.reward .race_year,
+.reward .race_level_value,
+.reward .race_year_value {
+  width: 130px;
+}
+.reward .race_year,
+.reward .race_year_value {
+  width: 131px;
+  border-right: none;
 }
 .info {
   top: 740px;

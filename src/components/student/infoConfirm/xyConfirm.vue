@@ -38,7 +38,7 @@
     >下载文件</el-button>
     <br>
     <span>请选择类型:</span>
-    <el-select v-model="typeValue" placeholder="请选择" style="width: 150px; margin: 15px;">
+    <el-select v-model="typeValue" placeholder="请选择" style="width: 150px; margin: 15px;" @change="getScore(true)">
       <el-option
         v-for="item in typeOptions"
         :key="item.value"
@@ -71,10 +71,10 @@
       :loading="secLoading"
     >查询</el-button>
     <el-table v-show="typeValue==='score'" :data="Score" border style="width: 100%; margin-top: 0;">
-      <el-table-column prop="Value.CourseName.Value" label="课程" width="220"></el-table-column>
+      <el-table-column prop="Value.CourseName.Value" label="课程"></el-table-column>
       <el-table-column prop="Value.CourseCode.Value" label="选课号"></el-table-column>
       <el-table-column prop="Value.Score.Value" label="成绩" width="180"></el-table-column>
-      <el-table-column prop="Value.GP.Value" label="绩点"></el-table-column>
+      <el-table-column prop="Value.GP.Value" label="绩点" width="180"></el-table-column>
     </el-table>
     <el-table
       v-show="typeValue==='level_exam'"
@@ -87,8 +87,8 @@
       <el-table-column prop="RegID.Value" label="准考证号"></el-table-column>
       <el-table-column prop="ExamDate.Value" label="考试日期"></el-table-column>
     </el-table>
-    <el-result icon="success" title="信息已确认" v-show="typeValue === 'score'&&scoreConfirmed"></el-result>
-    <el-result icon="success" title="信息已确认" v-show="typeValue === 'level_exam'&&levelConfirmed"></el-result>
+    <el-result icon="success" title="课程成绩信息已确认" v-show="typeValue === 'score'&&scoreConfirmed"></el-result>
+    <el-result icon="success" title="等级考试信息已确认" v-show="typeValue === 'level_exam'&&levelConfirmed"></el-result>
     <el-button
       type="primary"
       @click="scoreSubmit()"
@@ -197,6 +197,7 @@ export default {
       this.file = "";
       sessionStorage.removeItem("score");
       sessionStorage.removeItem("level_exam");
+      sessionStorage.removeItem("hj");
       this.scoreBtnDisabled = true;
       this.levelBtnDisabled = true;
       this.$emit("func", "");
@@ -204,6 +205,7 @@ export default {
     change(response, file, fileList) {
       sessionStorage.removeItem("score");
       sessionStorage.removeItem("level_exam");
+      sessionStorage.removeItem("hj");
     },
     dataURLtoFile(dataurl, filename) {
       let arr = dataurl.split(","),
@@ -320,12 +322,21 @@ export default {
                       });
                       this.levelBtnDisabled = false
                     }
+                    var data = response2.data.data.Body.data_map
+                    if (data.reward !== undefined && data.race_reward !== undefined)
+                      sessionStorage.setItem("hj", JSON.stringify(["reward", "race_reward"]))
+                    else if (data.reward !== undefined && data.race_reward === undefined)
+                      sessionStorage.setItem("hj", JSON.stringify(["reward"]))
+                    else if (data.reward === undefined && data.race_reward !== undefined)
+                      sessionStorage.setItem("hj", JSON.stringify(["race_reward"]))
+                    else if (data.reward === undefined && data.race_reward === undefined)
+                      sessionStorage.setItem("hj", JSON.stringify([]))
                     sessionStorage.setItem(this.typeValue, JSON.stringify(scores))
                     this.loading = false
                     this.secLoading = false
                   })
                   .catch(() => {
-                    this.$message.error("出错啦,请稍后再试")
+                    this.$message.error("获取学业文件信息出错啦,请稍后再试")
                     if (this.typeValue === "score") {
                       this.Score = response.data.data
                       this.scoreBtnDisabled = true

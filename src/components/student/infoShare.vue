@@ -42,12 +42,13 @@
       </div>
       <div v-show="stepActive===1" class="info-select" style="overflow: auto; max-height: 550px;">
         <el-form-item label="要分享的学籍信息" required>
+          <h5 v-show="profileData.length === 0">无</h5>
           <el-checkbox
             :indeterminate="isIndeterminate"
             v-model="checkAll"
             @change="CheckAllChange($event, 1)"
             border
-            v-show="profileData.length != 0"
+            v-show="profileData.length !== 0"
             style="width: 80px"
           >全选</el-checkbox>
           <el-checkbox-group
@@ -62,108 +63,79 @@
             >{{item.name}}</el-checkbox>
           </el-checkbox-group>
         </el-form-item>
-        <el-form-item label="要分享的学业信息" required>
-          <!-- <el-checkbox
-            :indeterminate="isIndeterminate2"
-            v-model="checkAll2"
-            @change="CheckAllChange($event, 2)"
-            border
-            v-show="scoreData.length != 0"
-            style="width: 80px"
-          >全选</el-checkbox>
-          <el-checkbox-group
-            v-model="ruleForm.scoreType"
-            style="margin-left: 50px; width: 960px"
-            @change="CheckedChange($event, 2)"
-          >
-            <el-checkbox
-              v-for="item in scoreData"
-              v-bind:key="item.value"
-              :label="item.value"
-            >{{item.name}}</el-checkbox>
-          </el-checkbox-group> -->
+        <el-form-item label="课程成绩信息" required>
           <el-table
             ref="multipleTable"
             :data="scoreData"
-            v-show="scoreData.length != 0"
+            v-show="scoreData.length !== 0"
             tooltip-effect="dark"
             style="width: 100%"
-            @selection-change="handleSelectionChange1">
-            <el-table-column
-              type="selection"
-              width="55">
-            </el-table-column>
-            <el-table-column
-              label="课程 "
-              width="300">
+            @selection-change="handleSelectionChange1"
+          >
+            <el-table-column type="selection" width="55"></el-table-column>
+            <el-table-column label="课程 " width="300">
               <template slot-scope="scope">{{ scope.row.name }}</template>
             </el-table-column>
-            <el-table-column
-              prop="value"
-              label="选课号">
-            </el-table-column>
+            <el-table-column prop="value" label="选课号"></el-table-column>
           </el-table>
         </el-form-item>
         <el-form-item label="等级考试信息" required>
           <el-table
             ref="multipleTable"
             :data="levelData"
-            v-show="levelData.length != 0"
+            v-show="levelData.length !== 0"
             tooltip-effect="dark"
             style="width: 100%"
-            @selection-change="handleSelectionChange2">
-            <el-table-column
-              type="selection"
-              width="55">
-            </el-table-column>
-            <el-table-column
-              label="考试名称">
+            @selection-change="handleSelectionChange2"
+          >
+            <el-table-column type="selection" width="55"></el-table-column>
+            <el-table-column label="考试名称">
               <template slot-scope="scope">{{ scope.row.name }}</template>
             </el-table-column>
-            <el-table-column
-              prop="value"
-              label="考试时间">
-            </el-table-column>
+            <el-table-column prop="value" label="考试时间"></el-table-column>
           </el-table>
         </el-form-item>
-        <el-form-item label="综合素质信息" required>
+        <el-form-item label="个人荣誉信息" required>
           <el-table
             ref="multipleTable"
             :data="rewardData"
-            v-show="rewardData.length != 0"
+            v-show="rewardData.length !== 0"
             tooltip-effect="dark"
             style="width: 100%"
-            @selection-change="handleSelectionChange3">
-            <el-table-column
-              type="selection"
-              width="55">
-            </el-table-column>
-            <el-table-column
-              label="项目名称">
+            @selection-change="handleSelectionChange3"
+          >
+            <el-table-column type="selection" width="55"></el-table-column>
+            <el-table-column label="项目名称">
               <template slot-scope="scope">{{ scope.row.name }}</template>
             </el-table-column>
-            <el-table-column
-              prop="value"
-              label="获得时间">
+            <el-table-column prop="yearValue" label="获得年份"></el-table-column>
+            <el-table-column prop="semValue" label="获得学期"></el-table-column>
+          </el-table>
+        </el-form-item>
+        <el-form-item label="创新学分信息" required>
+          <el-table
+            ref="multipleTable"
+            :data="raceData"
+            v-show="raceData.length !== 0"
+            tooltip-effect="dark"
+            style="width: 100%"
+            @selection-change="handleSelectionChange4"
+          >
+            <el-table-column type="selection" width="55"></el-table-column>
+            <el-table-column label="项目名称">
+              <template slot-scope="scope">{{ scope.row.name }}</template>
             </el-table-column>
+            <el-table-column prop="value" label="获得时间"></el-table-column>
           </el-table>
         </el-form-item>
         <el-form-item label="选择目的企业和岗位" required>
-          <!-- <el-select v-model="ruleForm.hr" filterable collapse-tags placeholder="请选择">
-            <el-option
-              v-for="item in hrOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            ></el-option>
-          </el-select> -->
           <el-cascader
             v-model="ruleForm.hr"
             :options="options"
             :props="{ multiple: false }"
             collapse-tags
-            clearable >
-          </el-cascader>
+            clearable
+          ></el-cascader>
         </el-form-item>
         <el-form-item
           label="有效时间"
@@ -230,7 +202,8 @@ export default {
         profileType: [],
         scoreType: [],
         levelType: [],
-        rewardType: []
+        rewardType: [],
+        raceType: []
       },
       profileData: [],
       profileDataValue: [],
@@ -240,6 +213,8 @@ export default {
       scoreDataValue: [],
       rewardData: [],
       rewardDataValue: [],
+      raceData: [],
+      raceDataValue: [],
       options: [
         {
           value: "company1",
@@ -299,21 +274,24 @@ export default {
   props: ["wh"],
   methods: {
     handleSelectionChange1(val) {
-        val.forEach(item => {
-          this.ruleForm.scoreType.push(item.value)
-        });
+      val.forEach(item => {
+        this.ruleForm.scoreType.push(item.value)
+      });
     },
     handleSelectionChange2(val) {
-        val.forEach(item => {
-          this.ruleForm.levelType.push(item.key)
-        });
+      val.forEach(item => {
+        this.ruleForm.levelType.push(item.key)
+      });
     },
     handleSelectionChange3(val) {
-      console.log(val);
-        val.forEach(item => {
-          this.ruleForm.rewardType.push(item.key)
-        });
-        console.log(this.ruleForm);
+      val.forEach(item => {
+        this.ruleForm.rewardType.push(item.key)
+      });
+    },
+    handleSelectionChange4(val) {
+      val.forEach(item => {
+        this.ruleForm.raceType.push(item.key)
+      });
     },
     CheckAllChange(val) {
       this.ruleForm.profileType = val ? this.profileDataValue : [];
@@ -404,8 +382,6 @@ export default {
                   name: this.content.score[score[j]].CourseName,
                 })
               }
-              console.log(this.scoreDataValue);
-              console.log(this.scoreData);
             }
             else if (range[i] === "level_exam") {
               this.levelData = [];
@@ -419,30 +395,40 @@ export default {
                   key: level[j],
                 })
               }
-              console.log(this.levelData);
-              console.log(this.levelDataValue);
             }
-            else if (range[i] === "race_reward") {
+            else if (range[i] === "reward") {
               this.rewardData = [];
               this.rewardDataValue = [];
-              var reward = Object.keys(this.content.race_reward);
+              var reward = Object.keys(this.content.reward);
               for (var j = 0; j < reward.length; j++) {
                 this.rewardDataValue.push(reward[j])
                 this.rewardData.push({
-                  value: this.content.race_reward[reward[j]].RewardDate,
-                  name: this.content.race_reward[reward[j]].RaceName,
+                  yearValue: this.content.reward[reward[j]].SchoolYear,
+                  semValue: this.content.reward[reward[j]].Semester === 0 ? "第一学期" : "第二学期",
+                  name: this.content.reward[reward[j]].RewardName,
                   key: reward[j]
                 })
               }
-              console.log(this.rewardData);
-              console.log(this.rewardDataValue);
+            }
+            else if (range[i] === "race_reward") {
+              this.raceData = [];
+              this.raceDataValue = [];
+              var race = Object.keys(this.content.race_reward);
+              for (var j = 0; j < race.length; j++) {
+                this.raceDataValue.push(race[j])
+                this.raceData.push({
+                  value: this.content.race_reward[race[j]].RewardDate,
+                  name: this.content.race_reward[race[j]].RaceName,
+                  key: race[j]
+                })
+              }
             }
           }
           this.loading = false
         })
-        .catch((error) => {
-          this.$message.error("出错啦,请稍后再试")
-        });
+      // .catch((error) => {
+      //   this.$message.error("出错啦,请稍后再试")
+      // });
     },
     resetForm(formName) {
       // this.$refs[formName].resetFields();
@@ -517,6 +503,16 @@ export default {
           }
           if (this.ruleForm.rewardType.length != 0) {
             if (this.checkAll2 === true)
+              ShareItems.push({ "Path": ["reward"] })
+            else
+              for (var i = 0; i < this.ruleForm.rewardType.length; i++) {
+                Path = ["reward"]
+                Path.push(this.ruleForm.rewardType[i])
+                ShareItems.push({ "Path": Path })
+              }
+          }
+          if (this.ruleForm.raceType.length != 0) {
+            if (this.checkAll2 === true)
               ShareItems.push({ "Path": ["race_reward"] })
             else
               for (var i = 0; i < this.ruleForm.rewardType.length; i++) {
@@ -552,12 +548,12 @@ export default {
                 });
             });
         })
-        // .catch(() => {
-        //   this.$message({
-        //     type: "info",
-        //     message: "分享已取消",
-        //   });
-        // });
+      // .catch(() => {
+      //   this.$message({
+      //     type: "info",
+      //     message: "分享已取消",
+      //   });
+      // });
     },
   },
   mounted() {

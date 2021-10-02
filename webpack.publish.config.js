@@ -20,7 +20,7 @@ module.exports = {
     // vendors: ['jquery'] // 这是第三方包的名称
   }, // 项目的入口文件
   output: {
-    path: path.join(__dirname, "./student"), // 输出路径
+    path: path.join(__dirname, "./company"), // 输出路径
     filename: "js/[name].js" // 输出文件名
   }, // 打包好的文件的数据配置
   devtool: "nosources-source-map",

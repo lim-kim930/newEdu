@@ -50,7 +50,6 @@ export default {
   methods: {
     byChange(e) {
       if (this.flag == 1 && e == 0) {
-        console.log(111111);
         this.codeIcon.color = this.codeIcon.borderBottomColor = "#5eacf0";
         this.psIcon.color = this.psIcon.borderBottomColor = "#909399";
         this.codeIcon.borderBottomWidth = "2px"
@@ -59,7 +58,6 @@ export default {
         this.flag = 0
       }
       else if (this.flag == 0 && e == 1) {
-        console.log(this.flag);
         this.psIcon.color = this.psIcon.borderBottomColor = "#5eacf0";
         this.codeIcon.color = this.codeIcon.borderBottomColor = "#909399";
         this.psIcon.borderBottomWidth = "2px"

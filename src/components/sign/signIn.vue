@@ -58,7 +58,7 @@ export default {
   },
   methods: {
     test() {
-      localStorage.setItem("jw_student_file", JSON.stringify({"token":"1679bd9a-43d5-43cc-9dc9-81374325f937","staffID":"19270808"}))
+      localStorage.setItem("jw_student_file", JSON.stringify({"token":"52bae146-f956-42f5-b3af-b9378710954a","staffID":"18271126"}))
       window.location.href = "https://limkim.xyz/newEdu/student"
     },
     byHDU() {
