@@ -152,18 +152,18 @@
               :style="{height: reward_height, paddingTop: reward_paddingTop}"
             >综合素质</span>
             <div class="reward_content" :style="{height: reward_height}">
-                <div class="rewardPart">
+                <div class="rewardPart" :style="{height: reward_height}">
                   <h4>个人荣誉</h4>
                   <span class="reward_name">奖项名称</span><span class="reward_level">奖项等级</span><span class="reward_year">获奖年份</span>
                   <span class="reward_value" v-for="item in rewardData" :key="item.id">
                     <span class="reward_name_value" >{{item.name}}</span><span class="reward_level_value">{{item.level}}</span><span class="reward_year_value">{{item.date}}</span>
                   </span>
                 </div>
-                <div class="racePart">
-                  <h4>个人荣誉</h4>
+                <div class="racePart" :style="{height: reward_height}">
+                  <h4>创新学分</h4>
                   <span class="race_name">项目名称</span><span class="race_level">奖项等级</span><span class="race_year">获奖时间</span>
-                  <span class="race_value" v-for="item in racedData" :key="item.id">
-                    <span class="race_name_value" >{{item.name}}</span><span class="race_score_value">{{item.level}}</span><span class="race_year_value">{{item.date}}</span>
+                  <span class="race_value" v-for="item in raceData" :key="item.id">
+                    <span class="race_name_value" >{{item.name}}</span><span class="race_level_value">{{item.level}}</span><span class="race_year_value">{{item.date}}</span>
                   </span>
                 </div>
             </div>
@@ -317,7 +317,6 @@ export default {
                 this.profileData[profileName[i]] = "data:image/png;base64," + Base64.decode(profile[profileName[i]])
               else
                 this.profileData[profileName[i]] = profile[profileName[i]]
-              console.log(this.profileData);
             }
           }
           var count = 2;
@@ -370,9 +369,9 @@ export default {
             var race_rewardCode = Object.keys(race_reward);
             for (var i = 0; i < race_rewardCode.length; i++) {
               this.raceData.push({
-                name: race_reward[race_rewardCode[i]].RewardName,
-                level: race_reward[race_rewardCode[i]].RewardLevel,
-                date: race_reward[race_rewardCode[i]].SchoolYear,
+                name: race_reward[race_rewardCode[i]].RaceName,
+                level: race_reward[race_rewardCode[i]].RaceLevel + " " +race_reward[race_rewardCode[i]].RewardLevel,
+                date: race_reward[race_rewardCode[i]].RewardDate,
               });
               count4++;
             }
@@ -403,11 +402,11 @@ export default {
           this.emptyShow = false;
           this.tableShow = true;
           this.loading = false
-          // setTimeout(() => {
-          //   this.saveImg(".table")
-          // }, 50)
+          setTimeout(() => {
+            this.saveImg(".table")
+          }, 50)
         })
-        .catch(error => {
+        .catch(() => {
           this.$message.error("出错啦,请稍后再试");
         });
     },
@@ -860,18 +859,21 @@ export default {
   border-right: none;
 }
 .level .level_value,
-.reward .reward_value {
+.reward .reward_value,
+.reward .race_value {
   float: left;
   display: block;
   width: 100%;
   height: 41px;
   border-bottom: 1px solid rgb(230, 230, 230) !important;
 }
-.reward .reward_value {
+.reward .reward_value,
+.reward .race_value {
   width: 532px;
 }
 .level_value span,
-.reward_value span {
+.reward_value span,
+.race_value span {
   display: inline-block;
   margin: 0;
   height: 40px;
@@ -882,9 +884,7 @@ export default {
   overflow: hidden;
   box-sizing: content-box;
 }
-.reward_value span {
-  width: 176px;
-}
+
 .level_value .level_year_value,
 .reward_value .reward_year_value {
   border-right: none;
@@ -892,6 +892,7 @@ export default {
 .rewardPart,
 .racePart {
   width: 532px;
+  font-size: 13px;
 }
 .rewardPart {
   border-right: 1px solid rgb(134, 134, 134);
@@ -901,7 +902,7 @@ export default {
 }
 .reward h4 {
   display: inline-block;
-  width: 532px;
+  width: 531px;
   height: 40px;
   line-height: 40px;
   text-align: center;

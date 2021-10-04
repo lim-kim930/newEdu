@@ -55,8 +55,9 @@ export default {
   },
   methods: {
     test() {//测试登录，使用指定的学号和token
-      localStorage.setItem("jw_student_file", JSON.stringify({"token":"52bae146-f956-42f5-b3af-b9378710954a","staffID":"18271126"}))
-      window.location.href = "https://limkim.xyz/newEdu/student"
+      // localStorage.setItem("jw_student_file", JSON.stringify({"token":"52bae146-f956-42f5-b3af-b9378710954a","staffID":"18271126"}))
+      // window.location.href = "https://limkim.xyz/newEdu/student"
+      this.$router.push("/testSignIn");
     },
     byHDU() {
       window.location.href = "https://api.hduhelp.com/gormja_wrapper/oauth/request";

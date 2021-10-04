@@ -104,7 +104,7 @@
       v-show="typeValue==='level_exam'&&!levelConfirmed"
       :disabled="levelBtnDisabled"
     >确认信息</el-button>
-    <el-button type="info" @click="dialog = true" plain v-show="!scoreConfirmed">错误反馈</el-button>
+    <el-button type="info" @click="dialog = true" plain v-show="(typeValue==='score'&&!scoreConfirmed)||(typeValue==='level_exam'&&!levelConfirmed)">错误反馈</el-button>
     <el-drawer
       title="学业信息错误反馈提示"
       :visible.sync="dialog"
@@ -149,19 +149,7 @@ export default {
         label: "等级考试"
       }],
       typeValue: "score",
-      yearOptions: [{
-        value: "0",
-        label: "2018 - 2019"
-      }, {
-        value: "1",
-        label: "2019 - 2020"
-      }, {
-        value: "2",
-        label: "2020 - 2021"
-      }, {
-        value: "3",
-        label: "2021 - 2022"
-      }],
+      yearOptions: [],
       yearValue: "",
       termOptions: [{
         value: "1",
@@ -446,7 +434,10 @@ export default {
             });
           });
           this.loading = false;
-          this.scoreConfirmed = true;
+          if(this.typeValue === "score")
+            this.scoreConfirmed = true;
+          else
+            this.levelConfirmed = true;
         })
         .catch(() => {
           this.$message.error("出错啦,请稍后再试");
@@ -522,6 +513,13 @@ export default {
   },
   mounted() {
     this.file = this.globalFile;
+    var grade = +JSON.parse(localStorage.getItem("jw_student_file")).staffID.substr(0, 2)
+    //根据学号判断年级,提供对应的4年学年选择
+    for(var i = 0; i < 4; i++)
+      this.yearOptions.push({
+        value: i,
+        label: "20"+ (grade + i) + " - 20" + (grade + i + 1)
+      })
   },
 };
 </script>

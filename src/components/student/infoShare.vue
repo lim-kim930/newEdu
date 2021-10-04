@@ -42,7 +42,6 @@
       </div>
       <div v-show="stepActive===1" class="info-select" style="overflow: auto; max-height: 550px;">
         <el-form-item label="要分享的学籍信息" required>
-          <h5 v-show="profileData.length === 0">无</h5>
           <el-checkbox
             :indeterminate="isIndeterminate"
             v-model="checkAll"
@@ -53,7 +52,7 @@
           >全选</el-checkbox>
           <el-checkbox-group
             v-model="ruleForm.profileType"
-            style="margin-left: 50px; width: 960px"
+            style="margin-left: 30px; width: 960px"
             @change="CheckedChange($event, 1)"
           >
             <el-checkbox
@@ -64,12 +63,14 @@
           </el-checkbox-group>
         </el-form-item>
         <el-form-item label="课程成绩信息" required>
+          <h4 v-show="scoreData.length === 0">暂无信息</h4>
           <el-table
             ref="multipleTable"
+            border
             :data="scoreData"
             v-show="scoreData.length !== 0"
             tooltip-effect="dark"
-            style="width: 100%"
+            style="width: 90%"
             @selection-change="handleSelectionChange1"
           >
             <el-table-column type="selection" width="55"></el-table-column>
@@ -80,12 +81,14 @@
           </el-table>
         </el-form-item>
         <el-form-item label="等级考试信息" required>
+          <h4 v-show="levelData.length === 0">暂无信息</h4>
           <el-table
             ref="multipleTable"
+            border
             :data="levelData"
             v-show="levelData.length !== 0"
             tooltip-effect="dark"
-            style="width: 100%"
+            style="width: 90%"
             @selection-change="handleSelectionChange2"
           >
             <el-table-column type="selection" width="55"></el-table-column>
@@ -96,12 +99,14 @@
           </el-table>
         </el-form-item>
         <el-form-item label="个人荣誉信息" required>
+          <h4 v-show="rewardData.length === 0">暂无信息</h4>
           <el-table
             ref="multipleTable"
+            border
             :data="rewardData"
             v-show="rewardData.length !== 0"
             tooltip-effect="dark"
-            style="width: 100%"
+            style="width: 90%"
             @selection-change="handleSelectionChange3"
           >
             <el-table-column type="selection" width="55"></el-table-column>
@@ -113,12 +118,14 @@
           </el-table>
         </el-form-item>
         <el-form-item label="创新学分信息" required>
+          <h4 v-show="raceData.length === 0">暂无信息</h4>
           <el-table
             ref="multipleTable"
+            border
             :data="raceData"
             v-show="raceData.length !== 0"
             tooltip-effect="dark"
-            style="width: 100%"
+            style="width: 90%"
             @selection-change="handleSelectionChange4"
           >
             <el-table-column type="selection" width="55"></el-table-column>
@@ -188,15 +195,15 @@ let FormData = require("form-data");
 export default {
   data() {
     return {
-      stepActive: 0,
-      checkAll: false,
-      isIndeterminate: false,
-      shareLink: "",
-      content: "",
-      fileList: [],
-      file: "",
-      btnShow: false,
-      ruleForm: {
+      stepActive: 0,//步骤数
+      checkAll: false,//学籍信息全选
+      isIndeterminate: false,//学籍全选按钮的不确定状态
+      shareLink: "",//分享链接
+      content: "",//学业文件内容
+      fileList: [],//upload文件列表
+      file: "",//文件
+      btnShow: false,//下一步按钮显示
+      ruleForm: {//表单选中数据
         date: "",
         hr: "",
         profileType: [],
@@ -205,10 +212,9 @@ export default {
         rewardType: [],
         raceType: []
       },
-      profileData: [],
-      profileDataValue: [],
-      levelData: [],
-      levelDataValue: [],
+      profileData: [],//学籍信息数据
+      profileDataValue: [],//学籍全选辅助
+      levelData: [],//等级考试信息数据
       scoreData: [],
       scoreDataValue: [],
       rewardData: [],
@@ -301,6 +307,7 @@ export default {
       this.checkAll = val.length === this.profileDataValue.length;
       this.isIndeterminate = val.length > 0 && val.length < this.profileDataValue.length;
     },
+    //复制成功提示
     onCopy() {
       this.$notify({
         title: "成功",
@@ -308,28 +315,50 @@ export default {
         type: "success"
       });
     },
+    //复制失败提示
     onCopyError() {
       this.$notify.error({
         title: "错误",
         message: "复制失败,请手动选中复制"
       });
     },
+    //关闭分享成功的dialog
     closeDialog() {
       this.dialogVisible = false
       this.loading = false
       this.resetForm()
     },
+    //文件加载完成,出现下一步按钮
     getFile() {
       this.btnShow = true
     },
+    //将文件放到file变量中
     change(response, file, fileList) {
       this.file = file[0].raw
     },
+    //删除文件
     remove(file, fileList) {
       this.fileList = []
+      this.file = ""
     },
+    //重置
+    resetForm() {
+      this.ruleForm = {
+        date: "",
+        hr: "",
+        profileType: [],
+        scoreType: [],
+        levelType: [],
+        rewardType: [],
+        raceType: []
+      }
+      this.isIndeterminate = false;
+      this.checkAll = false;
+    },
+    //下一步
     next() {
       document.querySelector(".info-select").style.maxHeight = this.wh - 360 + "px";
+      this.resetForm();
       this.stepActive = 1;
       this.loading = true;
       var data = new FormData();
@@ -342,7 +371,6 @@ export default {
       })
         .then((response) => {
           this.content = response.data.data.Body.data_map;
-          console.log(this.content);
           var range = Object.keys(this.content);
           for (var i = 0; i < range.length; i++) {
             if (range[i] === "profile") {
@@ -385,10 +413,8 @@ export default {
             }
             else if (range[i] === "level_exam") {
               this.levelData = [];
-              this.levelDataValue = [];
               var level = Object.keys(this.content.level_exam);
               for (var j = 0; j < level.length; j++) {
-                this.levelDataValue.push(level[j])
                 this.levelData.push({
                   value: this.content.level_exam[level[j]].ExamDate,
                   name: this.content.level_exam[level[j]].ExamName,
@@ -426,22 +452,9 @@ export default {
           }
           this.loading = false
         })
-      // .catch((error) => {
-      //   this.$message.error("出错啦,请稍后再试")
-      // });
-    },
-    resetForm(formName) {
-      // this.$refs[formName].resetFields();
-      this.ruleForm = {
-        date: "",
-        hr: [],
-        profileType: [],
-        scoreType: []
-      }
-      this.isIndeterminate1 = false;
-      this.checkAll1 = false;
-      this.isIndeterminate2 = false;
-      this.checkAll2 = false;
+      .catch(() => {
+        this.$message.error("获取学业文件信息出错啦,请稍后再试")
+      });
     },
     // 提交按钮
     submitForm() {
@@ -482,44 +495,32 @@ export default {
               }
           }
           if (this.ruleForm.scoreType.length != 0) {
-            if (this.checkAll2 === true)
-              ShareItems.push({ "Path": ["score"] })
-            else
-              for (var i = 0; i < this.ruleForm.scoreType.length; i++) {
-                Path = ["score"]
-                Path.push(this.ruleForm.scoreType[i])
-                ShareItems.push({ "Path": Path })
-              }
+            for (var i = 0; i < this.ruleForm.scoreType.length; i++) {
+              Path = ["score"]
+              Path.push(this.ruleForm.scoreType[i])
+              ShareItems.push({ "Path": Path })
+            }
           }
           if (this.ruleForm.levelType.length != 0) {
-            if (this.checkAll2 === true)
-              ShareItems.push({ "Path": ["level_exam"] })
-            else
-              for (var i = 0; i < this.ruleForm.levelType.length; i++) {
-                Path = ["level_exam"]
-                Path.push(this.ruleForm.levelType[i])
-                ShareItems.push({ "Path": Path })
-              }
+            for (var i = 0; i < this.ruleForm.levelType.length; i++) {
+              Path = ["level_exam"]
+              Path.push(this.ruleForm.levelType[i])
+              ShareItems.push({ "Path": Path })
+            }
           }
           if (this.ruleForm.rewardType.length != 0) {
-            if (this.checkAll2 === true)
-              ShareItems.push({ "Path": ["reward"] })
-            else
-              for (var i = 0; i < this.ruleForm.rewardType.length; i++) {
-                Path = ["reward"]
-                Path.push(this.ruleForm.rewardType[i])
-                ShareItems.push({ "Path": Path })
-              }
+            for (var i = 0; i < this.ruleForm.rewardType.length; i++) {
+              Path = ["reward"]
+              Path.push(this.ruleForm.rewardType[i])
+              ShareItems.push({ "Path": Path })
+            }
           }
           if (this.ruleForm.raceType.length != 0) {
-            if (this.checkAll2 === true)
-              ShareItems.push({ "Path": ["race_reward"] })
-            else
-              for (var i = 0; i < this.ruleForm.rewardType.length; i++) {
-                Path = ["race_reward"]
-                Path.push(this.ruleForm.rewardType[i])
-                ShareItems.push({ "Path": Path })
-              }
+            for (var i = 0; i < this.ruleForm.raceType.length; i++) {
+              Path = ["race_reward"]
+              Path.push(this.ruleForm.raceType[i])
+              ShareItems.push({ "Path": Path })
+            }
           }
           data.append("body", JSON.stringify({ "ShareItems": ShareItems }));
           this.axios
@@ -538,7 +539,6 @@ export default {
               })
                 .then((response) => {
                   this.shareLink = "https://api.hduhelp.com/gormja_wrapper/share/verify?fileID=" + response.data.data.Body.FileID + "&encryptedK1S=" + response.data.data.Body.EncryptedK1S;
-                  console.log(this.shareLink);
                   this.dialogVisible = true;
                   this.loading = false
                 })

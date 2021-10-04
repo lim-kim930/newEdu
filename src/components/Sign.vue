@@ -79,7 +79,7 @@ export default {
     $route() {
       switch (this.$route.path) {
         case "/signIn":
-          // case "/testSignIn":
+          case "/testSignIn":
           this.byChange(1)
           break
         case "/signUp":
@@ -97,7 +97,7 @@ export default {
       document.querySelector(".el-main").style.height = wh - 80 + "px";
       switch (this.$route.path) {
         case "/signIn":
-          // case "/testSignIn":
+          case "/testSignIn":
           this.byChange(1)
           break
         case "/signUp":

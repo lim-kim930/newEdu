@@ -6,23 +6,23 @@ import VueRouter from "vue-router"
 // import signUp from "./components/sign/signUp.vue"
 // import testSignIn from "./components/sign/testSignIn.vue"
 
-// import scoreChange from "./components/student/scoreChange.vue"
-// import infoConfirm from "./components/student/infoConfirm.vue"
-// import xjConfirm from "./components/student/infoConfirm/xjConfirm.vue"
-// import xyConfirm from "./components/student/infoConfirm/xyConfirm.vue"
-// import byConfirm from "./components/student/infoConfirm/byConfirm.vue"
-// import hjConfirm from "./components/student/infoConfirm/hjConfirm.vue"
-// import arcManage from "./components/student/arcManage.vue"
-// import infoShare from "./components/student/infoShare.vue"
-// import message from "./components/student/message.vue"
-// import accountManage from "./components/student/accountManage.vue"
+import scoreChange from "./components/student/scoreChange.vue"
+import infoConfirm from "./components/student/infoConfirm.vue"
+import xjConfirm from "./components/student/infoConfirm/xjConfirm.vue"
+import xyConfirm from "./components/student/infoConfirm/xyConfirm.vue"
+import byConfirm from "./components/student/infoConfirm/byConfirm.vue"
+import hjConfirm from "./components/student/infoConfirm/hjConfirm.vue"
+import arcManage from "./components/student/arcManage.vue"
+import infoShare from "./components/student/infoShare.vue"
+import message from "./components/student/message.vue"
+import accountManage from "./components/student/accountManage.vue"
 
-import queryInfo from "./components/Company/queryInfo.vue"
-import internCert from "./components/Company/internCert.vue"
-import comMessage from "./components/Company/message.vue"
-import received from "./components/Company/message/received.vue"
-import sent from "./components/Company/message/sent.vue"
-import comAccountManage from "./components/Company/accountManage.vue"
+// import queryInfo from "./components/Company/queryInfo.vue"
+// import internCert from "./components/Company/internCert.vue"
+// import comMessage from "./components/Company/message.vue"
+// import received from "./components/Company/message/received.vue"
+// import sent from "./components/Company/message/sent.vue"
+// import comAccountManage from "./components/Company/accountManage.vue"
 
 // import deansOfficeHome from './components/deansOffice/deansOfficeHome.vue'
 // import addStudent from './components/deansOffice/addStudent.vue'
@@ -41,53 +41,53 @@ import comAccountManage from "./components/Company/accountManage.vue"
 // 创建路由对象，并把得到的路由对象，挂载到 VM 实例上
 const router = new VueRouter({
   routes: [ // 路由规则
-    { path: "/", redirect: "/queryInfo" },
+    { path: "/", redirect: "/infoConfirm/xjConfirm" },
     // { path: "/comMessage", redirect: "/comMessage/received" },
     // { path: "/signIn", component: signIn },
     // { path: "/signUp", component: signUp },
     // { path: "/testSignIn", component: testSignIn },
 
-    // { path: "/scoreChange", component: scoreChange },
-    // {
-    //   path: "/infoConfirm",
-    //   component: infoConfirm,
-    //   children: [{
-    //     path: "/infoConfirm/xjConfirm",
-    //     component: xjConfirm
-    //   },
-    //   {
-    //     path: "/infoConfirm/xyConfirm",
-    //     component: xyConfirm
-    //   },
-    //   {
-    //     path: "/infoConfirm/hjConfirm",
-    //     component: hjConfirm
-    //   },
-    //   {
-    //     path: "/infoConfirm/byConfirm",
-    //     component: byConfirm
-    //   }]
-    // },
-    // { path: "/arcManage", component: arcManage },
-    // { path: "/infoShare", component: infoShare },
-    // { path: "/message", component: message },
-    // { path: "/accountManage", component: accountManage },
-
-    { path: "/queryInfo", component: queryInfo },
-    { path: "/internCert", component: internCert },
+    { path: "/scoreChange", component: scoreChange },
     {
-      path: "/comMessage",
-      component: comMessage,
+      path: "/infoConfirm",
+      component: infoConfirm,
       children: [{
-        path: "/comMessage/received",
-        component: received
+        path: "/infoConfirm/xjConfirm",
+        component: xjConfirm
       },
       {
-        path: "/comMessage/sent",
-        component: sent
+        path: "/infoConfirm/xyConfirm",
+        component: xyConfirm
+      },
+      {
+        path: "/infoConfirm/hjConfirm",
+        component: hjConfirm
+      },
+      {
+        path: "/infoConfirm/byConfirm",
+        component: byConfirm
       }]
     },
-    { path: "/comAccountManage", component: comAccountManage },
+    { path: "/arcManage", component: arcManage },
+    { path: "/infoShare", component: infoShare },
+    { path: "/message", component: message },
+    { path: "/accountManage", component: accountManage },
+
+    // { path: "/queryInfo", component: queryInfo },
+    // { path: "/internCert", component: internCert },
+    // {
+    //   path: "/comMessage",
+    //   component: comMessage,
+    //   children: [{
+    //     path: "/comMessage/received",
+    //     component: received
+    //   },
+    //   {
+    //     path: "/comMessage/sent",
+    //     component: sent
+    //   }]
+    // },
+    // { path: "/comAccountManage", component: comAccountManage },
 
 
     // { path: '/deansOfficeHome', component: deansOfficeHome },
