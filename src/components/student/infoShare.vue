@@ -548,12 +548,12 @@ export default {
                 });
             });
         })
-      // .catch(() => {
-      //   this.$message({
-      //     type: "info",
-      //     message: "分享已取消",
-      //   });
-      // });
+      .catch(() => {
+        this.$message({
+          type: "info",
+          message: "分享已取消",
+        });
+      });
     },
   },
   mounted() {
