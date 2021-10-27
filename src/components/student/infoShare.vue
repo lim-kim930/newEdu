@@ -624,7 +624,7 @@ export default {
   font-style: normal;
   color: #909399;
   height: 25px;
-  width: 500px;
+  width: 400px;
   margin: 0;
   overflow: hidden;
   white-space: nowrap;

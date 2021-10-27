@@ -3,6 +3,7 @@
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item>信息管理</el-breadcrumb-item>
       <el-breadcrumb-item>信息查询确认</el-breadcrumb-item>
+      <el-breadcrumb-item v-show="router !== ''">{{router}}</el-breadcrumb-item>
     </el-breadcrumb>
     <el-form
       ref="ruleForm"
@@ -37,7 +38,8 @@ export default {
     return {
       activeIndex: "1",//上边导航默认选中值
       loading: false,//form加载
-      confirmed: ""//学籍确认状态
+      confirmed: "",//学籍确认状态
+      router: ""//标题导航
     };
   },
   props: ["file", "xjConfirmed", "wh"],//拿到student页面传来的数据
@@ -53,15 +55,19 @@ export default {
       switch (key) {
         case "1":
           this.$router.push("/infoConfirm/xjConfirm");
+          this.router = "学籍确认";
           break
         case "2":
           this.$router.push("/infoConfirm/xyConfirm");
+          this.router = "学业确认";
           break
         case "3":
           this.$router.push("/infoConfirm/hjConfirm");
+          this.router = "综合素质确认";
           break
         case "4":
           this.$router.push("/infoConfirm/byConfirm");
+          this.router = "毕业确认";
           break
       }
     },
@@ -69,15 +75,19 @@ export default {
       switch (this.$route.path) {
         case "/infoConfirm/xjConfirm":
           this.activeIndex = "1";
+          this.router = "学籍确认";
           break
         case "/infoConfirm/xyConfirm":
           this.activeIndex = "2";
+          this.router = "学业确认";
           break
         case "/infoConfirm/hjConfirm":
           this.activeIndex = "3";
+          this.router = "综合素质确认";
           break
         case "/infoConfirm/byConfirm":
           this.activeIndex = "4";
+          this.router = "毕业确认";
           break
       }
     },

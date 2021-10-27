@@ -29,7 +29,7 @@
           placeholder="请输入要核验的链接"
           v-model="input"
           clearable
-          style="width: 20%; margin-left: 515px"
+          style="width: 20%; margin-left: 35%"
         ></el-input>
         <el-button type="primary" icon="el-icon-search" @click="query()" :loading="btn_loading">查询</el-button>
         <el-button
@@ -396,12 +396,11 @@ export default {
           this.reward_paddingTop = (count3 * 41 / 2 - 100) + "px"
           this.reward_height = count3 * 41 + "px"
           this.info_top = ((count+count2+count3) * 41 + 240) + "px"
-          setWaterMark("仅供高校学业核验系统核验使用", "有效期至:" + this.profileData.expired_at, (500 + count * 41))
+          setWaterMark("仅供高校学业核验系统核验使用", "有效期至:" + this.profileData.expired_at, (500 + (count+count2+count3) * 41))
           this.creat22();
           this.title = "为您核验到以下信息: "
           this.emptyShow = false;
           this.tableShow = true;
-          this.loading = false
           setTimeout(() => {
             this.saveImg(".table")
           }, 50)
@@ -443,8 +442,8 @@ export default {
       var context = canvas.getContext("2d");
       context.translate(0, 0);//移动坐标原点 
       // 绘制印章边框   
-      var width = canvas.width / 2;
-      var height = canvas.height / 2;
+      var width = 125;
+      var height = 125;
       //边框1
       context.lineWidth = 3;
       context.strokeStyle = "#f00";
@@ -546,11 +545,13 @@ export default {
         document.querySelector("canvas").remove()
       var tuzhangdiv = document.querySelector(".info");
       // 创建使用默认分辨率的画布
+      console.log();
       tuzhangdiv.appendChild(this.createHiDPICanvas(250, 250))
       this.createSeal("杭州电子科技大学", this.blockData.hash, "交易号", "※" + this.blockData.blockNumber.split("").reverse().join("") + "※");
     }
   },
   mounted() {
+    console.log(window.screen);
     if(this.$route.query.url !== undefined){
       this.input = this.$route.query.url
       this.query()
