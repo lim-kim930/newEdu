@@ -1,5 +1,6 @@
 node_modules
 dist
+.idea
 webpack.publish.config.js
 src/main.js
 src/router.js
