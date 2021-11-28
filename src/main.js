@@ -1,7 +1,8 @@
 import Vue from "vue"
-//导入自己的 .vue 组件
+// 导入自己的 .vue 组件
 // 在这里，如果要在webpack中使用.vue组件，必须先安装对应的loader加载器，否则webpack处理不了这种文件
 // vue-loader
+// 在下面这些APP中选择一个挂载
 // import APP from "../src/components/Sign.vue"
 import APP from "../src/components/Student.vue"
 // import APP from "../src/components/Company.vue"
@@ -34,6 +35,6 @@ Vue.use(ElementUI)
 
 const vm = new Vue({
   el: "#app",
-  render: c => c(APP),
-  router
+  router,
+  render: c => c(APP)
 })

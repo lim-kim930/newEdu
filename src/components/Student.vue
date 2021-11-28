@@ -94,6 +94,7 @@
     </el-container>
   </el-container>
 </template>
+
 <script>
 export default {
   data() {
@@ -210,10 +211,13 @@ export default {
     }
   },
   mounted() {//写在mounted或者activated生命周期内即可
-    //拿到屏幕高度
-    this.wh = this.windowHeight();
-    document.querySelector(".el-form").style.maxHeight = this.wh - 190 + "px";
-    document.querySelector(".el-main").style.height = this.wh - 80 + "px";
+    // 拿到屏幕高度
+    window.addEventListener('resize', () => {
+      let wh = window.innerHeight;
+      document.querySelector(".el-form").style.maxHeight = wh - 190 + "px";
+      document.querySelector(".el-main").style.height = wh - 80 + "px";
+      console.log(wh)
+    })
     //判断是否登录
     if (localStorage.getItem("jw_student_file") === null)
       this.$confirm("您还未登录,请前往登录", "提示", {
