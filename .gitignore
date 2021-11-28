@@ -1,4 +1,5 @@
 node_modules
+dist
 webpack.publish.config.js
 src/main.js
 src/router.js
