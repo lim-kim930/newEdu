@@ -1,31 +1,26 @@
 <template>
   <el-form ref="form">
-    <h3 style="font-weight: 400; margin-bottom: 30px; color:#909399">测试登录</h3>
+    <h3 style="font-weight: 400; margin-bottom: 30px; color:#909399">管理员登录</h3>
     <el-form-item style="margin-bottom: 27px">
       <el-input
-        placeholder="请输入学号"
+        placeholder="请输入用户名"
         v-model="uName"
-        style="width: 300px;"
+        style="width: 100%;"
         prefix-icon="el-icon-user-solid"
         clearable
       ></el-input>
     </el-form-item>
     <el-form-item style="margin-bottom: 27px">
       <el-input
-        placeholder="请输入对应token"
+        placeholder="请输入密码"
         v-model="token"
-        style="width: 300px;"
+        style="width: 100%;"
         prefix-icon="el-icon-key"
         clearable
       ></el-input>
     </el-form-item>
     <el-form-item style="margin-bottom: 5px;">
-      <el-button
-        type="primary"
-        @click="onSubmit()"
-        style="width: 300px;"
-        :loading="btnLoad"
-      >登录</el-button>
+      <el-button type="primary" @click="onSubmit()" style="width: 100%;" :loading="btnLoad">登录</el-button>
     </el-form-item>
     <div class="footer">
       <el-link
@@ -39,7 +34,7 @@
         @click="byCode()"
         style="color: #1890ff; margin-left: 70px;"
         :underline="false"
-      >密钥登录</el-link>
+      >密码登录</el-link>
       <el-link
         type="info"
         @click="byHDU()"
@@ -67,13 +62,14 @@ export default {
     },
     onSubmit() {
       this.btnLoad = true
-      if (this.uName.length === 8 && this.uName.length !== 0)
-        localStorage.setItem("jw_student_file", JSON.stringify({ "token": this.token, "staffID": this.uName }))
-      else {
-        this.$message.error("请正确输入学号和token");
+      if (this.uName.length === 0 || this.uName.length === 0) {
+        this.$message.error("请正确输入账号和密码");
         return
       }
-      window.location.href = "https://limkim.xyz/newEdu/student"
+      else {
+        localStorage.setItem("jw_manage_file", JSON.stringify({ "name": this.uName }))
+      }
+      window.location.href = "https://limkim.xyz/newEdu/manager"
     },
   },
 };
@@ -81,8 +77,8 @@ export default {
 
 <style scoped>
 .el-form {
-  margin: 70px 130px 0 100px;
-  width: 340px;
+  margin: 70px 90px 0 90px;
+  width: calc(100% - 180px);
   height: 300px;
   padding: 5px 5px;
   background-color: rgba(255, 255, 255, 0);

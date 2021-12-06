@@ -1,9 +1,14 @@
 <template>
   <el-form ref="form">
-    <h3 style="font-weight: 400; margin-bottom: 30px; color: #909399">普通用户登录</h3>
+    <h3 style="font-weight: 400; margin-bottom: 30px; color: #909399">企业账号密码登录</h3>
     <el-form-item style="margin-bottom: 27px">
+      <!-- <el-button type="primary" style="width: 100%; height: 40px" onclick="path.click()">
+        请选择密钥文件
+        <i class="el-icon-upload el-icon--right"></i>
+      </el-button>-->
+      <!-- <input type="file" id="path" style="display: none" accept=".json" /> -->
       <el-input
-        placeholder="请输入用户名"
+        placeholder="请输入企业账号"
         v-model="name"
         style="width: 100%"
         prefix-icon="el-icon-user"
@@ -22,7 +27,7 @@
       ></el-input>
     </el-form-item>
     <el-form-item style="margin-bottom: 5px">
-      <el-button type="primary" disabled @click="onSubmit()" style="width: 100%" :loading="btnLoad">登录</el-button>
+      <el-button type="primary" @click="onSubmit()" style="width: 100%" :loading="btnLoad">登录</el-button>
     </el-form-item>
     <div class="footer">
       <el-link
@@ -37,12 +42,12 @@
         style="color: #1890ff; margin-left: 5%;"
         :underline="false"
       >管理员</el-link> -->
-      <el-link
+      <!-- <el-link
         type="info"
         @click="byHDU()"
         style="color: #1890ff; margin-left: calc(95% - 140px)"
         :underline="false"
-      >数字杭电登录</el-link>
+      >数字杭电登录</el-link> -->
     </div>
   </el-form>
 </template>

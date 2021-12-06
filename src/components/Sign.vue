@@ -3,7 +3,7 @@
   <el-container>
     <!-- 头部 -->
     <el-header class="logo">
-      <span class="tittle">教务—学业分享系统 | 高校学业核验系统 | 登录</span>
+      <span class="tittle">教务—学业分享系统 | 高校学业核验系统</span>
     </el-header>
     <!-- 内容 -->
     <el-main>
@@ -16,11 +16,11 @@
         <div class="method_switch">
           <div id="signUp" :style="codeIcon" @click="byChange(0)">
             <i class="el-icon-link"></i>
-            <span>企业账户注册</span>
+            <span>企业登录</span>
           </div>
           <div id="signIn" :style="psIcon" @click="byChange(1)">
             <i class="el-icon-lock"></i>
-            <span>用户登录</span>
+            <span>普通用户登录</span>
           </div>
         </div>
         <router-view></router-view>
@@ -54,7 +54,7 @@ export default {
         this.psIcon.color = this.psIcon.borderBottomColor = "#909399";
         this.codeIcon.borderBottomWidth = "2px"
         this.psIcon.borderBottomWidth = "1px";
-        this.$router.push("/signUp");
+        this.$router.push("/comSignIn");
         this.flag = 0
       }
       else if (this.flag == 0 && e == 1) {
@@ -79,10 +79,10 @@ export default {
     $route() {
       switch (this.$route.path) {
         case "/signIn":
-          case "/testSignIn":
+          // case "/testSignIn":
           this.byChange(1)
           break
-        case "/signUp":
+        case "/comSignIn":
           this.byChange(0)
           break
       }
@@ -97,7 +97,7 @@ export default {
       document.querySelector(".el-main").style.height = wh - 80 + "px";
       switch (this.$route.path) {
         case "/signIn":
-          case "/testSignIn":
+        case "/testSignIn":
           this.byChange(1)
           break
         case "/signUp":

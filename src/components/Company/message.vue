@@ -1,26 +1,20 @@
 <template>
-  <div>
-    <el-breadcrumb separator-class="el-icon-arrow-right">
-      <el-breadcrumb-item>消息中心</el-breadcrumb-item>
-      <el-breadcrumb-item>{{index}}</el-breadcrumb-item>
-    </el-breadcrumb>
-    <el-form
-      ref="ruleForm"
-      label-width="100px"
-      v-loading="loading"
-      element-loading-text="拼命加载中"
-      class="form">
-        <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" @select="handleSelect">
-            <el-menu-item index="1" style="font-size: 18px; line-height: 60px">
-              收信箱 <el-badge :value="received" :max="99" class="item" v-show="received !== 0"></el-badge>
-            </el-menu-item>
-            <el-menu-item index="2" style="font-size: 18px">
-              已发送 <el-badge :value="sent" :max="99" class="item" v-show="sent !== 0"></el-badge>
-            </el-menu-item>
-        </el-menu>
-        <router-view @func="getReceived"></router-view>
-    </el-form>
-  </div>
+  <el-form
+    ref="ruleForm"
+    label-width="100px"
+    v-loading="loading"
+    element-loading-text="拼命加载中"
+    class="form">
+      <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" @select="handleSelect">
+          <el-menu-item index="1" style="font-size: 18px; line-height: 60px">
+            收信箱 <el-badge :value="received" :max="99" class="item" v-show="received !== 0"></el-badge>
+          </el-menu-item>
+          <el-menu-item index="2" style="font-size: 18px">
+            已发送 <el-badge :value="sent" :max="99" class="item" v-show="sent !== 0"></el-badge>
+          </el-menu-item>
+      </el-menu>
+      <router-view @func="getReceived"></router-view>
+  </el-form>
 </template>
 <script>
 export default {
@@ -74,7 +68,7 @@ export default {
 <style scoped>
 .form {
   overflow: auto;
-  margin: 30px 10px 10px 10px;
+  margin: 10px;
   width: calc(100% - 20px);
   padding: 20px 80px 30px 80px;
   background-color: #fff;

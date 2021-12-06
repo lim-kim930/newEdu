@@ -1,35 +1,14 @@
 <template>
-  <!-- template 中，只能有唯一的一个根元素 -->
   <el-container>
     <!-- 头部 -->
     <el-header class="logo">
       <div class="title">
-        <span>高校学业核验系统</span>
+        <span>管理系统</span>
       </div>
       <div class="user">
         <!-- <el-badge :value="200" :max="99" class="item">
           <el-button size="small">评论</el-button>
         </el-badge>-->
-        <el-dropdown style="height: 50px; line-height: 80px" @command="handleCommand">
-          <el-badge
-            :value="received + sent"
-            :hidden="received + sent === 0"
-            class="item"
-            style="width: 30px; height: 30px; margin-right: 20px; line-height: 30px !important; cursor: pointer;"
-          >
-            <i class="el-icon-message" style="font-size: 20px; color: #fff" @click="goMessage()"></i>
-          </el-badge>
-          <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item command="received" class="clearfix">
-              收信箱
-              <el-badge class="mark" :value="received" :hidden="received === 0" />
-            </el-dropdown-item>
-            <el-dropdown-item command="sent" class="clearfix">
-              已发送
-              <el-badge class="mark" :value="sent" :hidden="sent === 0" />
-            </el-dropdown-item>
-          </el-dropdown-menu>
-        </el-dropdown>
         <el-avatar :size="25" :src="circleUrl"></el-avatar>
         <span style="color: #fff;" id="uname">{{uName === ""?"":uName + " |"}}</span>
         <el-link :underline="false" @click="logOut()" style="color: #fff;">
@@ -54,27 +33,11 @@
             >
               <el-menu-item index="1">
                 <i class="el-icon-s-grid"></i>
-                <span slot="title" style="font-size: 20px">学生信息核验</span>
-              </el-menu-item>
-              <el-menu-item index="6">
-                <i class="el-icon-s-flag"></i>
-                <span slot="title" style="font-size: 20px">信息广场</span>
-              </el-menu-item>
-              <el-menu-item index="5">
-                <i class="el-icon-s-management"></i>
-                <span slot="title" style="font-size: 20px">招聘信息管理</span>
+                <span slot="title" style="font-size: 20px">企业相关</span>
               </el-menu-item>
               <el-menu-item index="2">
                 <i class="el-icon-s-check"></i>
-                <span slot="title" style="font-size: 20px">学生实习认证</span>
-              </el-menu-item>
-              <el-menu-item index="3">
-                <i class="el-icon-message-solid"></i>
-                <span slot="title" style="font-size: 20px">消息中心</span>
-              </el-menu-item>
-              <el-menu-item index="4">
-                <i class="el-icon-s-custom"></i>
-                <span slot="title" style="font-size: 20px">账号设置</span>
+                <span slot="title" style="font-size: 20px">档案重置</span>
               </el-menu-item>
             </el-menu>
           </el-col>
@@ -82,7 +45,7 @@
       </el-aside>
       <!-- 内容 -->
       <el-main v-loading="loading" element-loading-text="拼命加载中">
-        <router-view @func="getReceived" @func2="getSent" :received="received" :sent="sent" :wh="wh"></router-view>
+        <router-view :wh="wh"></router-view>
       </el-main>
     </el-container>
   </el-container>
@@ -91,42 +54,22 @@
 export default {
   data() {
     return {
+      wh: "",
       circleUrl: "https://limkim.xyz/newEdu/user.png",
       activeIndex: "",
       tokenInfo: "",
       loading: false,
       received: 0,
       sent: 0,
-      uName: "",
-      wh: ""//屏幕高度
+      uName: ""
     };
   },
   methods: {
-    getReceived(received) {
-      this.received = received
-    },
-    getSent(sent) {
-      this.sent = sent
-    },
-    handleCommand(command) {
-      this.$router.push("/comMessage/" + command);
-    },
-    goMessage() {
-      this.$router.push("/comMessage");
-    },
     btn(key) {
       if (key === "1")
-        this.$router.push("/queryInfo");
+        this.$router.push("/addCompany");
       else if (key === "2")
-        this.$router.push("/internCert");
-      else if (key === "3")
-        this.$router.push("/comMessage/received");
-      else if (key === "4")
-        this.$router.push("/comAccountManage");
-      else if (key === "5")
-        this.$router.push("/infoEntry");
-      else if (key === "6")
-        this.$router.push("/infoSquare");
+        this.$router.push("/profileReset");
     },
     logOut() {
       if (this.uName === "")
@@ -139,31 +82,18 @@ export default {
           type: "warning",
           center: true
         }).then(() => {
-          localStorage.removeItem("jw_ent_file");
-          window.location.href = "https://limkim.xyz/newEdu/sign";
+          localStorage.removeItem("jw_ent_file")
+          window.location.href = "https://limkim.xyz/newEdu/sign"
         })
       }
     },
     redirect() {
       switch (this.$route.path) {
-        case "/queryInfo":
+        case "/addCompany":
           this.activeIndex = "1";
           break
-        case "/comAccountManage":
-          this.activeIndex = "4";
-          break
-        case "/internCert":
+        case "/profileReset":
           this.activeIndex = "2";
-          break
-        case "/comMessage/received":
-        case "/comMessage/sent":
-          this.activeIndex = "3";
-          break
-        case "/infoEntry":
-          this.activeIndex = "5";
-          break
-        case "/infoSquare":
-          this.activeIndex = "6";
           break
       }
     },
@@ -180,11 +110,10 @@ export default {
       // to.path  ( 表示的是要跳转到的路由的地址 eg: /home );
     }
   },
-  mounted() {//写在mounted或者activated生命周期内即可
-    this.wh = this.windowHeight();
+  mounted() {        //写在mounted或者activated生命周期内即可
+    this.wh = this.windowHeight()
     document.querySelector(".el-main").style.height = this.wh - 80 + "px";
-    this.redirect();
-    if (localStorage.getItem("jw_ent_file") === null)
+    if (localStorage.getItem("jw_manage_file") === null)
       this.$confirm("您还未登录,请前往登录", "提示", {
         confirmButtonText: "确定",
         showCancelButton: false,
@@ -194,22 +123,9 @@ export default {
       }).catch(() => {
         window.location.href = "https://limkim.xyz/newEdu/sign"
       });
-    else {
-      this.uName = JSON.parse(localStorage.getItem("jw_ent_file")).CompanyCode
-      this.axios({
-        method: "post",
-        url: "https://api.hduhelp.com/gormja_wrapper/share/lookupShareLink",
-        headers: { "Content-Type": "application/json", "Authorization": JSON.parse(localStorage.getItem("jw_ent_file")).authorization }
-        // data: localStorage.getItem("sss")
-      })
-        .then((response) => {
-          this.received = response.data.data.length;
-          sessionStorage.setItem("message", JSON.stringify(response.data.data))
-        })
-        .catch(error => {
-          this.$message.error("获取站内信息出错啦,请稍后再试");
-        });
-    }
+    else
+      this.uName = JSON.parse(localStorage.getItem("jw_manage_file")).name
+    this.redirect();
   },
 };
 </script>

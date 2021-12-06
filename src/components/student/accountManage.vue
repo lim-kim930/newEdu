@@ -1,19 +1,9 @@
 <template>
-  <div>
-    <el-breadcrumb separator-class="el-icon-arrow-right">
-      <el-breadcrumb-item>账号设置</el-breadcrumb-item>
-    </el-breadcrumb>
-    <div class="pwd">
-      <h4>重置学籍确认状态</h4>
-      <el-divider></el-divider>
-      <el-form
-        :model="ruleForm"
-        status-icon
-        ref="ruleForm"
-        label-width="100px"
-        class="demo-ruleForm"
-      >
-        <!-- <el-form-item label="原密码" prop="oldPass" required>
+  <div class="pwd">
+    <!-- <h4>重置学籍确认状态</h4> -->
+    <el-divider></el-divider>
+    <el-form :model="ruleForm" status-icon ref="ruleForm" label-width="100px" class="demo-ruleForm">
+      <!-- <el-form-item label="原密码" prop="oldPass" required>
             <el-input type="password" v-model="ruleForm.oldPass" autocomplete="off" show-password></el-input>
           </el-form-item>
           <el-form-item label="新密码" prop="pass" required>
@@ -21,13 +11,12 @@
           </el-form-item>
           <el-form-item label="确认密码" prop="checkPass" required>
             <el-input type="password" v-model="ruleForm.checkPass" autocomplete="off" show-password></el-input>
-        </el-form-item>-->
-        <el-form-item>
-          <el-button type="primary" @click="submitForm()">确认修改</el-button>
-          <!-- <el-button @click="resetForm('ruleForm')">重置</el-button> -->
-        </el-form-item>
-      </el-form>
-    </div>
+      </el-form-item>-->
+      <!-- <el-form-item> -->
+      <!-- <el-button type="primary" @click="submitForm()">确认修改</el-button> -->
+      <!-- <el-button @click="resetForm('ruleForm')">重置</el-button> -->
+      <!-- </el-form-item> -->
+    </el-form>
   </div>
 </template>
 <script>
@@ -35,9 +24,9 @@ export default {
   data() {
     return {
       ruleForm: {
-        pass: '',
-        checkPass: '',
-        oldPass: ''
+        pass: "",
+        checkPass: "",
+        oldPass: ""
       },
     };
   },
@@ -75,7 +64,7 @@ export default {
 .pwd,
 .chain {
   overflow: auto;
-  margin: 30px 10px;
+  margin: 10px;
   width: calc(100% - 20px);
   padding: 40px 100px;
   background-color: #fff;

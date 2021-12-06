@@ -1,15 +1,12 @@
 <template>
   <div>
-    <el-breadcrumb separator-class="el-icon-arrow-right">
-      <el-breadcrumb-item>学生信息核验</el-breadcrumb-item>
-    </el-breadcrumb>
     <div
       v-loading="loading"
       element-loading-text="拼命加载中"
-      style="margin: 30px 10px; border-radius: 10px;"
+      style="margin: 10px; border-radius: 10px;"
     >
-      <el-form status-iconc lass="ruleForm" :style="{height: form_height}">
-        <span style="font-size: 18px; display: inline-block; margin-bottom: 40px">
+      <el-form status-iconc lass="ruleForm" :style="{'max-height': this.wh - 105 + 'px'}">
+        <span style="font-size: 18px; font-weight: 700; display: inline-block; margin-bottom: 40px">
           {{title}}
           <el-popover
             placement="right-start"
@@ -39,7 +36,7 @@
           @click="dialogTableVisible = true"
           v-show="btnShow"
         >查看交易详情</el-button>
-        <el-empty :image-size="200" v-show="emptyShow"></el-empty>
+        <el-empty :image-size="200" description="输入链接即可核验" v-show="emptyShow"></el-empty>
         <div
           id="mycanvas"
           v-show="!tableShow"
@@ -111,25 +108,25 @@
               <div class="part1" :style="{height: score_height}">
                 <span class="course_name">课程名</span><span class="course_score">成绩</span><span class="course_gp">绩点</span>
                 <span class="score_value" v-for="item in scoreDataPart1" :key="item.id">
-                  <span class="course_name_value" :style="{lineHeight: item.name.length<=8?'40px':item.name.length<=16?'20px':'13px'}" :title="item.name">{{item.name}}</span><span class="course_score_value">{{item.score}}</span><span class="course_gp_value">{{item.gp}}</span>
+                  <span class="course_name_value" :style="{lineHeight: item.name.length<=8?'50px':item.name.length<=16?'25px':'16px'}" :title="item.name">{{item.name}}</span><span class="course_score_value">{{item.score}}</span><span class="course_gp_value">{{item.gp}}</span>
                 </span>
               </div>
               <div class="part2" :style="{height: score_height}">
                 <span class="course_name">课程名</span><span class="course_score">成绩</span><span class="course_gp">绩点</span>
                 <span class="score_value" v-for="item in scoreDataPart2" :key="item.id">
-                  <span class="course_name_value" :style="{lineHeight: item.name.length<=8?'40px':item.name.length<=16?'20px':'13px'}" :title="item.name">{{item.name}}</span><span class="course_score_value">{{item.score}}</span><span class="course_gp_value">{{item.gp}}</span>
+                  <span class="course_name_value" :style="{lineHeight: item.name.length<=8?'50px':item.name.length<=16?'25px':'16px'}" :title="item.name">{{item.name}}</span><span class="course_score_value">{{item.score}}</span><span class="course_gp_value">{{item.gp}}</span>
                 </span>
               </div>
               <div class="part3" :style="{height: score_height}">
                 <span class="course_name">课程名</span><span class="course_score">成绩</span><span class="course_gp">绩点</span>
                 <span class="score_value" v-for="item in scoreDataPart3" :key="item.id">
-                  <span class="course_name_value" :style="{lineHeight: item.name.length<=8?'40px':item.name.length<=16?'20px':'14px'}" :title="item.name">{{item.name}}</span><span class="course_score_value">{{item.score}}</span><span class="course_gp_value">{{item.gp}}</span>
+                  <span class="course_name_value" :style="{lineHeight: item.name.length<=8?'50px':item.name.length<=16?'25px':'16px'}" :title="item.name">{{item.name}}</span><span class="course_score_value">{{item.score}}</span><span class="course_gp_value">{{item.gp}}</span>
                 </span>
               </div>
               <div class="part4" :style="{height: score_height}">
                 <span class="course_name">课程名</span><span class="course_score">成绩</span><span class="course_gp">绩点</span>
                 <span class="score_value" v-for="item in scoreDataPart4" :key="item.id">
-                  <span class="course_name_value" :style="{lineHeight: item.name.length<=8?'40px':item.name.length<=16?'20px':'14px'}" :title="item.name">{{item.name}}</span><span class="course_score_value">{{item.score}}</span><span class="course_gp_value">{{item.gp}}</span>
+                  <span class="course_name_value" :style="{lineHeight: item.name.length<=8?'50px':item.name.length<=16?'25px':'16px'}" :title="item.name">{{item.name}}</span><span class="course_score_value">{{item.score}}</span><span class="course_gp_value">{{item.gp}}</span>
                 </span>
               </div>
             </div>
@@ -236,6 +233,7 @@ export default {
       file: ""
     };
   },
+  props: ["wh"],
   methods: {
     saveImg(val) {
       window.pageYoffset = 0;
@@ -281,8 +279,8 @@ export default {
       this.axios({
         method: "post",
         url: this.input, //用户输入的链接
-        headers: { "Content-Type": "application/json" },
-        data: localStorage.getItem("jw_ent_file")
+        headers: { "Content-Type": "application/json", "Authorization": JSON.parse(localStorage.getItem("jw_ent_file")).authorization },
+        // data: localStorage.getItem("jw_ent_file")
       })
         .then((response) => {
           this.profileData = {};
@@ -329,6 +327,7 @@ export default {
                 flag = 1;
                 count++;
               }
+              console.log(score);
               this["scoreDataPart" + flag].push({
                 name: score[scoreCode[i]].CourseName,
                 score: score[scoreCode[i]].ScoreMakeup === ""?score[scoreCode[i]].ScoreFinal:score[scoreCode[i]].ScoreMakeup,
@@ -384,18 +383,18 @@ export default {
           if (count3 < 5)
             count3 = 5
           this.form_height = "750px"
-          this.score_height = count * 41 + "px"
-          this.title_height = count * 41 + "px"
-          this.title_paddingTop = (count * 41 / 2 - 82) + "px"
-          this.score_content_height = (count * 41 + 1) + "px"
-          this.table_height = ((count+count2+count3) * 41 + 500) + "px"
-          this.level_top = (count * 41 + 240) + "px"
+          this.score_height = count * 51 + "px"
+          this.title_height = count * 51 + "px"
+          this.title_paddingTop = (count * 51 / 2 - 82) + "px"
+          this.score_content_height = (count * 51 + 1) + "px"
+          this.table_height = (count*51 + (count2 + count3) * 41 + 500) + "px"
+          this.level_top = (count * 51 + 240) + "px"
           this.level_paddingTop = (count2 * 41 / 2 - 100) + "px"
           this.level_height = count2 * 41 + "px"
-          this.reward_top = (count * 41 + 240) + count2 * 41 + "px"
+          this.reward_top = (count * 51 + 240) + count2 * 41 + "px"
           this.reward_paddingTop = (count3 * 41 / 2 - 100) + "px"
           this.reward_height = count3 * 41 + "px"
-          this.info_top = ((count+count2+count3) * 41 + 240) + "px"
+          this.info_top = (count * 51 +(count2 + count3) * 41 + 240) + "px"
           setWaterMark("仅供高校学业核验系统核验使用", "有效期至:" + this.profileData.expired_at, (500 + (count+count2+count3) * 41))
           this.creat22();
           this.title = "为您核验到以下信息: "
@@ -405,9 +404,9 @@ export default {
             this.saveImg(".table")
           }, 50)
         })
-        .catch(() => {
-          this.$message.error("出错啦,请稍后再试");
-        });
+        // .catch(() => {
+        //   this.$message.error("出错啦,请稍后再试");
+        // });
     },
     createHiDPICanvas(w, h, ratio) {
       const PIXEL_RATIO = (function () {
@@ -570,7 +569,6 @@ export default {
   border: 1px solid rgba(204, 204, 204, 0.5);
   box-shadow: 0 2px 5px 1px rgba(0, 0, 0, 0.1);
   border-radius: 10px;
-  max-height: 750px;
 }
 .upload {
   display: inline-block;
@@ -741,10 +739,10 @@ export default {
 .score_content span {
   display: inline-block;
   margin: 0;
-  height: 40px;
+  height: 50px;
   width: 81px;
   text-align: center;
-  line-height: 40px;
+  line-height: 50px;
   border-top: 1px solid #ccc;
   border-bottom: 1px solid #ccc;
   border-left: 1px solid #ccc;
@@ -760,7 +758,7 @@ export default {
 .score_content .course_gp_value {
   width: 81px;
   border-top: none;
-  height: 40px;
+  height: 50px;
   border-bottom: none;
   border-left: 1px solid rgb(230, 230, 230);
   background-color: #fff;
@@ -965,49 +963,5 @@ export default {
   width: 1166px;
   margin: 0 5%;
   background-size: 100% !important;
-}
-</style>
-<style>
-.my-label {
-  background: #c8d6c1 !important;
-}
-.my-content {
-  height: 20px;
-  background: #fde2e2;
-}
-.el-breadcrumb {
-  margin: 10px 10px 0 10px;
-  height: 60px;
-  background-color: #fff;
-  line-height: 60px !important;
-  padding-left: 20px;
-  border-radius: 10px;
-}
-.el-breadcrumb__item {
-  font-size: 16px !important;
-}
-.table-expand .el-form-item {
-  font-size: 18px;
-  margin-right: 0;
-  margin-bottom: 0;
-  width: 100%;
-}
-.el-table__expanded-cell {
-  padding: 0 !important;
-}
-.table-expand {
-  margin: 0 !important;
-  width: 100% !important;
-  padding: 10px 60px !important;
-}
-.table-expand .el-form-item .el-form-item__label {
-  color: #99a9bf !important;
-  font-size: 17px !important;
-}
-.table-expand .el-form-item .el-form-item__content {
-  font-size: 17px !important;
-}
-.cell {
-  font-size: 17px;
 }
 </style>

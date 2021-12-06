@@ -1,5 +1,5 @@
 <template>
-  <el-form ref="form" v-loading="loading" element-loading-text="拼命加载中" class="form1">
+  <el-form ref="form" v-loading="loading" :element-loading-text="loadText" class="form1">
     <el-descriptions class="margin-top" :column="3" border v-if="data">
       <el-descriptions-item v-for="item in data" v-bind:key="item.id">
         <template slot="label">{{item.VisibleName}}</template>
@@ -7,7 +7,7 @@
       </el-descriptions-item>
       <el-descriptions-item v-if="pic.VisibleName">
         <template slot="label">{{pic.VisibleName}}</template>
-        <img :src="'data:image/png;base64,'+pic.Value" alt="照片" style="width: 100px;">
+        <img :src="'data:image/png;base64,'+pic.Value" alt="照片" style="width: 100px;" />
       </el-descriptions-item>
     </el-descriptions>
     <el-result icon="success" title="学籍信息已确认" v-show="confirmed"></el-result>
@@ -52,6 +52,8 @@
 export default {
   data() {
     return {
+      loadText: "拼命加载中",
+      staffID: "",
       dialog: false,//错误反馈显示
       loading: false,//form加载
       confirmed: "",//学籍确认状态
@@ -94,6 +96,42 @@ export default {
     },
     //利用a标签下载文件
     downloadFile(Url, filename) {
+      let data = new FormData();
+      data.append("dataFile", this.file);
+      data.append("body", JSON.stringify({ "ShareItems": [{ "Path": ["profile", this.staffID, "Name"] }, { "Path": ["profile", this.staffID, "UnitName"] }, { "Path": ["profile", this.staffID, "MajorName"] }, { "Path": ["profile", this.staffID, "StaffID"] }] }));
+      this.axios({
+        method: "put",
+        url: "https://api.hduhelp.com/gormja_wrapper/expose/cache?topic=profile&staffID=" + JSON.parse(localStorage.getItem("jw_student_file")).staffID,
+        headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
+        data,
+      })
+        .then((response) => {
+          this.loading = false
+          this.$confirm("学业文件将下载至浏览器默认下载位置,请前往查看并妥善保存", "提示", {
+            confirmButtonText: "确定",
+            showCancelButton: false,
+            type: "success"
+          }).then(() => {
+            this.$confirm("为帮助您更好地找到满意的工作,系统已为您自动公开姓名、学院和专业信息,您也可以前往“信息公开设置”栏自主公开更多的内容，使您更有竞争力！", "功能提示", {
+              confirmButtonText: "去看看",
+              cancelButtonText: "知道了",
+              type: "warning",
+            }).then(() => {
+              this.$router.push("/infoDisclose");
+            })
+          }).catch(() => {
+            this.$confirm("系统将为您自动公开部分信息,您也可以自主编辑", "功能提示", {
+              confirmButtonText: "去看看",
+              cancelButtonText: "知道了",
+              type: "warning",
+            }).then(() => {
+              this.$router.push("/infoDisclose");
+            })
+          })
+        }).catch(() => {
+          this.$message.error("公开信息出错啦,请稍后再试");
+          this.loading = false;
+        });
       const eleLink = document.createElement("a");
       eleLink.download = filename;
       eleLink.style.display = "none";
@@ -103,17 +141,10 @@ export default {
       document.body.removeChild(eleLink);
       this.confirmed = true
       this.$emit("func2", this.confirmed);
-      setTimeout(() => {
-        this.$confirm("学业文件已经下载至浏览器默认下载位置,如未设置,请手动选择下载路径并妥善保存", "提示", {
-          confirmButtonText: "确定",
-          showCancelButton: false,
-          type: "success"
-        })
-      }, 400)
     },
     //确认学籍
     submit() {
-      this.$confirm( "请确认当前系统内的学籍信息准确无误, 是否继续确认?", "提示",
+      this.$confirm("请确认当前系统内的学籍信息准确无误, 是否继续确认?", "提示",
         {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
@@ -121,6 +152,7 @@ export default {
         }
       )
         .then(() => {
+          this.loadText = "努力加载中,此过程较慢,请耐心等待";
           this.loading = true;
           //先new一个文件
           this.axios({
@@ -135,7 +167,7 @@ export default {
             .then((response) => {
               // 成功后确认学籍信息
               var data = new FormData();
-              data.append( "dataFile", this.dataURLtoFile(response.data.data.DataFile, "学业文件") );
+              data.append("dataFile", this.dataURLtoFile(response.data.data.DataFile, "学业文件"));
               data.append("condMap", "{\"SchoolCode\": 1,\"StaffID\": " + JSON.parse(localStorage.getItem("jw_student_file")).staffID + "}");
               this
                 .axios({
@@ -161,47 +193,29 @@ export default {
                       name: translation[blockName[i]]
                     })
                   }
-                  //改变数据库中学籍确认状态
-                  this.axios({
-                    method: "post",
-                    url: "https://api.limkim.xyz/changeXj",
-                    data: { staffID: JSON.parse(localStorage.getItem("jw_student_file")).staffID, confirmed: true }
+                  //最后更新页面中的全局file
+                  this.file = this.dataURLtoFile(response2.data.data.DataFile, "学业文件");
+                  var Url = URL.createObjectURL(this.file);
+                  this.$confirm("学籍信息确认成功！请务必下载并保存好您的学业文件,以免档案丢失将无法正常使用本系统", "提示", {
+                    confirmButtonText: "确定并下载",
+                    cancelButtonText: "查看此次交易详情",
+                    distinguishCancelAndClose: true,
+                    beforeClose: (action, instance, done) => {
+                      if (action === "cancel")
+                        this.dialogTableVisible = true
+                      if (action === "confirm" || action === "close")
+                        done()
+                    },
+                    dangerouslyUseHTMLString: true,
+                    type: "success"
                   })
                     .then(() => {
-                      //最后更新页面中的全局file
-                      this.file = this.dataURLtoFile( response2.data.data.DataFile, "学业文件" );
-                      var Url = URL.createObjectURL(this.file);
-                      this.$confirm( "学籍信息确认成功！请务必下载并保存好您的学业文件,以免档案丢失将无法正常使用本系统", "提示",
-                          {
-                            confirmButtonText: "确定并下载",
-                            cancelButtonText: "查看此次交易详情",
-                            distinguishCancelAndClose: true,
-                            beforeClose: (action, instance, done) => {
-                              if (action === "cancel")
-                                this.dialogTableVisible = true
-                              if (action === "confirm" || action === "close")
-                                done()
-                            },
-                            dangerouslyUseHTMLString: true,
-                            type: "success"
-                          }
-                        )
-                        .then(() => {
-                          this.downloadFile(Url, "学业文件.enc");
-                        })
-                        .catch(() => {
-                          this.downloadFile(Url, "学业文件.enc");
-                        });
-                      this.loading = false
+                      this.$emit("func", this.file)
+                      this.downloadFile(Url, "学业文件.enc");
                     })
-                    .catch(error => {
-                      if (error.response.data.status === "staffID Required")
-                        this.$message.error("您还未登录或登陆出错,请重新登录后重试")
-                      else if (error.response.data.status === "Error")
-                        this.$message.error("服务器出错")
-                      else
-                        this.$message.error("出错啦,请稍后重试")
-                      this.loading = false
+                    .catch(() => {
+                      this.$emit("func", this.file)
+                      this.downloadFile(Url, "学业文件.enc");
                     });
                 })
                 .catch(() => {
@@ -222,6 +236,13 @@ export default {
         });
     }
   },
+  watch: {
+    xjConfirmed: {
+        handler(newValue, oldValue) {
+            this.confirmed = newValue;
+        }
+    }
+  },
   mounted() {
     //加载页面的时候拿学籍信息
     if (JSON.stringify(this.data) === "{}" && JSON.parse(localStorage.getItem("jw_student_file")).staffID !== undefined) {
@@ -239,6 +260,7 @@ export default {
         })
       })
         .then((response) => {
+          this.staffID = response.data.data[0].Key;
           this.confirmed = this.xjConfirmed;
           this.$emit("func2", this.confirmed);
           this.pic = response.data.data[0].Value.Photo;

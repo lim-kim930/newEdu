@@ -25,6 +25,7 @@
           <el-card  shadow="always">
             <h5>学校: {{item.SchoolCode}}</h5>
             <h5>应聘公司: {{item.TargetCompanyCode}}</h5>
+            <h5>应聘岗位: {{item.TargetTargetJobID}}</h5>
             <h5>过期时间: {{item.date}}</h5>
           </el-card>
         </el-col>
@@ -96,7 +97,7 @@ export default {
   margin: 0;
 }
 .el-card {
-  height: 100px;
+  height: 120px;
   border-radius: 10px;
 }
 </style>

@@ -1,10 +1,6 @@
 <template>
   <div>
-    <el-breadcrumb separator-class="el-icon-arrow-right">
-      <el-breadcrumb-item>信息管理</el-breadcrumb-item>
-      <el-breadcrumb-item>成绩更改</el-breadcrumb-item>
-    </el-breadcrumb>
-    <el-form label-width="100px" v-loading="loading" element-loading-text="拼命加载中" class="form">
+    <el-form label-width="140px" v-loading="loading" element-loading-text="拼命加载中" class="form">
       <el-form-item label="课程代码(课程号)" required>
         <el-input v-model="form.course" style="width: 200px"></el-input>
       </el-form-item>
@@ -27,12 +23,12 @@
         <i class="el-icon-upload"></i>
       </el-upload>
       <el-form-item>
-        <el-button type="primary" @click="onSubmit" style="width: 150px; margin: 10px 0 0 50px">提交申请</el-button>
+        <el-button type="primary" @click="onSubmit" style="width: 150px; margin: 10px 0 0 10px">提交申请</el-button>
       </el-form-item>
     </el-form>
     <el-dialog title="提示" :visible.sync="dialogVisible" width="30%">
-      <h3>请先联系教务处更改有错误的成绩信息,然后在本系统提交更改申请</h3>
-      <h3 style="margin-top: 10px">教务处联系方式:</h3>
+      <h3 style="margin-left: 20px">请先联系教务处更改有错误的成绩信息,然后在本系统提交更改申请</h3>
+      <h3 style="margin: 10px 0 0 20px">教务处联系方式:</h3>
       <div class="content">
         <span>电话: 0571-86915011</span>
         <span>邮箱地址: hdujwc@hdu.edu.cn</span>
@@ -122,7 +118,7 @@ export default {
 <style scoped>
 .form {
   overflow: auto;
-  margin: 30px 10px;
+  margin: 10px;
   width: calc(100% - 20px);
   padding: 40px 100px;
   background-color: #fff;
