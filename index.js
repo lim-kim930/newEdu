@@ -38,3 +38,4 @@ if (localStorage.getItem("jw_ent_file") !== null)
     return window.location.href = "https://edu.limkim.cn/company";
 if (localStorage.getItem("jw_manager_file") !== null)
     return window.location.href = "https://edu.limkim.cn/manager";
+window.location.href = "https://edu.limkim.cn/sign";
