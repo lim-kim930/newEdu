@@ -6,7 +6,7 @@ if (location.search.split("?")[1] !== undefined) {
         redirect: "follow",
         headers: { "Authorization": "token " + location.search.split("?")[1].split("&")[0].split("=")[1] }
     };
-    return fetch("https://api.hduhelp.com/base/person/info", requestOptions)
+    fetch("https://api.hduhelp.com/base/person/info", requestOptions)
         .then(response => response.text())
         .then(result => {
             if (JSON.parse(result).data.STAFFTYPE === "1") {
@@ -31,6 +31,7 @@ if (location.search.split("?")[1] !== undefined) {
         }).catch(error => {
             alert(error);
         });
+    return
 }
 if (localStorage.getItem("jw_student_file") !== null)
     return window.location.href = "https://edu.limkim.cn/student";
