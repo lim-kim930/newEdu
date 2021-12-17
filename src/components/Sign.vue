@@ -46,6 +46,7 @@ export default {
     };
   },
   methods: {
+<<<<<<< HEAD
     signRouteSwitch(flag) {
       if (this.flag == 1 && flag == 0)
         this.signRouteChange(0)
@@ -69,6 +70,24 @@ export default {
         case "/comSignIn":
           this.signRouteSwitch(0)
           break
+=======
+    byChange(e) {
+      if (this.flag === 1 && e === 0) {
+        this.codeIcon.color = this.codeIcon.borderBottomColor = "#5eacf0";
+        this.psIcon.color = this.psIcon.borderBottomColor = "#909399";
+        this.codeIcon.borderBottomWidth = "2px"
+        this.psIcon.borderBottomWidth = "1px";
+        this.$router.push("/signUp");
+        this.flag = 0
+      }
+      else if (this.flag === 0 && e === 1) {
+        this.psIcon.color = this.psIcon.borderBottomColor = "#5eacf0";
+        this.codeIcon.color = this.codeIcon.borderBottomColor = "#909399";
+        this.psIcon.borderBottomWidth = "2px"
+        this.codeIcon.borderBottomWidth = "1px";
+        this.$router.push("/signIn");
+        this.flag = 1
+>>>>>>> 168dbd93b1392ca2bef7c41a2f93ff0a4112056b
       }
     },
     windowHeight() {
@@ -95,7 +114,22 @@ export default {
 };
 </script>
 
+<<<<<<< HEAD
 <style scoped>
+=======
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  text-decoration: none;
+  list-style: none;
+  outline: none;
+  box-sizing: border-box;
+}
+body {
+  margin: 0 !important;
+}
+>>>>>>> 168dbd93b1392ca2bef7c41a2f93ff0a4112056b
 .el-header {
   background: url(../img/logo2.png) no-repeat;
   background-size: 90px;
