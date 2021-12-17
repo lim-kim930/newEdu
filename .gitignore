@@ -1,6 +1,5 @@
 .DS_Store
 node_modules
-<<<<<<< HEAD
 /dist
 
 
@@ -22,10 +21,3 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
-=======
-dist
-.idea
-webpack.publish.config.js
-src/main.js
-src/router.js
->>>>>>> 168dbd93b1392ca2bef7c41a2f93ff0a4112056b

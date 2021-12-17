@@ -120,7 +120,6 @@
     </el-container>
   </el-container>
 </template>
-
 <script>
 export default {
   data() {
@@ -281,7 +280,6 @@ export default {
       this.redirect();
     }
   },
-<<<<<<< HEAD
   mounted() {
     // 刷新和关闭标签页提示
     window.onbeforeunload = (e) => {
@@ -307,17 +305,6 @@ export default {
       this.wh = this.windowHeight() < 650 ? 650 : this.windowHeight();
     };
     // 判断是否登录
-=======
-  mounted() {//写在mounted或者activated生命周期内即可
-    // 拿到屏幕高度
-    window.addEventListener('resize', () => {
-      let wh = window.innerHeight;
-      document.querySelector(".el-form").style.maxHeight = wh - 190 + "px";
-      document.querySelector(".el-main").style.height = wh - 80 + "px";
-      console.log(wh)
-    })
-    //判断是否登录
->>>>>>> 168dbd93b1392ca2bef7c41a2f93ff0a4112056b
     if (localStorage.getItem("jw_student_file") === null)
       this.$confirm("您还未登录,请前往登录", "提示", {
         confirmButtonText: "确定",
