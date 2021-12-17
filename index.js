@@ -8,7 +8,7 @@
             headers: { "Authorization": "token " + location.search.split("?")[1].split("&")[0].split("=")[1] }
         };
         return fetch("https://api.hduhelp.com/base/person/info", requestOptions).then(response => {
-            response.text()
+            response.text();
         }).then(result => {
             if (JSON.parse(result).data.STAFFTYPE === "1") {
                 localStorage.setItem("jw_student_file", JSON.stringify({
@@ -40,4 +40,4 @@
     if (localStorage.getItem("jw_manager_file") !== null)
         return window.location.href = "https://edu.limkim.cn/manager";
     window.location.href = "https://edu.limkim.cn/sign";
-})()
+})();
