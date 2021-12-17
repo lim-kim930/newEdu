@@ -1,12 +1,11 @@
 <template>
-  <!-- template 中，只能有唯一的一个根元素 -->
   <el-container>
     <!-- 头部 -->
     <el-header class="logo">
       <span class="tittle">教务—学业分享系统 | 高校学业核验系统</span>
     </el-header>
     <!-- 内容 -->
-    <el-main>
+    <el-main :style="{ 'min-height': wh - 80 + 'px' }">
       <div class="ad_content">
         <span style="font-size: 30px">基于区块链</span>
         <el-divider></el-divider>
@@ -14,11 +13,11 @@
       </div>
       <div class="log_content">
         <div class="method_switch">
-          <div id="signUp" :style="codeIcon" @click="byChange(0)">
+          <div id="signUp" :style="codeIcon" @click="signRouteSwitch(0)">
             <i class="el-icon-link"></i>
             <span>企业登录</span>
           </div>
-          <div id="signIn" :style="psIcon" @click="byChange(1)">
+          <div id="signIn" :style="psIcon" @click="signRouteSwitch(1)">
             <i class="el-icon-lock"></i>
             <span>普通用户登录</span>
           </div>
@@ -29,8 +28,6 @@
   </el-container>
 </template>
 <script>
-// 使用 JS Component 之前，先按需导入一下需要的组件
-// import { Toast } from "mint-ui";
 export default {
   data() {
     return {
@@ -45,86 +42,60 @@ export default {
         borderBottomColor: "#ccc",
         borderBottomWidth: "1px",
       },
+      wh: "",
     };
   },
   methods: {
-    byChange(e) {
-      if (this.flag == 1 && e == 0) {
-        this.codeIcon.color = this.codeIcon.borderBottomColor = "#5eacf0";
-        this.psIcon.color = this.psIcon.borderBottomColor = "#909399";
-        this.codeIcon.borderBottomWidth = "2px"
-        this.psIcon.borderBottomWidth = "1px";
-        this.$router.push("/comSignIn");
-        this.flag = 0
-      }
-      else if (this.flag == 0 && e == 1) {
-        this.psIcon.color = this.psIcon.borderBottomColor = "#5eacf0";
-        this.codeIcon.color = this.codeIcon.borderBottomColor = "#909399";
-        this.psIcon.borderBottomWidth = "2px"
-        this.codeIcon.borderBottomWidth = "1px";
-        this.$router.push("/signIn");
-        this.flag = 1
-      }
+    signRouteSwitch(flag) {
+      if (this.flag == 1 && flag == 0)
+        this.signRouteChange(0)
+      else if (this.flag == 0 && flag == 1)
+        this.signRouteChange(1)
     },
-    windowHeight() {
-      var de = document.documentElement;
-      return self.innerHeight || (de && de.clientHeight) || document.body.clientHeight;
-    }
-  },
-  filters: {},
-  components: {},
-  directives: {},
-  props: [],
-  watch: {   //监听路由变化
-    $route() {
+    signRouteChange(flag) {
+      this.codeIcon.color = this.codeIcon.borderBottomColor = flag === 0 ? "#5eacf0" : "#909399";
+      this.psIcon.color = this.psIcon.borderBottomColor = flag === 0 ? "#909399" : "#5eacf0";
+      this.codeIcon.borderBottomWidth = flag === 0 ? "2px" : "1px";
+      this.psIcon.borderBottomWidth = flag === 0 ? "1px" : "2px";
+      this.$router.push(flag === 0 ? "/comSignIn" : "/signIn");
+      this.flag = flag;
+    },
+    redirect() {
       switch (this.$route.path) {
         case "/signIn":
           // case "/testSignIn":
-          this.byChange(1)
+          this.signRouteSwitch(1)
           break
         case "/comSignIn":
-          this.byChange(0)
+          this.signRouteSwitch(0)
           break
       }
-      //  console.log(to , from )
-      // to , from 分别表示从哪跳转到哪，都是一个对象
-      // to.path  ( 表示的是要跳转到的路由的地址 eg: /home );
+    },
+    windowHeight() {
+      const de = document.documentElement;
+      return self.innerHeight || (de && de.clientHeight) || document.body.clientHeight;
     }
   },
-  mounted() {        //写在mounted或者activated生命周期内即可
-    window.onpageshow = window.onload = e => {      //刷新时弹出提示
-      var wh = this.windowHeight();
-      document.querySelector(".el-main").style.height = wh - 80 + "px";
-      switch (this.$route.path) {
-        case "/signIn":
-        case "/testSignIn":
-          this.byChange(1)
-          break
-        case "/signUp":
-          this.byChange(0)
-          break
-      }
-    };
-    if (localStorage.getItem("jw_student_file") !== null && localStorage.getItem("jw_ent_file") === null)
-      window.location.href = "https://limkim.xyz/newEdu/student"
-    else if (localStorage.getItem("jw_student_file") === null && localStorage.getItem("jw_ent_file") !== null)
-      window.location.href = "https://limkim.xyz/newEdu/company"
+  watch: {
+    $route() {
+      this.redirect();
+    }
   },
+  mounted() {
+    this.wh = this.windowHeight() < 600 ? 600 : this.windowHeight();
+    window.onresize = () => {
+      this.wh = this.windowHeight() < 600 ? 600 : this.windowHeight();
+    }
+    this.redirect();
+    if (localStorage.getItem("jw_student_file") !== null && localStorage.getItem("jw_ent_file") === null)
+      window.location.href = "https://edu.limkim.cn/student"
+    else if (localStorage.getItem("jw_student_file") === null && localStorage.getItem("jw_ent_file") !== null)
+      window.location.href = "https://edu.limkim.cn/company"
+  }
 };
 </script>
 
-<style>
-* {
-  margin: 0px;
-  padding: 0px;
-  text-decoration: none;
-  list-style: none;
-  outline: none;
-  box-sizing: border-box;
-}
-body {
-  margin: 0 !important;
-}
+<style scoped>
 .el-header {
   background: url(../img/logo2.png) no-repeat;
   background-size: 90px;
@@ -198,13 +169,20 @@ body {
   text-align: center;
   line-height: 44px;
 }
-/* .else span {
-    display: inline-block;
-    margin: 0 !important;
-    width: 300px;
-    text-align: center;
-} */
 .el-divider--horizontal {
   margin: 10px 0 !important;
+}
+</style>
+<style>
+* {
+  margin: 0px;
+  padding: 0px;
+  text-decoration: none;
+  list-style: none;
+  outline: none;
+  box-sizing: border-box;
+}
+body {
+  margin: 0 !important;
 }
 </style>

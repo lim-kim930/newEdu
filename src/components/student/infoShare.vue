@@ -12,7 +12,7 @@
         :active="stepActive"
         align-center
         finish-status="success"
-        style="height: 70px;margin-bottom: 50px"
+        style="height: 70px; margin-bottom: 30px"
       >
         <el-step title="步骤 1" description="请上传您之前生成的学业文件" icon="el-icon-user"></el-step>
         <el-step title="步骤 2" description="请确定此次分享的各项信息" icon="el-icon-edit"></el-step>
@@ -38,7 +38,11 @@
         </el-upload>
         <el-button class="next" type="primary" plain v-show="btnShow" @click="next()">下一步</el-button>
       </div>
-      <div v-show="stepActive===1" class="info-select" style="overflow: auto; max-height: 550px;">
+      <div
+        v-show="stepActive===1"
+        class="info-select"
+        :style="{overflow: 'auto', 'max-height': this.wh-280+'px'}"
+      >
         <el-form-item label="要分享的学籍信息" required>
           <el-checkbox
             :indeterminate="isIndeterminate"
@@ -76,7 +80,7 @@
             <el-table-column type="selection" width="55"></el-table-column>
             <el-table-column prop="name" label="课程名"></el-table-column>
             <el-table-column prop="value" label="选课号"></el-table-column>
-            <el-table-column prop="gp" label="绩点" width="80"></el-table-column>
+            <el-table-column prop="gp" label="绩点" width="100"></el-table-column>
           </el-table>
         </el-form-item>
         <el-form-item label="等级考试信息" required>
@@ -134,15 +138,48 @@
             <el-table-column prop="value" label="获得时间"></el-table-column>
           </el-table>
         </el-form-item>
-        <el-form-item label="选择目的企业和岗位" required>
+        <el-form-item class="md" label="个人填写信息" required>
+          <h4 v-show="!selfData[0].md">暂无信息</h4>
+          <el-checkbox v-show="selfData[0].md" v-model="ruleForm.selfChecked">选择</el-checkbox>
+          <mavonEditor
+            :toolbars="toolbars"
+            :autofocus="false"
+            defaultOpen="preview"
+            :editable="false"
+            v-show="selfData[0].md"
+            v-model="selfData[0].md"
+            :style="{'width': '90%', 'margin-top': '10px', 'height': this.wh - 300 + 'px'}"
+          />
+        </el-form-item>
+        <el-form-item label="排名信息" required>
+          <h4 v-show="rankData.length === 0">暂无信息</h4>
+          <el-table
+            :data="rankData"
+            tooltip-effect="dark"
+            style="width: 90%"
+            border
+            v-show="rankData.length !== 0"
+            @selection-change="handleSelectionChange"
+          >
+            <el-table-column type="selection" width="55"></el-table-column>
+            <el-table-column prop="GPA" label="绩点"></el-table-column>
+            <el-table-column prop="Rank" label="学院排名"></el-table-column>
+          </el-table>
+        </el-form-item>
+        <el-form-item label="目的企业和岗位" required>
+          <span
+            v-show="target_show"
+            style="color: #67C23A; background-color: #f0f9eb; padding: 10px; border-radius: 5px;"
+          >{{ target }}</span>
+          <br v-show="target_show" />
           <el-cascader
+            style=" margin-top: 5px"
             v-model="ruleForm.hr"
             :options="options"
             :props="props"
             collapse-tags
             clearable
           ></el-cascader>
-          <span v-show="target_show">已为您选择：{{ target }}</span>
         </el-form-item>
         <el-form-item
           label="有效时间"
@@ -167,11 +204,19 @@
     <el-dialog :visible.sync="previewVisible">
       <span style="font-size: 18px; font-weight: 700; margin-left: 10px">分享预览,请确认无误后点击分享</span>
       <el-button
-            type="primary"
-            @click="confirm()"
-            style="width: 150px; margin-bottom: 10px; margin-left: calc(100% - 460px)"
-          >立即分享</el-button>
-      <div
+        type="primary"
+        plain
+        @click="dialogSwitch()"
+        :disabled="!this.ruleForm.selfChecked"
+        style="width: 150px; margin-bottom: 10px; margin-left: calc(100% - 630px)"
+      >{{this.ruleForm.selfChecked?(this.switch === 1?"查看个性化预览":"返回"):"未选择个人填写信息"}}</el-button>
+      <el-button
+        type="primary"
+        @click="confirm()"
+        style="width: 150px; margin-bottom: 10px; margin-left: 10px"
+      >立即分享</el-button>
+      <div v-show="this.switch === 1">
+        <div
           id="mycanvas"
           v-show="!tableShow"
           :style="{background: 'url('+ url +') no-repeat', height: table_height}"
@@ -200,15 +245,15 @@
             <span class="content">{{profileValue.Nation}}</span>
           </div>
           <div class="classCode">
-            <span class="title">班级代码</span>
-            <span class="content">{{profileValue.ClassCode}}</span>
+            <span class="title">GPA</span>
+            <span class="content">{{rankValue.GPA}}</span>
           </div>
           <div class="className">
             <span class="title">班级名称</span>
             <span class="content">{{profileValue.ClassName}}</span>
           </div>
           <div class="pic" :style="{background: 'url('+ profileValue.Photo +') no-repeat' }"></div>
-          
+
           <div class="schoolCode">
             <span class="title">学校代码</span>
             <span class="content">{{profileValue.SchoolCode}}</span>
@@ -226,77 +271,112 @@
             <span class="content">{{profileValue.UnitName}}</span>
           </div>
           <div class="majorCode">
-            <span class="title">专业代码</span>
-            <span class="content">{{profileValue.MajorCode}}</span>
+            <span class="title">GPA排名</span>
+            <span class="content">{{rankValue.Rank}}</span>
           </div>
           <div class="majorName">
             <span class="title">专业名称</span>
             <span class="content">{{profileValue.MajorName}}</span>
           </div>
           <div class="score" :style="{height: score_height}">
-            <span
-              class="title"
-              :style="{height: score_height, paddingTop: title_paddingTop}"
-            >成绩单</span>
+            <span class="title" :style="{height: score_height, paddingTop: title_paddingTop}">成绩单</span>
             <div class="score_content" :style="{height: score_height}">
               <div class="part1" :style="{height: score_height}">
-                <span class="course_name">课程名</span><span class="course_score">成绩</span><span class="course_gp">绩点</span>
+                <span class="course_name">课程名</span>
+                <span class="course_score">成绩</span>
+                <span class="course_gp">绩点</span>
                 <span class="score_value" v-for="item in scoreDataPart1" :key="item.id">
-                  <span class="course_name_value" :style="{lineHeight: item.name.length<=8?'50px':item.name.length<=16?'25px':'16px'}" :title="item.name">{{item.name}}</span><span class="course_score_value">{{item.score}}</span><span class="course_gp_value">{{item.gp}}</span>
+                  <span
+                    class="course_name_value"
+                    :style="{lineHeight: item.name.length<=8?'50px':item.name.length<=16?'25px':'16px'}"
+                    :title="item.name"
+                  >{{item.name}}</span>
+                  <span class="course_score_value">{{item.score}}</span>
+                  <span class="course_gp_value">{{item.gp}}</span>
                 </span>
               </div>
               <div class="part2" :style="{height: score_height}">
-                <span class="course_name">课程名</span><span class="course_score">成绩</span><span class="course_gp">绩点</span>
+                <span class="course_name">课程名</span>
+                <span class="course_score">成绩</span>
+                <span class="course_gp">绩点</span>
                 <span class="score_value" v-for="item in scoreDataPart2" :key="item.id">
-                  <span class="course_name_value" :style="{lineHeight: item.name.length<=8?'50px':item.name.length<=16?'25px':'16px'}" :title="item.name">{{item.name}}</span><span class="course_score_value">{{item.score}}</span><span class="course_gp_value">{{item.gp}}</span>
+                  <span
+                    class="course_name_value"
+                    :style="{lineHeight: item.name.length<=8?'50px':item.name.length<=16?'25px':'16px'}"
+                    :title="item.name"
+                  >{{item.name}}</span>
+                  <span class="course_score_value">{{item.score}}</span>
+                  <span class="course_gp_value">{{item.gp}}</span>
                 </span>
               </div>
               <div class="part3" :style="{height: score_height}">
-                <span class="course_name">课程名</span><span class="course_score">成绩</span><span class="course_gp">绩点</span>
+                <span class="course_name">课程名</span>
+                <span class="course_score">成绩</span>
+                <span class="course_gp">绩点</span>
                 <span class="score_value" v-for="item in scoreDataPart3" :key="item.id">
-                  <span class="course_name_value" :style="{lineHeight: item.name.length<=8?'50px':item.name.length<=16?'25px':'16px'}" :title="item.name">{{item.name}}</span><span class="course_score_value">{{item.score}}</span><span class="course_gp_value">{{item.gp}}</span>
+                  <span
+                    class="course_name_value"
+                    :style="{lineHeight: item.name.length<=8?'50px':item.name.length<=16?'25px':'16px'}"
+                    :title="item.name"
+                  >{{item.name}}</span>
+                  <span class="course_score_value">{{item.score}}</span>
+                  <span class="course_gp_value">{{item.gp}}</span>
                 </span>
               </div>
               <div class="part4" :style="{height: score_height}">
-                <span class="course_name">课程名</span><span class="course_score">成绩</span><span class="course_gp">绩点</span>
+                <span class="course_name">课程名</span>
+                <span class="course_score">成绩</span>
+                <span class="course_gp">绩点</span>
                 <span class="score_value" v-for="item in scoreDataPart4" :key="item.id">
-                  <span class="course_name_value" :style="{lineHeight: item.name.length<=8?'50px':item.name.length<=16?'25px':'16px'}" :title="item.name">{{item.name}}</span><span class="course_score_value">{{item.score}}</span><span class="course_gp_value">{{item.gp}}</span>
+                  <span
+                    class="course_name_value"
+                    :style="{lineHeight: item.name.length<=8?'50px':item.name.length<=16?'25px':'16px'}"
+                    :title="item.name"
+                  >{{item.name}}</span>
+                  <span class="course_score_value">{{item.score}}</span>
+                  <span class="course_gp_value">{{item.gp}}</span>
                 </span>
               </div>
             </div>
           </div>
           <div class="level" :style="{top: level_top, height: level_height}">
-            <span
-              class="title"
-              :style="{height: level_height, paddingTop: level_paddingTop}"
-            >等级考试</span>
+            <span class="title" :style="{height: level_height, paddingTop: level_paddingTop}">等级考试</span>
             <div class="level_content" :style="{height: level_height}">
-                <span class="level_name">考试名称</span><span class="level_score">考试成绩</span><span class="level_year">考试时间</span>
-                <span class="level_value" v-for="item in levelData2" :key="item.id">
-                  <span class="level_name_value" >{{item.name}}</span><span class="level_score_value">{{item.score}}</span><span class="level_year_value">{{item.date}}</span>
-                </span>
+              <span class="level_name">考试名称</span>
+              <span class="level_score">考试成绩</span>
+              <span class="level_year">考试时间</span>
+              <span class="level_value" v-for="item in levelValue" :key="item.id">
+                <span class="level_name_value">{{item.name}}</span>
+                <span class="level_score_value">{{item.score}}</span>
+                <span class="level_year_value">{{item.date}}</span>
+              </span>
             </div>
           </div>
           <div class="reward" :style="{top: reward_top, height: reward_height}">
-            <span
-              class="title"
-              :style="{height: reward_height, paddingTop: reward_paddingTop}"
-            >综合素质</span>
+            <span class="title" :style="{height: reward_height, paddingTop: reward_paddingTop}">综合素质</span>
             <div class="reward_content" :style="{height: reward_height}">
-                <div class="rewardPart" :style="{height: reward_height}">
-                  <h4>个人荣誉</h4>
-                  <span class="reward_name">奖项名称</span><span class="reward_level">奖项等级</span><span class="reward_year">获奖年份</span>
-                  <span class="reward_value" v-for="item in rewardData" :key="item.id">
-                    <span class="reward_name_value" >{{item.name}}</span><span class="reward_level_value">{{item.level}}</span><span class="reward_year_value">{{item.date}}</span>
-                  </span>
-                </div>
-                <div class="racePart" :style="{height: reward_height}">
-                  <h4>创新学分</h4>
-                  <span class="race_name">项目名称</span><span class="race_level">奖项等级</span><span class="race_year">获奖时间</span>
-                  <span class="race_value" v-for="item in raceData" :key="item.id">
-                    <span class="race_name_value" >{{item.name}}</span><span class="race_level_value">{{item.level}}</span><span class="race_year_value">{{item.date}}</span>
-                  </span>
-                </div>
+              <div class="rewardPart" :style="{height: reward_height}">
+                <h4>个人荣誉</h4>
+                <span class="reward_name">奖项名称</span>
+                <span class="reward_level">奖项等级</span>
+                <span class="reward_year">获奖年份</span>
+                <span class="reward_value" v-for="item in rewardValue" :key="item.id">
+                  <span class="reward_name_value">{{item.name}}</span>
+                  <span class="reward_level_value">{{item.level}}</span>
+                  <span class="reward_year_value">{{item.date}}</span>
+                </span>
+              </div>
+              <div class="racePart" :style="{height: reward_height}">
+                <h4>创新学分</h4>
+                <span class="race_name">项目名称</span>
+                <span class="race_level">奖项等级</span>
+                <span class="race_year">获奖时间</span>
+                <span class="race_value" v-for="item in raceValue" :key="item.id">
+                  <span class="race_name_value">{{item.name}}</span>
+                  <span class="race_level_value">{{item.level}}</span>
+                  <span class="race_year_value">{{item.date}}</span>
+                </span>
+              </div>
             </div>
           </div>
           <div class="info" :style="{top: info_top}">
@@ -312,6 +392,16 @@
             </div>
           </div>
         </div>
+      </div>
+      <mavonEditor
+        :toolbars="toolbars"
+        :autofocus="false"
+        defaultOpen="preview"
+        :editable="false"
+        v-show="this.switch===2"
+        v-model="selfData[0].md"
+        :style="{'width': '90%', 'margin': ' 10px 5%', 'height': this.wh - 300 + 'px'}"
+      />
     </el-dialog>
     <el-dialog class="share" title="提示" :visible.sync="dialogVisible" width="35%">
       <span>
@@ -340,8 +430,9 @@
 </template>
 <script>
 let FormData = require("form-data");
-import html2canvas from "html2canvas"
-import { Base64 } from "js-base64"
+import { mavonEditor } from "mavon-editor";
+import "mavon-editor/dist/css/index.css";
+import { Base64 } from "js-base64";
 export default {
   data() {
     let that = this;
@@ -362,8 +453,11 @@ export default {
       reward_height: "",
       info_top: "",
       profileValue: {},
-      profileData2: {},
-      levelData2: [],//等级考试信息数据
+      levelValue: [],//等级考试信息数据
+      rewardValue: [],
+      raceValue: [],
+      rankValue: {},
+      selfValue: {},
       scoreDataPart1: [],
       scoreDataPart2: [],
       scoreDataPart3: [],
@@ -381,28 +475,27 @@ export default {
       target_show: false,
       ruleForm: {//表单选中数据
         date: "",
-        hr: "",
-        jobID: "",
+        hr: [],
         profileType: [],
         scoreType: [],
         levelType: [],
         rewardType: [],
+        rankType: [],
+        selfChecked: false,
         raceType: []
       },
       profileData: [],//学籍信息数据
       profileDataValue: [],//学籍全选辅助
       levelData: [],//等级考试信息数据
       scoreData: [],
-      scoreDataValue: [],
       rewardData: [],
-      rewardDataValue: [],
       raceData: [],
-      raceDataValue: [],
+      rankData: [{}],
+      selfData: [{}],
       options: [],
       props: {
         lazy: true,
         lazyLoad(node, resolve) {
-          console.log(node);
           that.target_show = false;
           const { data, level } = node;
           if (data === undefined)
@@ -425,35 +518,51 @@ export default {
                   leaf: level >= 1
                 });
             resolve(nodes);
-          }).catch(err => {
-            this.$message.error("获取岗位信息错误")
-          })
+          }).catch(() => {
+            this.$message.error("获取岗位信息错误");
+          });
         }
       },
       loading: false,
-      dialogVisible: false
+      dialogVisible: false,
+      toolbars: {
+        readmodel: true
+      },
+      switch: 1
     };
   },
   props: ["wh", "file"],
+  components: { mavonEditor },
   methods: {
-    handleSelectionChange1(val) {
+    handleSelectionChange(val) {
+      this.ruleForm.rankType = [];
       val.forEach(item => {
-        this.ruleForm.scoreType.push(item.value)
+        this.ruleForm.rankType.push(item.value);
+      });
+    },
+    handleSelectionChange1(val) {
+      this.ruleForm.scoreType = [];
+      val.forEach(item => {
+        this.ruleForm.scoreType.push(item.value);
       });
     },
     handleSelectionChange2(val) {
+      this.ruleForm.levelType = [];
       val.forEach(item => {
-        this.ruleForm.levelType.push(item.key)
+        this.ruleForm.levelType.push(item.key);
       });
+
     },
     handleSelectionChange3(val) {
+      this.ruleForm.rewardType = [];
       val.forEach(item => {
-        this.ruleForm.rewardType.push(item.key)
+        this.ruleForm.rewardType.push(item.key);
       });
     },
     handleSelectionChange4(val) {
+      this.ruleForm.raceType = [];
       val.forEach(item => {
-        this.ruleForm.raceType.push(item.key)
+        this.ruleForm.raceType.push(item.key);
       });
     },
     CheckAllChange(val) {
@@ -481,22 +590,22 @@ export default {
     },
     //关闭分享成功的dialog
     closeDialog() {
-      this.dialogVisible = false
-      this.loading = false
+      this.dialogVisible = false;
+      this.loading = false;
     },
     //文件加载完成,出现下一步按钮
     getFile() {
-      this.btnShow = true
+      this.btnShow = true;
     },
     //将文件放到file变量中
-    change(response, file, fileList) {
-      this.dataFile = file[0].raw
+    change(response, file) {
+      this.dataFile = file[0].raw;
       this.$emit("func", this.dataFile);
     },
     //删除文件
-    remove(file, fileList) {
-      this.dataFileList = []
-      this.dataFile = ""
+    remove() {
+      this.dataFileList = [];
+      this.dataFile = "";
       this.$emit("func", this.dataFile);
     },
     //重置
@@ -507,15 +616,18 @@ export default {
         profileType: [],
         scoreType: [],
         levelType: [],
+        rankType: [],
         rewardType: [],
         raceType: []
       };
       this.isIndeterminate = false;
       this.checkAll = false;
     },
+    dialogSwitch() {
+      this.switch = this.switch === 1 ? 2 : 1;
+    },
     //下一步
     next() {
-      document.querySelector(".info-select").style.maxHeight = this.wh - 300 + "px";
       this.stepActive = 1;
       this.loading = true;
       var data = new FormData();
@@ -524,359 +636,367 @@ export default {
         method: "post",
         url: "https://api.hduhelp.com/gormja_wrapper/dataFile/get?staffID=" + JSON.parse(localStorage.getItem("jw_student_file")).staffID,
         headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
-        data,
-      })
-        .then((response1) => {
-          this.axios({
-            method: "get",
-            url: "https://api.hduhelp.com/gormja_wrapper/company/lookup",
-          })
-            .then((response) => {
-              for (let i = 0; i < response.data.data.length; i++) {
-                this.options.push({
-                  value: response.data.data[i].CompanyCode,
-                  label: response.data.data[i].Name
-                })
-              }
-              this.resetForm();
-              if (sessionStorage.getItem("com")){
-                this.target = JSON.parse(sessionStorage.getItem("com")).Name+"/"+JSON.parse(sessionStorage.getItem("com")).job
-                this.ruleForm.hr=[JSON.parse(sessionStorage.getItem("com")).CompanyCode, JSON.parse(sessionStorage.getItem("com")).JobID]
-                this.target_show = true;
-              }
-              sessionStorage.removeItem("com");
-              this.content = response1.data.data.Body.data_map;
-              var range = Object.keys(this.content);
-              for (var i = 0; i < range.length; i++) {
-                if (range[i] === "profile") {
-                  const translation = {
-                    ClassCode: "班级号码",
-                    ClassName: "班级名称",
-                    SchoolCode: "学校代码",
-                    StaffID: "学号",
-                    UnitCode: "学院代码",
-                    UnitName: "学院名称",
-                    MajorCode: "专业代码",
-                    MajorName: "专业名称",
-                    Sex: "性别",
-                    Name: "姓名",
-                    Photo: "照片",
-                    Nation: "民族",
-                  }
-                  const sort = ["Name", "Sex", "Nation", "Photo", "StaffID", "ClassCode", "ClassName", "MajorName", "MajorCode", "UnitName", "UnitCode", "SchoolCode"]
-                  const profile = Object.keys(this.content.profile[Object.keys(this.content.profile)]);
-                  this.profileData = [];
-                  this.profileDataValue = [];
-                  for (let i = 0; i < sort.length; i++) {
-                    if (profile.indexOf(sort[i])) {
-                      this.profileDataValue.push(sort[i])
-                      this.profileData.push({
-                        value: sort[i],
-                        name: translation[sort[i]]
-                      })
-                    }
-                  }
-                }
-                else if (range[i] === "score") {
-                  this.scoreData = [];
-                  this.scoreDataValue = [];
-                  var score = Object.keys(this.content.score);
-                  for (var j = 0; j < score.length; j++) {
-                    this.scoreDataValue.push(score[j])
-                    this.scoreData.push({
-                      value: score[j],
-                      name: this.content.score[score[j]].CourseName,
-                      gp: this.content.score[score[j]].GP,
-                    })
-                  }
-                }
-                else if (range[i] === "level_exam") {
-                  this.levelData = [];
-                  var level = Object.keys(this.content.level_exam);
-                  for (var j = 0; j < level.length; j++) {
-                    this.levelData.push({
-                      value: this.content.level_exam[level[j]].ExamDate,
-                      name: this.content.level_exam[level[j]].ExamName,
-                      key: level[j],
-                    })
-                  }
-                }
-                else if (range[i] === "reward") {
-                  this.rewardData = [];
-                  this.rewardDataValue = [];
-                  var reward = Object.keys(this.content.reward);
-                  for (var j = 0; j < reward.length; j++) {
-                    this.rewardDataValue.push(reward[j])
-                    this.rewardData.push({
-                      yearValue: this.content.reward[reward[j]].SchoolYear,
-                      semValue: this.content.reward[reward[j]].Semester === 0 ? "第一学期" : "第二学期",
-                      name: this.content.reward[reward[j]].RewardName,
-                      key: reward[j]
-                    })
-                  }
-                }
-                else if (range[i] === "race_reward") {
-                  this.raceData = [];
-                  this.raceDataValue = [];
-                  var race = Object.keys(this.content.race_reward);
-                  for (var j = 0; j < race.length; j++) {
-                    this.raceDataValue.push(race[j])
-                    this.raceData.push({
-                      value: this.content.race_reward[race[j]].RewardDate,
-                      name: this.content.race_reward[race[j]].RaceName,
-                      key: race[j]
-                    })
-                  }
-                }
-              }
-              this.loading = false;
-            }).catch(() => {
-              this.$message.error("获取公司信息出错啦,请稍后再试")
-              this.loading = false;
+        data
+      }).then((response) => {
+        this.content = response.data.data.Body.data_map;
+        this.axios({
+          method: "get",
+          url: "https://api.hduhelp.com/gormja_wrapper/company/lookup",
+        }).then((response) => {
+          for (let i = 0; i < response.data.data.length; i++)
+            this.options.push({
+              value: response.data.data[i].CompanyCode,
+              label: response.data.data[i].Name
             });
-        })
-        .catch((err) => {
-          if (err.response.data.msg === "file hash does not equal to chain")
-            this.$message.error("学业文件错误或者过期,请检查后再试")
-          else
-            this.$message.error("获取学业文件信息出错啦,请稍后再试")
-          this.stepActive = 0;
+          this.resetForm();
+          if (sessionStorage.getItem("com")) {
+            if (JSON.parse(sessionStorage.getItem("com")).Name === "") {
+              for (let i = 0; i < this.options.length; i++)
+                if (this.options[i].value === JSON.parse(sessionStorage.getItem("com")).CompanyCode) {
+                  this.target = "正在回应" + (this.options[i].label || this.options[i].value) + "的简历请求, 已为您选择对应企业和岗位, 你也可以自由选择:";
+                  break;
+                }
+            }
+            else {
+              this.target = "已为您选择: " + JSON.parse(sessionStorage.getItem("com")).Name + "/" + JSON.parse(sessionStorage.getItem("com")).job + ", 你也可以自由选择:";
+              this.ruleForm.hr = [JSON.parse(sessionStorage.getItem("com")).CompanyCode, JSON.parse(sessionStorage.getItem("com")).JobID];
+            }
+            this.target_show = true;
+            sessionStorage.removeItem("com");
+          }
+          var range = Object.keys(this.content);
+          for (var i = 0; i < range.length; i++) {
+            if (range[i] === "profile") {
+              const translation = {
+                ClassCode: "班级号码",
+                ClassName: "班级名称",
+                SchoolCode: "学校代码",
+                StaffID: "学号",
+                UnitCode: "学院代码",
+                UnitName: "学院名称",
+                MajorCode: "专业代码",
+                MajorName: "专业名称",
+                Sex: "性别",
+                Name: "姓名",
+                Photo: "照片",
+                Nation: "民族",
+              };
+              const sort = ["Name", "Sex", "Nation", "Photo", "StaffID", "ClassName", "MajorName", "UnitName", "UnitCode", "SchoolCode"];
+              const profile = Object.keys(this.content.profile[Object.keys(this.content.profile)]);
+              this.profileData = [];
+              this.profileDataValue = [];
+              for (let i = 0; i < sort.length; i++) {
+                if (profile.indexOf(sort[i])) {
+                  this.profileDataValue.push(sort[i]);
+                  this.profileData.push({
+                    value: sort[i],
+                    name: translation[sort[i]]
+                  });
+                }
+              }
+            }
+            else if (range[i] === "score") {
+              this.scoreData = [];
+              var score = Object.keys(this.content.score);
+              for (var j = 0; j < score.length; j++) {
+                this.scoreData.push({
+                  value: score[j],
+                  name: this.content.score[score[j]].CourseName,
+                  gp: this.content.score[score[j]].GP
+                });
+              }
+            }
+            else if (range[i] === "level_exam") {
+              this.levelData = [];
+              var level = Object.keys(this.content.level_exam);
+              for (var j = 0; j < level.length; j++) {
+                this.levelData.push({
+                  value: this.content.level_exam[level[j]].ExamDate,
+                  name: this.content.level_exam[level[j]].ExamName,
+                  key: level[j]
+                });
+              }
+            }
+            else if (range[i] === "reward") {
+              this.rewardData = [];
+              var reward = Object.keys(this.content.reward);
+              for (var j = 0; j < reward.length; j++) {
+                this.rewardData.push({
+                  yearValue: this.content.reward[reward[j]].SchoolYear,
+                  semValue: this.content.reward[reward[j]].Semester === 0 ? "第一学期" : "第二学期",
+                  name: this.content.reward[reward[j]].RewardName,
+                  key: reward[j]
+                });
+              }
+            }
+            else if (range[i] === "race_reward") {
+              this.raceData = [];
+              var race = Object.keys(this.content.race_reward);
+              for (var j = 0; j < race.length; j++) {
+                this.raceData.push({
+                  value: this.content.race_reward[race[j]].RewardDate,
+                  name: this.content.race_reward[race[j]].RaceName,
+                  key: race[j]
+                });
+              }
+            }
+            else if (range[i] === "rank") {
+              this.rankData = [];
+              this.rankData.push({
+                value: "GPA",
+                GPA: this.content.rank[Object.keys(this.content.rank)[0]].GPA.toFixed(2),
+                Rank: this.content.rank[Object.keys(this.content.rank)[0]].Rank,
+                key: Object.keys(this.content.rank)[0]
+              });
+            }
+            else if (range[i] === "self_introduction") {
+              this.selfData = [];
+              this.selfData.push({
+                value: "GPA",
+                md: Base64.decode(this.content.self_introduction[Object.keys(this.content.self_introduction)[0]].SelfIntroduction),
+                key: Object.keys(this.content.self_introduction)[0]
+              });
+            }
+          }
+          this.loading = false;
+        }).catch(() => {
+          this.$message.error("获取公司列表或者数据处理出错啦,请稍后再试");
           this.loading = false;
         });
+      }).catch((err) => {
+        if (err.response.data.msg === "file hash does not equal to chain")
+          this.$message.error("学业文件错误或者过期,请检查后再试");
+        else
+          this.$message.error("获取学业文件信息出错啦,请稍后再试");
+        this.stepActive = 0;
+        this.loading = false;
+      });
     },
     // 提交按钮
     submitForm() {
-      if (this.ruleForm.hr === "") {
-        this.$message({
-          type: "error",
-          message: "请选择要分享的企业",
-        });
-        return
-      }
-      if ((!(/(^[1-9]\d*$)/.test(this.ruleForm.date)) && this.ruleForm.date != "") || this.ruleForm.date > 9999) {
-        this.$message({
-          type: "error",
-          message: "分享时长填写有误,请检查",
-        });
-        return
-      }
+      if (this.ruleForm.hr === "")
+        return this.$message.error("请选择要分享的企业");
+      if ((!(/(^[1-9]\d*$)/.test(this.ruleForm.date)) && this.ruleForm.date != "") || this.ruleForm.date > 9999)
+        return this.$message.error("分享时长填写有误,请检查");
       this.$confirm("请确认信息选填无误,是否继续?", "警告", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning",
-      })
-        .then(() => {
-          let ShareItems = [];
-          let Path = [];
-          let data = new FormData();
-          data.append("dataFile", this.dataFile);
-          data.append("companyCode", this.ruleForm.hr[0]);
-          data.append("jobID", this.ruleForm.jobID);
-          if (this.ruleForm.profileType.length != 0) {
-            if (this.checkAll1 === true)
-              ShareItems.push({ "Path": ["profile", Object.keys(this.content.profile)[0]] })
-            else
-              for (var i = 0; i < this.ruleForm.profileType.length; i++) {
-                Path = ["profile", Object.keys(this.content.profile)[0]]
-                Path.push(this.ruleForm.profileType[i])
-                ShareItems.push({ "Path": Path })
-              }
-          }
-          if (this.ruleForm.scoreType.length != 0) {
-            for (var i = 0; i < this.ruleForm.scoreType.length; i++) {
-              Path = ["score"]
-              Path.push(this.ruleForm.scoreType[i])
-              ShareItems.push({ "Path": Path })
+      }).then(() => {
+        this.switch = 1;
+        let ShareItems = [];
+        let Path = [];
+        let data = new FormData();
+        data.append("dataFile", this.dataFile);
+        data.append("companyCode", this.ruleForm.hr[0]);
+        data.append("jobID", this.ruleForm.hr[1]);
+        if (this.ruleForm.profileType.length != 0) {
+          if (this.checkAll1 === true)
+            ShareItems.push({ "Path": ["profile", Object.keys(this.content.profile)[0]] });
+          else
+            for (var i = 0; i < this.ruleForm.profileType.length; i++) {
+              Path = ["profile", Object.keys(this.content.profile)[0]];
+              Path.push(this.ruleForm.profileType[i]);
+              ShareItems.push({ "Path": Path });
             }
+        }
+        if (this.ruleForm.scoreType.length != 0) {
+          for (var i = 0; i < this.ruleForm.scoreType.length; i++) {
+            Path = ["score"];
+            Path.push(this.ruleForm.scoreType[i]);
+            ShareItems.push({ "Path": Path });
           }
-          if (this.ruleForm.levelType.length != 0) {
-            for (var i = 0; i < this.ruleForm.levelType.length; i++) {
-              Path = ["level_exam"]
-              Path.push(this.ruleForm.levelType[i])
-              ShareItems.push({ "Path": Path })
-            }
+        }
+        if (this.ruleForm.levelType.length != 0) {
+          for (var i = 0; i < this.ruleForm.levelType.length; i++) {
+            Path = ["level_exam"];
+            Path.push(this.ruleForm.levelType[i]);
+            ShareItems.push({ "Path": Path });
           }
-          if (this.ruleForm.rewardType.length != 0) {
-            for (var i = 0; i < this.ruleForm.rewardType.length; i++) {
-              Path = ["reward"]
-              Path.push(this.ruleForm.rewardType[i])
-              ShareItems.push({ "Path": Path })
-            }
+        }
+        if (this.ruleForm.rewardType.length != 0) {
+          for (var i = 0; i < this.ruleForm.rewardType.length; i++) {
+            Path = ["reward"];
+            Path.push(this.ruleForm.rewardType[i]);
+            ShareItems.push({ "Path": Path });
           }
-          if (this.ruleForm.raceType.length != 0) {
-            for (var i = 0; i < this.ruleForm.raceType.length; i++) {
-              Path = ["race_reward"]
-              Path.push(this.ruleForm.raceType[i])
-              ShareItems.push({ "Path": Path })
-            }
+        }
+        if (this.ruleForm.raceType.length != 0) {
+          for (var i = 0; i < this.ruleForm.raceType.length; i++) {
+            Path = ["race_reward"];
+            Path.push(this.ruleForm.raceType[i]);
+            ShareItems.push({ "Path": Path });
           }
-          data.append("body", JSON.stringify({ "ShareItems": ShareItems }));
-          this.axios
-            .get("https://api.limkim.xyz/getSysTime")
-            .then((response) => {
-              if (this.ruleForm.date === "")
-                var nextDate = new Date((response.data.Systime2 + 10 * 86400000));
+        }
+        if (this.ruleForm.rankType.length != 0) {
+          Path = ["rank", Object.keys(this.content.rank)[0]];
+          ShareItems.push({ "Path": Path });
+        }
+        if (this.ruleForm.selfChecked) {
+          Path = ["self_introduction", Object.keys(this.content.self_introduction)[0]];
+          ShareItems.push({ "Path": Path });
+        }
+        data.append("body", JSON.stringify({ "ShareItems": ShareItems }));
+        this.axios({
+          method: "get",
+          url: "https://api.limkim.xyz/getSysTime"
+        }).then((response) => {
+          if (this.ruleForm.date === "")
+            var nextDate = new Date((response.data.Systime2 + 10 * 86400000));
+          else
+            var nextDate = new Date((response.data.Systime2 + this.ruleForm.date * 86400000));
+          data.append("expireAtStr", "{\"Time\":\"" + nextDate.toISOString() + "\"}");
+          this.data = data;
+          const newdata = JSON.parse(data.get("body")).ShareItems;
+          this.scoreDataPart1 = [];
+          this.scoreDataPart2 = [];
+          this.scoreDataPart3 = [];
+          this.scoreDataPart4 = [];
+          this.levelValue = [];
+          this.rewardValue = [];
+          this.raceValue = [];
+          this.rankValue = {};
+          this.selfValue = {};
+          let count = 2;
+          let count2 = 1;
+          let count3 = 2;
+          let count4 = 2;
+          let flag = 1;
+          for (let i = 0; i < newdata.length; i++) {
+            let date = new Date(JSON.parse(data.get("expireAtStr")).Time).toJSON();
+            this.profileValue.expired_at = new Date(+new Date(date) + 8 * 3600 * 1000).toISOString().replace(/T/g, " ").replace(/\.[\d]{3}Z/, "");
+            if (newdata[i].Path[0] === "profile") {
+              if (newdata[i].Path[2] === "Photo")
+                this.profileValue[newdata[i].Path[2]] = "data:image/png;base64," + Base64.decode(this.content[newdata[i].Path[0]][newdata[i].Path[1]][newdata[i].Path[2]]);
               else
-                var nextDate = new Date((response.data.Systime2 + this.ruleForm.date * 86400000));
-              data.append("expireAtStr", "{\"Time\":\"" + nextDate.toISOString() + "\"}");
-              this.data = data
-              const newdata = JSON.parse(data.get("body")).ShareItems;
-              this.profileData2 = {};
-              this.scoreDataPart1 = [];
-              this.scoreDataPart2 = [];
-              this.scoreDataPart3 = [];
-              this.scoreDataPart4 = [];
-              let count = 2;
-              let count2 = 1;
-              let count3 = 2;
-              let count4 = 2;
-              let flag = 1;
-              console.log(newdata);
-              for (let i = 0; i < newdata.length; i++) {
-                if (newdata[i].Path[0] === "profile") {
-                  if (newdata[i].Path[2] === "Photo")
-                    this.profileValue[newdata[i].Path[2]] = "data:image/png;base64," + Base64.decode(this.content[newdata[i].Path[0]][newdata[i].Path[1]][newdata[i].Path[2]])
-                  else
-                    this.profileValue[newdata[i].Path[2]] = this.content[newdata[i].Path[0]][newdata[i].Path[1]][newdata[i].Path[2]]
-                }
-                else if (newdata[i].Path[0] === "score") {
-                  let score = this.content.score;
-                  if (flag === 5) {
-                    flag = 1;
-                    count++;
-                  }
-                  this["scoreDataPart" + flag].push({
-                    name: score[newdata[i].Path[1]].CourseName,
-                    score: score[newdata[i].Path[1]].ScoreMakeup === "" ? score[newdata[i].Path[1]].ScoreFinal : score[newdata[i].Path[1]].ScoreMakeup,
-                    gp: score[newdata[i].Path[1]].GP
-                  });
-                  flag++;
-                }
+                this.profileValue[newdata[i].Path[2]] = this.content[newdata[i].Path[0]][newdata[i].Path[1]][newdata[i].Path[2]];
+            }
+            else if (newdata[i].Path[0] === "score") {
+              let score = this.content.score;
+              if (flag === 5) {
+                flag = 1;
+                count++;
               }
-              // if (this.content.level_exam) {
-              //   let level_exam = this.content.level_exam;
-              //   console.log(level_exam);
-              //   let level_examCode = Object.keys(level_exam);
-              //   console.log(level_examCode);
-              //   for (let i = 0; i < level_examCode.length; i++) {
-              //     this.levelData2.push({
-              //       name: level_exam[level_examCode[i]].ExamName,
-              //       score: level_exam[level_examCode[i]].Score,
-              //       date: level_exam[level_examCode[i]].ExamDate,
-              //     });
-              //     count2++;
-              //   }
-              // }
-              let date = new Date(JSON.parse(data.get("expireAtStr")).Time).toJSON();
-              this.profileValue.expired_at = new Date(+new Date(date) + 8 * 3600 * 1000).toISOString().replace(/T/g, " ").replace(/\.[\d]{3}Z/, "");
-              // // if (response.data.data.ShareFile.data_map.profile != undefined) {
-              // //   var profile = this.content.profile[Object.keys(this.content.profile)[0]];
-              // //   var profileName = Object.keys(profile);
-              // //   for (var i = 0; i < profileName.length; i++){
-              // //     if(profileName[i] === "Photo")
-              // //       this.profileData[profileName[i]] = "data:image/png;base64," + Base64.decode(profile[profileName[i]])
-              // //     else
-              // //       this.profileData[profileName[i]] = profile[profileName[i]]
-              // //   }
-              // // }
-
-              // // if (response.data.data.ShareFile.data_map.level_exam != undefined) {
-              // //   var level_exam = response.data.data.ShareFile.data_map.level_exam;
-              // //   var level_examCode = Object.keys(level_exam);
-              // //   for (var i = 0; i < level_examCode.length; i++) {
-              // //     this.levelData.push({
-              // //       name: level_exam[level_examCode[i]].ExamName,
-              // //       score: level_exam[level_examCode[i]].Score,
-              // //       date: level_exam[level_examCode[i]].ExamDate,
-              // //     });
-              // //     count2++;
-              // //   }
-              // // }
-              // // if (response.data.data.ShareFile.data_map.reward != undefined) {
-              // //   var reward = response.data.data.ShareFile.data_map.reward;
-              // //   var rewardCode = Object.keys(reward);
-              // //   for (var i = 0; i < rewardCode.length; i++) {
-              // //     this.rewardData.push({
-              // //       name: reward[rewardCode[i]].RewardName,
-              // //       level: reward[rewardCode[i]].RewardLevel,
-              // //       date: reward[rewardCode[i]].SchoolYear,
-              // //     });
-              // //     count3++;
-              // //   }
-              // // }
-              // // if (response.data.data.ShareFile.data_map.race_reward != undefined) {
-              // //   var race_reward = response.data.data.ShareFile.data_map.race_reward;
-              // //   var race_rewardCode = Object.keys(race_reward);
-              // //   for (var i = 0; i < race_rewardCode.length; i++) {
-              // //     this.raceData.push({
-              // //       name: race_reward[race_rewardCode[i]].RaceName,
-              // //       level: race_reward[race_rewardCode[i]].RaceLevel + " " +race_reward[race_rewardCode[i]].RewardLevel,
-              // //       date: race_reward[race_rewardCode[i]].RewardDate,
-              // //     });
-              // //     count4++;
-              // //   }
-              // // }
-              if (count < 4)
-                count = 4
-              if (count2 < 5)
-                count2 = 5
-              count3 = count3 >= count4 ? count3 : count4
-              if (count3 < 5)
-                count3 = 5
-              this.form_height = "750px"
-              this.score_height = count * 51 + "px"
-              this.title_height = count * 51 + "px"
-              this.title_paddingTop = (count * 51 / 2 - 82) + "px"
-              this.score_content_height = (count * 51 + 1) + "px"
-              this.table_height = (count*51 + (count2 + count3) * 41 + 500) + "px"
-              this.level_top = (count * 51 + 240) + "px"
-              this.level_paddingTop = (count2 * 41 / 2 - 100) + "px"
-              this.level_height = count2 * 41 + "px"
-              this.reward_top = (count * 51 + 240) + count2 * 41 + "px"
-              this.reward_paddingTop = (count3 * 41 / 2 - 100) + "px"
-              this.reward_height = count3 * 41 + "px"
-              this.info_top = (count * 51 +(count2 + count3) * 41 + 240) + "px"
-              // this.creat22();
-              // this.emptyShow = false;
-              // this.tableShow = true;
-              // setTimeout(() => {
-              //   this.saveImg(".table")
-              // }, 50)
-              this.previewVisible = true
-
-            });
-        })
-        .catch(() => {
-          this.$message({
-            type: "info",
-            message: "分享已取消",
-          });
+              this["scoreDataPart" + flag].push({
+                name: score[newdata[i].Path[1]].CourseName,
+                score: score[newdata[i].Path[1]].ScoreMakeup === "" ? score[newdata[i].Path[1]].ScoreFinal : score[newdata[i].Path[1]].ScoreMakeup,
+                gp: score[newdata[i].Path[1]].GP
+              });
+              flag++;
+            }
+          }
+          let range = [];
+          for (let i = 0; i < newdata.length; i++) {
+            if (range.indexOf(newdata[i].Path[0]) === -1)
+              range.push(newdata[i].Path[0]);
+          }
+          if (range.indexOf("level_exam") !== -1) {
+            const level_exam = this.content.level_exam;
+            for (let i = 0; i < this.ruleForm.levelType.length; i++) {
+              this.levelValue.push({
+                name: level_exam[this.ruleForm.levelType[i]].ExamName,
+                score: level_exam[this.ruleForm.levelType[i]].Score,
+                date: level_exam[this.ruleForm.levelType[i]].ExamDate,
+              });
+              count2++;
+            }
+          }
+          if (range.indexOf("reward") !== -1) {
+            const reward = this.content.reward;
+            for (let i = 0; i < this.ruleForm.rewardType.length; i++) {
+              this.rewardValue.push({
+                name: reward[this.ruleForm.rewardType[i]].RewardName,
+                level: reward[this.ruleForm.rewardType[i]].RewardLevel,
+                date: reward[this.ruleForm.rewardType[i]].SchoolYear,
+              });
+              count3++;
+            }
+          }
+          if (range.indexOf("race_reward") !== -1) {
+            const race_reward = this.content.race_reward;
+            for (let i = 0; i < this.ruleForm.raceType.length; i++) {
+              this.raceValue.push({
+                name: race_reward[this.ruleForm.raceType[i]].RaceName,
+                level: race_reward[this.ruleForm.raceType[i]].RaceLevel + " " + race_reward[this.ruleForm.raceType[i]].RewardLevel,
+                date: race_reward[this.ruleForm.raceType[i]].RewardDate,
+              });
+              count4++;
+            }
+          }
+          if (range.indexOf("rank") !== -1)
+            this.rankValue = {
+              GPA: this.rankData[0].GPA,
+              Rank: this.rankData[0].Rank
+            };
+          if (range.indexOf("self_introduction") !== -1)
+            this.selfValue = { md: this.selfData[0].md };
+          if (count < 4)
+            count = 4;
+          if (count2 < 5)
+            count2 = 5;
+          count3 = count3 >= count4 ? count3 : count4;
+          if (count3 < 5)
+            count3 = 5;
+          this.form_height = "750px";
+          this.score_height = count * 51 + "px";
+          this.title_height = count * 51 + "px";
+          this.title_paddingTop = (count * 51 / 2 - 82) + "px";
+          this.score_content_height = (count * 51 + 1) + "px";
+          this.table_height = (count * 51 + (count2 + count3) * 41 + 500) + "px";
+          this.level_top = (count * 51 + 240) + "px";
+          this.level_paddingTop = (count2 * 41 / 2 - 100) + "px";
+          this.level_height = count2 * 41 + "px";
+          this.reward_top = (count * 51 + 240) + count2 * 41 + "px";
+          this.reward_paddingTop = (count3 * 41 / 2 - 100) + "px";
+          this.reward_height = count3 * 41 + "px";
+          this.info_top = (count * 51 + (count2 + count3) * 41 + 240) + "px";
+          // this.creat22();
+          // this.emptyShow = false;
+          // this.tableShow = true;
+          // setTimeout(() => {
+          //   this.saveImg(".table")
+          // }, 50)
+          this.previewVisible = true;
+        }).catch(() => {
+          this.$message.error("数据处理或者加载预览出错啦，请稍后重试");
         });
+      }).catch(() => {
+        this.$message.info("分享已取消");
+      });
     },
     confirm() {
-      this.loading = true
-      this.previewVisible = false
+      this.loading = true;
+      this.previewVisible = false;
       this.axios({
         method: "post",
         url: "https://api.hduhelp.com/gormja_wrapper/share/share?topic=profile&staffID=" + JSON.parse(localStorage.getItem("jw_student_file")).staffID,
         headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
         data: this.data
-      })
-        .then((response) => {
-          this.shareLink = "https://api.hduhelp.com/gormja_wrapper/share/verify?fileID=" + response.data.data.Body.FileID + "&encryptedK1S=" + response.data.data.Body.EncryptedK1S;
+      }).then((response) => {
+        this.shareLink = "https://api.hduhelp.com/gormja_wrapper/share/verify?fileID=" + response.data.data.Body.FileID + "&encryptedK1S=" + response.data.data.Body.EncryptedK1S;
+        this.axios({
+          method: "post",
+          url: "https://api.hduhelp.com/gormja_wrapper/share/lookupShareLinkForSelf",
+          headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
+          data: { "StaffID": JSON.parse(localStorage.getItem("jw_student_file")).staffID }
+        }).then((response) => {
+          sessionStorage.setItem("sent", JSON.stringify(response.data.data));
           this.dialogVisible = true;
-          this.loading = false
-        })
-        .catch((error) => {
-          this.$message.error("出错啦,请稍后再试");
+          this.loading = false;
+        }).catch(() => {
+          this.$message.error("获取站内信息出错啦,请稍后再试");
           this.loading = false;
         });
+      }).catch(() => {
+        this.$message.error("出错啦,请稍后再试");
+        this.loading = false;
+      });
     }
   },
   mounted() {
-    if(this.file){
-      this.dataFile = this.file
-      this.next()
+    if (this.file) {
+      this.dataFile = this.file;
+      this.next();
     }
   }
 };
@@ -888,7 +1008,7 @@ export default {
   margin: 10px;
   width: calc(100% - 20px);
   min-height: 500px;
-  padding: 40px 40px 0 40px;
+  padding: 30px 40px 0 40px;
   background-color: #fff;
   border: 1px solid rgba(204, 204, 204, 0.5);
   box-shadow: 0 2px 5px 1px rgba(0, 0, 0, 0.1);
@@ -1355,5 +1475,15 @@ export default {
 .share .el-dialog__body span {
   display: block;
   height: 30px;
+}
+</style>
+<style>
+.md .v-note-edit,
+.el-dialog .v-note-edit {
+  display: none !important;
+}
+.md .v-note-show,
+.el-dialog .v-note-show {
+  flex-basis: 100% !important;
 }
 </style>

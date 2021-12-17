@@ -12,7 +12,6 @@
       <i class="el-icon-error"></i> 学业文件未上传
     </el-tag>
     <el-upload
-      style="margin-bottom: 10px;"
       ref="file-upload"
       class="upload"
       action="#"
@@ -25,52 +24,90 @@
       点击上传学业文件
       <i class="el-icon-upload"></i>
     </el-upload>
-    <el-button
+    <!-- <el-button
       type="primary"
       plain
       icon="el-icon-delete-solid"
       @click="reupload()"
       v-show="file != ''"
-      style="margin: 0 0 10px 10px;"
-    >删除文件</el-button>
+      style="margin-left: 10px;"
+    >删除文件</el-button>-->
     <el-button
       type="primary"
       plain
       icon="el-icon-download"
       @click="downloadFile('学业文件.enc')"
       v-show="file != ''"
-      style="margin: 0 0 10px 10px;"
+      style="margin-left: 10px;"
     >下载文件</el-button>
-    <br />
-    <span v-show="loading2" class="loadmask">
-      <i style="dispaly: block" class="el-icon-loading"></i>
-      <span>正在为您努力计算排名,请稍等</span>
-      <el-progress
-        style="width: 300px; margin-bottom: 10px; display: inline-block"
-        :stroke-width="10"
-        :percentage="percentage"
-      ></el-progress>
-    </span>
-    <el-descriptions style="padding: 0;" :column="3" border v-show="data">
-      <el-descriptions-item v-for="item in data" v-bind:key="item.id">
-        <template slot="label">{{item.VisibleName}}</template>
-        {{item.Value}}
-      </el-descriptions-item>
-    </el-descriptions>
-    <el-empty :image-size="150" v-show="data.length === 0" description="未查询到您的排名信息"></el-empty>
-    <el-result icon="success" title="排名信息已确认" v-show="confirmed"></el-result>
+    <span style="margin-left: calc(100% - 800px)">请选择类型:</span>
+    <el-select
+      v-model="typeValue"
+      placeholder="请选择"
+      style="width: 150px; margin: 10px;"
+      @change="getInfo()"
+    >
+      <el-option
+        v-for="item in typeOptions"
+        :key="item.value"
+        :label="item.label"
+        :value="item.value"
+      ></el-option>
+    </el-select>
     <el-button
       type="primary"
       @click="submit()"
       plain
-      v-show="!confirmed&&data.length !== 0"
+      v-show="(typeValue==='reward'&&!honorConfirmed&&honorData.length !== 0)||(typeValue==='race_reward'&&!innovConfirmed&&innovData.length !== 0)"
       :disabled="file===''"
-      style="margin-top: 10px"
     >确认信息</el-button>
     <!-- 使用typeValue、Confirmed和Data.length来判断按钮是否显示和禁用 -->
-    <el-button type="info" @click="dialog = true;" plain v-show="!confirmed&&data.length !== 0">错误反馈</el-button>
+    <el-button
+      type="info"
+      @click="dialog = true;"
+      plain
+      v-show="(typeValue==='reward'&&!honorConfirmed&&honorData.length !== 0)||(typeValue==='race_reward'&&!innovConfirmed&&innovData.length !== 0)"
+    >错误反馈</el-button>
+    <el-table
+      :data="honorData"
+      v-show="typeValue==='reward'&&honorData.length !== 0"
+      border
+      style="width: 100%; margin-top: 0;"
+    >
+      <!-- <el-table-column type="selection" width="55"></el-table-column> -->
+      <el-table-column prop="RewardName.Value" label="奖项名称"></el-table-column>
+      <el-table-column prop="RewardLevel.Value" label="奖项等级" width="150"></el-table-column>
+      <el-table-column prop="SchoolYear.Value" label="获得学年"></el-table-column>
+      <el-table-column prop="Semester.Value" label="获得学期"></el-table-column>
+      <el-table-column label="类型">奖学金</el-table-column>
+    </el-table>
+    <el-empty
+      :image-size="150"
+      v-show="typeValue==='reward'&&honorData.length === 0"
+      description="未查询到您的个人荣誉信息"
+    ></el-empty>
+    <el-table
+      :data="innovData"
+      v-show="typeValue==='race_reward'&&innovData.length !== 0"
+      border
+      style="width: 100%; margin-top: 0;"
+    >
+      <!-- <el-table-column type="selection" width="55"></el-table-column> -->
+      <el-table-column prop="RaceName.Value" label="竞赛名称"></el-table-column>
+      <el-table-column prop="RaceLevel.Value" label="竞赛等级" width="150"></el-table-column>
+      <el-table-column prop="RewardDate.Value" label="获奖日期"></el-table-column>
+      <el-table-column prop="RewardLevel.Value" label="奖项等级" width="150"></el-table-column>
+      <el-table-column label="类型" width="180">学科竞赛</el-table-column>
+    </el-table>
+    <el-empty
+      :image-size="150"
+      v-show="typeValue==='race_reward'&&innovData.length === 0"
+      description="未查询到您的创新学分信息"
+    ></el-empty>
+    <el-result icon="success" title="个人荣誉信息已确认" v-show="typeValue==='reward'&&honorConfirmed"></el-result>
+    <el-result icon="success" title="创新学分信息已确认" v-show="typeValue==='race_reward'&&innovConfirmed"></el-result>
     <el-drawer
-      title="排名信息错误反馈提示"
+      title="综合素质信息错误反馈提示"
       :visible.sync="dialog"
       direction="rtl"
       custom-class="demo-drawer"
@@ -78,7 +115,7 @@
       :show-close="false"
       :close-on-press-escape="false"
     >
-      <h4>请联系教务处修改后返回系统，检查无误后继续完成排名确认</h4>
+      <h4>请联系教务处修改后返回系统，检查无误后继续完成综合素质确认</h4>
       <h4>教务处联系信息:</h4>
       <div class="content">
         <span>电话: 0571-86915011</span>
@@ -99,15 +136,47 @@
   </el-form>
 </template>
 <script>
+let FormData = require("form-data");
 export default {
   data() {
     return {
-      percentage: 0,
       dialog: false,//错误反馈显示
       loading: false,//form加载
+      typeOptions: [{
+        value: "reward",
+        label: "个人荣誉"
+      }, {
+        value: "race_reward",
+        label: "创新学分"
+      }],
+      typeValue: "reward",
+      yearOptions: [{
+        value: "0",
+        label: "2018 - 2019"
+      }, {
+        value: "1",
+        label: "2019 - 2020"
+      }, {
+        value: "2",
+        label: "2020 - 2021"
+      }, {
+        value: "3",
+        label: "2021 - 2022"
+      }],
+      yearValue: "",
+      termOptions: [{
+        value: "1",
+        label: "第一学期"
+      }, {
+        value: "2",
+        label: "第二学期"
+      }],
+      termValue: "",
       file: "",//学业文件
-      data: {},//信息数据
-      confirmed: false,
+      honorData: [],//个人荣誉信息数据
+      innovData: [],//创新学分信息数据
+      honorConfirmed: false,
+      innovConfirmed: false,
       secLoading: false,//查询按钮加载
       dialogTableVisible: false,//交易详情显示
       blockDataInfo: []//交易详情信息数据
@@ -126,8 +195,11 @@ export default {
       this.$refs["file-upload"].clearFiles();
       this.file = "";
       this.$emit("func", "");
-      sessionStorage.removeItem("gpa");
-      this.confirmed = false
+      sessionStorage.removeItem("score");
+      sessionStorage.removeItem("level_exam");
+      sessionStorage.removeItem("hj");
+      this.honorConfirmed = false
+      this.innovConfirmed = false
     },
     dataURLtoFile(dataurl, filename) {
       let arr = dataurl.split(","),
@@ -159,22 +231,31 @@ export default {
     //根据存的项目名判断确认状态
     checkConfirm() {
       if (this.file === "") {
-        this.confirmed = false;
-        return;
+        this.honorConfirmed = false
+        this.innovConfirmed = false
+        return
       }
-      if (sessionStorage.getItem("gpa") === null) {
-        this.getFileInfo();
-        return;
+      if (sessionStorage.getItem("hj") === null) {
+        this.getFileInfo()
+        return
       }
-      if (JSON.parse(sessionStorage.getItem("gpa")) === false)
-        this.confirmed = false;
-      else
-        this.confirmed = true;
+      if (JSON.parse(sessionStorage.getItem("hj")).indexOf(this.typeValue) === -1) {
+        if (this.typeValue === "reward")
+          this.honorConfirmed = false
+        else
+          this.innovConfirmed = false
+      }
+      else {
+        if (this.typeValue === "reward")
+          this.honorConfirmed = true
+        else
+          this.innovConfirmed = true
+      }
     },
     //拿到文件明文
     getFileInfo() {
       this.loading = true;
-      var data = new FormData();
+      let data = new FormData();
       data.append("dataFile", this.file);
       // 拿到学生档案明文
       this.axios({
@@ -182,37 +263,44 @@ export default {
         url: "https://api.hduhelp.com/gormja_wrapper/dataFile/get?staffID=" + JSON.parse(localStorage.getItem("jw_student_file")).staffID,
         headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
         data,
-      })
-        .then((response) => {
-          //存储学业文件内有的项目名称,避免每次查询都要请求一次文件明文
-          const data = response.data.data.Body.data_map
-          sessionStorage.setItem("gpa", data.rank === undefined ? false : true)
-          this.loading = false
-          this.checkConfirm()//判断确认状态
-        })
-        .catch(() => {
+      }).then((response) => {
+        //存储学业文件内有的项目名称,避免每次查询都要请求一次文件明文
+        var data = response.data.data.Body.data_map
+        if (data.reward !== undefined && data.race_reward !== undefined)
+          sessionStorage.setItem("hj", JSON.stringify(["reward", "race_reward"]))
+        else if (data.reward !== undefined && data.race_reward === undefined)
+          sessionStorage.setItem("hj", JSON.stringify(["reward"]))
+        else if (data.reward === undefined && data.race_reward !== undefined)
+          sessionStorage.setItem("hj", JSON.stringify(["race_reward"]))
+        else if (data.reward === undefined && data.race_reward === undefined)
+          sessionStorage.setItem("hj", JSON.stringify([]))
+        this.loading = false
+        this.checkConfirm()//判断确认状态
+      }).catch((err) => {
+        if (err.response.data.msg === "file hash does not equal to chain") {
+          this.$message.error("学业文件错误或者过期,请检查后再试")
+          this.reupload()
+        }
+        else
           this.$message.error("获取学业文件信息出错啦,请稍后再试")
-          this.loading = false
-          this.confirmed = false
-        });
+        this.loading = false
+        this.reupload()
+        if (this.typeValue === "reward")
+          this.honorConfirmed = false
+        else
+          this.innovConfirmed = false
+      });
     },
     //根据typeValue拿信息
     getInfo() {
-      let timer = setInterval(() => {
-        if (this.percentage < 90)
-          this.percentage += parseInt(10 * Math.random())
-        else if (this.percentage < 97)
-          this.percentage += parseInt(3 * Math.random())
-        else {
-          this.percentage = 99
-          clearInterval(timer)
-        }
-      }, 300)
-      this.data = {};
-      this.loading2 = true;
+      if (this.typeValue === "reward")
+        this.honorData = [];
+      else
+        this.innovData = [];
+      this.loading = true;
       this.axios({
         method: "post",
-        url: "https://api.hduhelp.com/gormja_wrapper/lookup?topic=rank",
+        url: "https://api.hduhelp.com/gormja_wrapper/lookup?topic=" + this.typeValue,
         headers: {
           "Content-Type": "application/json",
           Authorization: "token " + JSON.parse(localStorage.getItem("jw_student_file")).token
@@ -223,23 +311,27 @@ export default {
         })
       })
         .then((response) => {
-          this.percentage = 100;
-          this.data = {
-            MajorName: response.data.data[0].Value.MajorName,
-            GPA: response.data.data[0].Value.GPA,
-            Rank: response.data.data[0].Value.Rank
-          }
+          response.data.data.forEach(item => {
+            if (this.typeValue === "reward") {
+              item.Value.Semester.Value = (item.Value.Semester.Value === 0 ? "第一学期" : "第二学期")//替换Semester为文字描述
+              this.honorData.push(item.Value);
+            } else
+              this.innovData.push(item.Value);
+          });
           this.checkConfirm();//判断确认状态
-          this.loading2 = false;
+          this.loading = false;
         })
         .catch(() => {
-          this.$message.error("获取排名信息出错啦,请稍后再试");
-          this.loading2 = false;
-          this.confirmed = false;
+          this.$message.error("获取相关信息出错啦,请稍后再试");
+          this.loading = false;
+          if (this.typeValue === "reward")
+            this.honorConfirmed = false
+          else
+            this.innovConfirmed = false
         });
     },
     submit() {
-      this.$confirm("请确认当前系统内排名信息准确无误, 是否继续确认?", "提示",
+      this.$confirm("请确认当前系统内该类型的综合素质信息准确无误, 是否继续确认?", "提示",
         {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
@@ -251,9 +343,11 @@ export default {
           data.append("dataFile", this.file);
           data.append("condMap", "{\"SchoolCode\": 1,\"StaffID\": " + JSON.parse(localStorage.getItem("jw_student_file")).staffID + "}");
           this.loading = true;
+          this.$emit("func2", false);
+          this.$emit("func3", 2);
           this.axios({
             method: "put",
-            url: "https://api.hduhelp.com/gormja_wrapper/confirm?topic=rank",
+            url: "https://api.hduhelp.com/gormja_wrapper/confirm?topic=" + this.typeValue,
             headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
             data,
           })
@@ -274,10 +368,12 @@ export default {
                   name: translation[blockName[i]]
                 })
               }
-              sessionStorage.removeItem("gpa");
+              sessionStorage.removeItem("hj");
               this.file = this.dataURLtoFile(response.data.data.DataFile, "学业文件");
               this.$emit("func", this.file);
-              this.$confirm("排名信息确认成功！继续确认请点击任意空白区域", "提示", {
+              this.$emit("func2", true);
+              this.$emit("func3", null);
+              this.$confirm("综合素质信息确认成功！继续确认请点击任意空白区域", "提示", {
                 confirmButtonText: "下载新的学业文件",
                 cancelButtonText: "查看此次交易详情",
                 distinguishCancelAndClose: true,
@@ -298,9 +394,14 @@ export default {
                 });
               });
               this.loading = false;
-              this.confirmed = true
+              if (this.typeValue === "reward")
+                this.honorConfirmed = true
+              else
+                this.innovConfirmed = true
             })
             .catch(() => {
+              this.$emit("func2", true);
+              this.$emit("func3", null);
               this.$message.error("出错啦,请稍后再试");
               this.loading = false;
             });
@@ -323,25 +424,21 @@ export default {
         showCancelButton: false,
         type: "warning"
       }).then(() => {
-        window.location.href = "https://limkim.xyz/newEdu/sign"
+        window.location.href = "https://edu.limkim.cn/sign"
       }).catch(() => {
-        window.location.href = "https://limkim.xyz/newEdu/sign"
+        window.location.href = "https://edu.limkim.cn/sign"
       });
   },
 };
 </script>
 
 <style scoped>
-.form1 {
-  min-height: 200px;
-  position: relative;
-}
 .el-table {
   margin: 20px 0;
 }
 .upload {
   display: inline-block;
-  margin-left: 30px;
+  margin-left: 10px;
   width: 170px;
   height: 40px;
   line-height: 40px;
@@ -357,17 +454,5 @@ export default {
   font-size: 16px;
   line-height: 40px;
   margin: 10px;
-}
-.loadmask {
-  text-align: center;
-  background-color: #fff;
-  opacity: 0.7;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-  padding-top: 100px;
 }
 </style>

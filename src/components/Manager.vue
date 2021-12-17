@@ -6,13 +6,14 @@
         <span>管理系统</span>
       </div>
       <div class="user">
-        <!-- <el-badge :value="200" :max="99" class="item">
-          <el-button size="small">评论</el-button>
-        </el-badge>-->
         <el-avatar :size="25" :src="circleUrl"></el-avatar>
-        <span style="color: #fff;" id="uname">{{uName === ""?"":uName + " |"}}</span>
-        <el-link :underline="false" @click="logOut()" style="color: #fff;">
-          {{uName === ""?"登录":"退出"}}
+        <span id="uname">{{uName === ""?"":uName + " |"}}</span>
+        <el-link
+          :underline="false"
+          @click="logOut()"
+          style="font-size: 15px; color: #fff; margin-top: -4px"
+        >
+          {{uName === ""?"登录":"退出登录"}}
           <i class="el-icon-caret-right"></i>
         </el-link>
       </div>
@@ -20,12 +21,12 @@
     <!-- 主体 -->
     <el-container>
       <!-- 侧边栏 -->
-      <el-aside width="240px">
+      <el-aside width="240px" :style="{ 'height': wh - 100 + 'px' }">
         <el-row class="tac">
           <el-col :span="24">
             <el-menu
               :default-active="activeIndex"
-              @select="btn"
+              @select="indexRouteSwitch"
               background-color="#fff"
               text-color="#3a4b56"
               active-text-color="#409eff"
@@ -44,7 +45,11 @@
         </el-row>
       </el-aside>
       <!-- 内容 -->
-      <el-main v-loading="loading" element-loading-text="拼命加载中">
+      <el-main
+        v-loading="loading"
+        element-loading-text="拼命加载中"
+        :style="{'height': this.wh - 80 + 'px'}"
+      >
         <router-view :wh="wh"></router-view>
       </el-main>
     </el-container>
@@ -55,25 +60,20 @@ export default {
   data() {
     return {
       wh: "",
-      circleUrl: "https://limkim.xyz/newEdu/user.png",
+      circleUrl: "https://edu.limkim.cn/static/user.png",
       activeIndex: "",
-      tokenInfo: "",
       loading: false,
-      received: 0,
-      sent: 0,
+      // received: 0,
+      // sent: 0,
       uName: ""
     };
   },
   methods: {
-    btn(key) {
-      if (key === "1")
-        this.$router.push("/addCompany");
-      else if (key === "2")
-        this.$router.push("/profileReset");
+    indexRouteSwitch(key) {
+      this.$router.push(key === "1" ? "/addCompany" : "/profileReset");
     },
     logOut() {
       if (this.uName === "")
-        //改成登录
         this.$router.push("/signIn");
       else {
         this.$confirm("确定要退出登录吗?", "提示", {
@@ -82,68 +82,55 @@ export default {
           type: "warning",
           center: true
         }).then(() => {
-          localStorage.removeItem("jw_ent_file")
-          window.location.href = "https://limkim.xyz/newEdu/sign"
-        })
+          localStorage.removeItem("jw_ent_file");
+          window.location.href = "https://edu.limkim.cn/sign";
+        });
       }
     },
     redirect() {
       switch (this.$route.path) {
         case "/addCompany":
           this.activeIndex = "1";
-          break
+          break;
         case "/profileReset":
           this.activeIndex = "2";
-          break
+          break;
       }
     },
     windowHeight() {
-      var de = document.documentElement;
+      const de = document.documentElement;
       return self.innerHeight || (de && de.clientHeight) || document.body.clientHeight;
     }
   },
-  watch: {   //监听路由变化
+  watch: {
     $route() {
-      this.redirect()
-      //  console.log(to , from )
-      // to , from 分别表示从哪跳转到哪，都是一个对象
-      // to.path  ( 表示的是要跳转到的路由的地址 eg: /home );
+      this.redirect();
     }
   },
-  mounted() {        //写在mounted或者activated生命周期内即可
-    this.wh = this.windowHeight()
+  mounted() {
+    this.wh = this.windowHeight() < 600 ? 600 : this.windowHeight();
     document.querySelector(".el-main").style.height = this.wh - 80 + "px";
-    if (localStorage.getItem("jw_manage_file") === null)
+    window.onresize = () => {
+      this.wh = this.windowHeight() < 600 ? 600 : this.windowHeight();
+    };
+    this.redirect();
+    if (localStorage.getItem("jw_manager_file") === null)
       this.$confirm("您还未登录,请前往登录", "提示", {
         confirmButtonText: "确定",
         showCancelButton: false,
         type: "warning"
       }).then(() => {
-        window.location.href = "https://limkim.xyz/newEdu/sign"
+        window.location.href = "https://edu.limkim.cn/sign";
       }).catch(() => {
-        window.location.href = "https://limkim.xyz/newEdu/sign"
+        window.location.href = "https://edu.limkim.cn/sign";
       });
     else
-      this.uName = JSON.parse(localStorage.getItem("jw_manage_file")).name
-    this.redirect();
+      this.uName = JSON.parse(localStorage.getItem("jw_manager_file")).uname;
   },
 };
 </script>
 
 <style scoped>
-.mark {
-  margin-top: 10px;
-}
-</style>
-<style>
-* {
-  margin: 0px;
-  padding: 0px;
-  text-decoration: none;
-  list-style: none;
-  outline: none;
-  box-sizing: border-box;
-}
 .el-header {
   background: url(../img/logo2.png) no-repeat;
   background-position: 20px;
@@ -171,6 +158,11 @@ export default {
   margin-left: 47%;
   text-align: center;
   line-height: 80px;
+  color: #fff;
+}
+#uname {
+  display: inline-block;
+  margin: 0 5px;
 }
 .el-container {
   background-color: rgba(224, 224, 224, 0.685);
@@ -203,12 +195,17 @@ export default {
 .el-avatar {
   vertical-align: middle !important;
 }
-/* #logout {
-  background: url('E:\网站\sever\src\img\logout2.png') no-repeat;
-  background-size: 100%;
-  background-position: 0 0;
-} */
-/* #logout:hover {
-
-} */
+</style>
+<style>
+* {
+  margin: 0px;
+  padding: 0px;
+  text-decoration: none;
+  list-style: none;
+  outline: none;
+  box-sizing: border-box;
+}
+.cell {
+  font-size: 17px;
+}
 </style>

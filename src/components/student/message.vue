@@ -1,49 +1,79 @@
 <template>
-  <div>
-    <el-breadcrumb separator-class="el-icon-arrow-right">
-      <el-breadcrumb-item>信息中心</el-breadcrumb-item>
-    </el-breadcrumb>
-    <el-form ref="form" :model="form" label-width="80px">
-      
-    </el-form>
-  </div>
+  <el-form
+    label-width="100px"
+    v-loading="loading"
+    element-loading-text="拼命加载中"
+    class="form"
+    :style="{'max-height': this.wh - 105 + 'px'}"
+  >
+    <el-menu
+      :default-active="activeIndex"
+      class="el-menu-demo"
+      mode="horizontal"
+      @select="msgRouteSwitch"
+    >
+      <el-menu-item index="1" style="font-size: 18px; line-height: 60px">
+        收信箱
+        <el-badge :value="received" :max="99" class="item" v-show="received !== 0"></el-badge>
+      </el-menu-item>
+      <el-menu-item index="2" style="font-size: 18px">
+        已发送
+        <el-badge :value="sent" :max="99" class="item" v-show="sent !== 0"></el-badge>
+      </el-menu-item>
+    </el-menu>
+    <router-view @func="getReceived"></router-view>
+  </el-form>
 </template>
 <script>
 export default {
   data() {
     return {
-      form: {
-        name: "",
-        region: "",
-        date: "",
-        delivery: false,
-        type: [],
-        resource: "",
-        desc: ""
-      }
+      activeIndex: "1",
+      loading: false
     }
   },
+  props: ["wh", "received", "sent"],
   methods: {
-    onSubmit() {
-
+    getReceived(received) {
+      this.$emit("func", received)
+    },
+    msgRouteSwitch(key) {
+      this.$router.push(key === "1" ? "/message/received" : "/message/sent");
+    },
+    redirect() {
+      switch (this.$route.path) {
+        case "/message/received":
+          this.activeIndex = "1";
+          break
+        case "/message/sent":
+          this.activeIndex = "2";
+          break
+      }
+    },
+  },
+  watch: {
+    $route() {
+      this.redirect()
     }
   },
+  mounted() {
+    this.redirect();
+  }
 };
 </script>
 
 <style scoped>
-.el-form {
+.form {
   overflow: auto;
-  margin: 30px 10px;
+  margin: 10px;
   width: calc(100% - 20px);
-  padding: 40px 100px;
+  padding: 20px 80px 30px 80px;
   background-color: #fff;
   border: 1px solid rgba(204, 204, 204, 0.5);
   box-shadow: 0 2px 5px 1px rgba(0, 0, 0, 0.1);
   border-radius: 10px;
-  max-height: 750px;
 }
-.el-table {
-  margin: 0 !important;
+.item {
+  margin-top: -7px;
 }
 </style>

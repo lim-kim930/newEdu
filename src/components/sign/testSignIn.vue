@@ -67,9 +67,9 @@ export default {
         return
       }
       else {
-        localStorage.setItem("jw_manage_file", JSON.stringify({ "name": this.uName }))
+        localStorage.setItem("jw_manager_file", JSON.stringify({ "name": this.uName }))
       }
-      window.location.href = "https://limkim.xyz/newEdu/manager"
+      window.location.href = "https://edu.limkim.cn/manager"
     },
   },
 };

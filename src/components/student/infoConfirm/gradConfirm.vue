@@ -1,6 +1,6 @@
 <template>
   <el-form ref="form" class="form1">
-    <el-empty :image-size="200" description="您还没有已发送的消息哦~"></el-empty>
+    <el-result icon="info" title="信息提示" subTitle="您还没有达到毕业时间,无法进行毕业确认"></el-result>
   </el-form>
 </template>
 <script>
@@ -12,7 +12,8 @@ export default {
   methods: {
   },
   mounted() {
-  }
+
+  },
 };
 </script>
 

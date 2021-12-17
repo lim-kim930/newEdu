@@ -1,5 +1,10 @@
 <template>
-  <el-form ref="form" :model="form" label-width="80px">
+  <el-form
+    ref="form"
+    :model="form"
+    label-width="80px"
+    :style="{'max-height': this.wh - 105 + 'px'}"
+  >
     <el-form-item label="学生学号">
       <el-input v-model="form.name" style="width: 150px"></el-input>
     </el-form-item>
@@ -52,11 +57,11 @@ export default {
       }
     }
   },
+  props: ["wh"],
   methods: {
     onSubmit() {
-
     }
-  },
+  }
 };
 </script>
 
@@ -71,8 +76,5 @@ export default {
   box-shadow: 0 2px 5px 1px rgba(0, 0, 0, 0.1);
   border-radius: 10px;
   max-height: 750px;
-}
-.el-table {
-  margin: 0 !important;
 }
 </style>

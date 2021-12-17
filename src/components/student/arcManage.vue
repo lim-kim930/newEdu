@@ -1,6 +1,6 @@
 <template>
   <div class="pwd">
-    <h4>重置学籍确认状态</h4>
+    <h4>提交档案找回申请</h4>
     <el-divider></el-divider>
     <el-form
       status-icon
@@ -9,9 +9,14 @@
       v-loading="loading"
       element-loading-text="拼命加载中"
     >
+      <h5></h5>
+      <el-alert type="info" :closable="false" style="margin-bottom: 10px">
+        <h5>提示:</h5>
+        <h5>如果档案丢失,无法使用系统,可以在这里向管理员提交档案状态重置的申请</h5>
+        <h5>重置后,之前确认的信息将需要重新确认,所以请在文件确实丢失的情况下提交</h5>
+      </el-alert>
       <el-form-item>
-        <el-button type="primary" @click="submitForm()">确认修改</el-button>
-        <!-- <el-button @click="resetForm('ruleForm')">重置</el-button> -->
+        <el-button type="primary" @click="submitForm()">确认提交</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -25,11 +30,10 @@ export default {
   },
   methods: {
     submitForm() {
-      this.$confirm("确定要重置您的学籍确认状态吗?您将需要重新确认所有信息", "提示", {
+      this.$confirm("成功重置后您将需要重新确认所有信息,点击确定以继续", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning",
-        center: true
       }).then(() => {
         this.loading = true;
         this.axios({
@@ -40,34 +44,34 @@ export default {
             staffID: JSON.parse(localStorage.getItem("jw_student_file")).staffID
           }
         })
-          .then((response) => {
+          .then(() => {
             this.axios({
               method: "post",
               url: "https://api.limkim.xyz/changeXj",
               data: { staffID: JSON.parse(localStorage.getItem("jw_student_file")).staffID, confirmed: false }
             })
-              .then((response) => {
+              .then(() => {
                 this.$message.success("重置成功");
-                location.reload()
+                location.reload();
               })
               .catch(error => {
                 if (error.response.data.status === "staffID Required")
-                  this.$message.error("您还未登录或登陆出错,请重新登录后重试")
+                  this.$message.error("您还未登录或登陆出错,请重新登录后重试");
                 else if (error.response.data.status === "Error")
-                  this.$message.error("服务器出错")
+                  this.$message.error("服务器出错");
                 else
-                  this.$message.error("出错啦,请稍后重试")
-                this.loading = false
+                  this.$message.error("出错啦,请稍后重试");
+                this.loading = false;
               });
           })
-          .catch(error => {
-            this.$message.error("重置出错啦,请稍后重试")
-            this.loading = false
+          .catch(() => {
+            this.$message.error("提交申请出错啦,请稍后重试");
+            this.loading = false;
           });
       })
         .catch(() => {
 
-        })
+        });
     }
   }
 };
@@ -84,5 +88,9 @@ export default {
   box-shadow: 0 2px 5px 1px rgba(0, 0, 0, 0.1);
   border-radius: 10px;
   max-height: 750px;
+}
+.el-alert h5 {
+  font-size: 18px;
+  margin-bottom: 10px;
 }
 </style>

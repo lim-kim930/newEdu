@@ -15,7 +15,7 @@
     >{{step===0?"添加企业":"返回"}}</el-button>
     <el-table
       v-show="step === 0"
-      :data="tableData"
+      :data="companyListData"
       style="width: 100%"
       :max-height="this.wh - 240"
       border
@@ -37,7 +37,7 @@
       </el-table-column>
       <el-table-column label="公司名称" prop="Name" sortable></el-table-column>
       <el-table-column label="公司账号" prop="CompanyCode" sortable></el-table-column>
-      <el-table-column label="创建时间" prop="CreatAt" sortable></el-table-column>
+      <el-table-column label="创建时间" prop="CreatedAt" sortable></el-table-column>
       <el-table-column label="操作">
         <template slot-scope="scope">
           <el-button size="mini" type="danger" plain @click="handleEdit(scope.$index, scope.row)">删除</el-button>
@@ -58,7 +58,7 @@
         <el-input
           type="textarea"
           v-model="form.Description"
-          :rows="4"
+          :rows="10"
           resize="none"
           show-word-limit
           maxlength="500"
@@ -66,7 +66,7 @@
         ></el-input>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="onSubmit" style="margin-top: 20px">点击录入</el-button>
+        <el-button type="primary" @click="addCompany" style="margin-top: 20px">点击录入</el-button>
       </el-form-item>
     </div>
   </el-form>
@@ -77,27 +77,63 @@ export default {
     return {
       step: 0,
       loading: false,
-      tableData: [],
+      companyListData: [],
       form: {
         Name: "",
         CompanyCode: "",
         Passphrase: "",
         Description: ""
-      },
+      }
     };
   },
   props: ["wh"],
   methods: {
-    onSubmit() {
-      if (this.form.Name.trim().length === 0 || this.form.CompanyCode.trim().length === 0 || this.form.Passphrase.trim().length === 0)
-        return this.$message.warning("请将内容填写完成！");
-      this.loading = true
+    handleEdit(index, row) {
+      this.$confirm("确定要删除该公司吗", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+        center: true
+      }).then(() => {
+        this.axios({
+          method: "put",
+          url: "https://api.hduhelp.com/gormja_wrapper/company/delete",
+          headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_manager_file")).token },
+          data: {
+            CompanyCode: row.CompanyCode
+          }
+        }).then(() => {
+          this.$message.success("公司删除成功!");
+          this.getCompanyInfo();
+        }).catch(() => {
+          this.$message.error("公司删除失败啦,请重试");
+          this.loading = false;
+        });
+      });
+    },
+    getCompanyInfo() {
+      this.companyListData = [];
+      this.step = 0;
+      this.loading = true;
       this.axios({
-        method: "put",
-        url: "https://api.hduhelp.com/gormja_wrapper/company/put",
-        headers: {
-          "Authorization": "token " + JSON.parse(localStorage.getItem("jw_manage_file")).token
-        },
+        method: "get",
+        url: "https://api.hduhelp.com/gormja_wrapper/company/lookup",
+      }).then((response) => {
+        this.companyListData = response.data.data;
+        this.loading = false;
+      }).catch(() => {
+        this.$message.error("获取企业列表出错啦,请稍后再试");
+        this.loading = false;
+      });
+    },
+    addCompany() {
+      if (this.form.Name.trim().length === 0 || this.form.CompanyCode.trim().length === 0 || this.form.Passphrase.trim().length === 0)
+        return this.$message.warning("请将内容填写完成!");
+      this.loading = true;
+      this.axios({
+        method: "post",
+        url: "https://api.hduhelp.com/gormja_wrapper/company/add",
+        headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_manager_file")).token },
         data: {
           CompanyCode: this.form.CompanyCode,
           Name: this.form.Name,
@@ -105,32 +141,23 @@ export default {
           Description: this.form.Description
         }
       }).then(() => {
-        this.$message({
-          message: "注册成功！",
-          type: "success"
-        });
-        setTimeout(function () {
-          location.reload()
-        }, 1000)
-        this.loading = false
-      }).catch(() => {
-        this.$message.error("添加企业出错啦,请稍后再试");
-        this.loading = false
+        this.$message.success("企业添加成功!");
+        this.form = {
+          Name: "",
+          CompanyCode: "",
+          Passphrase: "",
+          Description: ""
+        };
+        this.getCompanyInfo();
+        this.loading = false;
+      }).catch((err) => {
+        this.$message.error(err.response.data.msg);
+        this.loading = false;
       });
     }
   },
   mounted() {
-    this.loading = true
-    this.axios({
-      method: "get",
-      url: "https://api.hduhelp.com/gormja_wrapper/company/lookup",
-    }).then((response) => {
-      this.tableData = response.data.data
-      this.loading = false
-    }).catch((error) => {
-      this.$message.error("获取企业列表出错啦,请稍后再试");
-      this.loading = false
-    })
+    this.getCompanyInfo();
   },
 };
 </script>
@@ -146,18 +173,8 @@ export default {
   box-shadow: 0 2px 5px 1px rgba(0, 0, 0, 0.1);
   border-radius: 10px;
 }
-.el-table {
-  margin: 0 !important;
-}
 </style>
 <style>
-.el-dropdown-link {
-  cursor: pointer;
-  color: #409eff;
-}
-.el-icon-arrow-down {
-  font-size: 12px;
-}
 .demo-table-expand {
   font-size: 0;
 }
@@ -176,7 +193,14 @@ export default {
 .el-form-item__content {
   padding-left: 20px;
 }
-.cell {
-  font-size: 17px;
+/* 文本域的字数下标 */
+.el-textarea__inner {
+  padding-right: 20px;
+}
+.el-textarea .el-input__count {
+  line-height: 20px;
+  height: 20px;
+  margin-right: 10px;
+  background-color: rgba(255, 255, 255, 0);
 }
 </style>

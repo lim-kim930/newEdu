@@ -1,19 +1,16 @@
 {
-  "name": "sever",
-  "version": "1.0.0",
-  "description": "npm-install-package",
-  "main": "app.js",
+  "name": "server",
+  "version": "0.1.0",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "webpack-dev-server --open --hot",
-    "pub": "webpack --config webpack.publish.config.js --mode production"
+    "serve": "vue-cli-service serve --open",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "private": "true",
   "dependencies": {
     "@kangc/v-md-editor": "^1.7.8",
+    "axios": "^0.24.0",
+    "core-js": "^3.6.5",
     "element-china-area-data": "^5.0.2",
     "element-ui": "^2.15.5",
     "form-data": "^4.0.0",
@@ -22,32 +19,15 @@
     "mavon-editor": "^2.9.1",
     "vue": "^2.6.12",
     "vue-clipboard2": "^0.3.1",
-    "vue-router": "^3.5.1",
-    "wangeditor": "^4.7.9"
+    "vue-router": "^3.5.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.13.10",
-    "@babel/preset-env": "^7.13.10",
-    "axios": "^0.21.1",
-    "babel-core": "^6.26.3",
-    "babel-loader": "^7.1.5",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-stage-0": "^6.24.1",
-    "clean-webpack-plugin": "^3.0.0",
-    "css-loader": "^5.1.1",
-    "eslint": "^7.32.0",
-    "eslint-plugin-vue": "^7.17.0",
-    "file-loader": "^6.2.0",
-    "html-webpack-plugin": "^4.5.1",
-    "mini-css-extract-plugin": "^1.3.9",
-    "optimize-css-assets-webpack-plugin": "^6.0.0",
-    "style-loader": "^2.0.0",
-    "url-loader": "^4.1.1",
-    "vue-loader": "^15.9.7",
-    "vue-template-compiler": "^2.6.12",
-    "webpack": "^4.46.0",
-    "webpack-cli": "^3.3.12",
-    "webpack-dev-server": "^3.11.2"
+    "@vue/cli-plugin-babel": "~4.5.0",
+    "@vue/cli-plugin-eslint": "~4.5.0",
+    "@vue/cli-service": "~4.5.0",
+    "babel-eslint": "^10.1.0",
+    "eslint": "^6.7.2",
+    "eslint-plugin-vue": "^6.2.2",
+    "vue-template-compiler": "^2.6.11"
   }
 }
