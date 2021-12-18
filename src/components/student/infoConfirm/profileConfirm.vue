@@ -103,7 +103,7 @@ export default {
       data.append("body", JSON.stringify({ "ShareItems": [{ "Path": ["profile", this.staffID, "Name"] }, { "Path": ["profile", this.staffID, "UnitName"] }, { "Path": ["profile", this.staffID, "MajorName"] }, { "Path": ["profile", this.staffID, "StaffID"] }, { "Path": ["profile", this.staffID, "MajorCode"] }, { "Path": ["profile", this.staffID, "UnitCode"] }, { "Path": ["profile", this.staffID, "ClassCode"] }] }));
       this.axios({
         method: "put",
-        url: "https://api.hduhelp.com/gormja_wrapper/expose/cache?topic=profile&staffID=" + JSON.parse(localStorage.getItem("jw_student_file")).staffID,
+        url: "/expose/cache?topic=profile&staffID=" + JSON.parse(localStorage.getItem("jw_student_file")).staffID,
         headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
         data
       }).then(() => {
@@ -155,7 +155,7 @@ export default {
         // 先new一个文件
         this.axios({
           method: "post",
-          url: "https://api.hduhelp.com/gormja_wrapper/dataFile/new?schoolCode=1&staffID=" + JSON.parse(localStorage.getItem("jw_student_file")).staffID,
+          url: "/dataFile/new?schoolCode=1&staffID=" + JSON.parse(localStorage.getItem("jw_student_file")).staffID,
           headers: { Authorization: "token " + JSON.parse(localStorage.getItem("jw_student_file")).token }
         }).then((response) => {
           // 成功后确认学籍信息
@@ -164,7 +164,7 @@ export default {
           data.append("condMap", "{\"SchoolCode\": 1,\"StaffID\": " + JSON.parse(localStorage.getItem("jw_student_file")).staffID + "}");
           this.axios({
             method: "put",
-            url: "https://api.hduhelp.com/gormja_wrapper/confirm?topic=profile",
+            url: "/confirm?topic=profile",
             headers: { Authorization: "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
             data
           }).then((response) => {
@@ -233,7 +233,7 @@ export default {
     this.loading = true;
     this.axios({
       method: "post",
-      url: "https://api.hduhelp.com/gormja_wrapper/lookup?topic=profile",
+      url: "/lookup?topic=profile",
       headers: { Authorization: "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
       data: JSON.stringify({
         SchoolCode: 1,

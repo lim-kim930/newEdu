@@ -321,7 +321,7 @@ export default {
       // 拿学籍确认状态
       this.axios({
         method: "get",
-        url: "https://api.hduhelp.com/gormja_wrapper/dataFile/getFileID",
+        url: "/dataFile/getFileID",
         headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
       }).then((response) => {
         this.xjConfirmed = response.data.data.FileID === "null" ? false : true;
@@ -329,7 +329,7 @@ export default {
         if (this.xjConfirmed)
           this.axios({
             method: "post",
-            url: "https://api.hduhelp.com/gormja_wrapper/share/listFurtherShareRequestForReceiver",
+            url: "/share/listFurtherShareRequestForReceiver",
             headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
             data: { "student": "any" }
           }).then((response) => {
@@ -337,7 +337,7 @@ export default {
             sessionStorage.setItem("message", JSON.stringify(response.data.data));
             return this.axios({
               method: "post",
-              url: "https://api.hduhelp.com/gormja_wrapper/share/lookupShareLinkForSelf",
+              url: "/share/lookupShareLinkForSelf",
               headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
               data: { "StaffID": JSON.parse(localStorage.getItem("jw_student_file")).staffID }
             });

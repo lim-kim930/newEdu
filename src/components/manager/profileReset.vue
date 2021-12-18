@@ -1,9 +1,5 @@
 <template>
-  <el-form
-    status-icon
-    v-loading="loading"
-    element-loading-text="拼命加载中"
-  >
+  <el-form status-icon v-loading="loading" element-loading-text="拼命加载中">
     <h4>重置学籍确认状态</h4>
     <el-divider></el-divider>
     <el-form-item label="要重置的学号" style="width: 250px;display: inline-block">
@@ -32,7 +28,7 @@ export default {
         this.loading = true;
         this.axios({
           method: "put",
-          url: "https://api.hduhelp.com/gormja_wrapper/dataFile/resetNewable",
+          url: "/dataFile/resetNewable",
           headers: { Authorization: "token " + JSON.parse(localStorage.getItem("jw_manager_file")).token },
           data: { staffID: this.staffID }
         }).then(() => {

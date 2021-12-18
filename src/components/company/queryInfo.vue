@@ -348,7 +348,7 @@ export default {
       this.blockInfoBtnShow = false;
       this.table_height = "";
       // 先简单判断连接正确性
-      if (this.queryUrl.indexOf("https://api.hduhelp.com/gormja_wrapper/share/verify?fileID=") === -1)
+      if (this.queryUrl.indexOf("/share/verify?fileID=") === -1)
         return this.$message.error("请输入正确的核验链接");
       this.loading = true;
       this.axios({
@@ -358,7 +358,7 @@ export default {
       }).then((response) => {
         this.axios({
           method: "post",
-          url: "https://api.hduhelp.com/gormja_wrapper/share/lookupShareLinkForCompany",
+          url: "/share/lookupShareLinkForCompany",
           headers: { "Authorization": JSON.parse(localStorage.getItem("jw_ent_file")).authorization },
           data: { "schoolCode": "1" }
         }).then((response) => {

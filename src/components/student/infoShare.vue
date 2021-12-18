@@ -490,7 +490,7 @@ export default {
       scoreData: [],
       rewardData: [],
       raceData: [],
-      rankData: [{}],
+      rankData: [],
       selfData: [{}],
       options: [],
       props: {
@@ -862,9 +862,9 @@ export default {
           let count3 = 2;
           let count4 = 2;
           let flag = 1;
+          let date = new Date(JSON.parse(data.get("expireAtStr")).Time).toJSON();
+          this.profileValue.expired_at = new Date(+new Date(date) + 8 * 3600 * 1000).toISOString().replace(/T/g, " ").replace(/\.[\d]{3}Z/, "");
           for (let i = 0; i < newdata.length; i++) {
-            let date = new Date(JSON.parse(data.get("expireAtStr")).Time).toJSON();
-            this.profileValue.expired_at = new Date(+new Date(date) + 8 * 3600 * 1000).toISOString().replace(/T/g, " ").replace(/\.[\d]{3}Z/, "");
             if (newdata[i].Path[0] === "profile") {
               if (newdata[i].Path[2] === "Photo")
                 this.profileValue[newdata[i].Path[2]] = "data:image/png;base64," + Base64.decode(this.content[newdata[i].Path[0]][newdata[i].Path[1]][newdata[i].Path[2]]);

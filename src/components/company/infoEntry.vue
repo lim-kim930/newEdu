@@ -187,7 +187,7 @@ export default {
         this.loading = true;
         this.axios({
           method: "put",
-          url: "https://api.hduhelp.com/gormja_wrapper/job/delete",
+          url: "/job/delete",
           headers: { "Authorization": JSON.parse(localStorage.getItem("jw_ent_file")).authorization },
           data: { "JobID": row }
         }).then(() => {
@@ -204,7 +204,7 @@ export default {
       this.loading = true;
       this.axios({
         method: "post",
-        url: "https://api.hduhelp.com/gormja_wrapper/job/lookup",
+        url: "/job/lookup",
         data: { "CompanyCode": JSON.parse(localStorage.getItem("jw_ent_file")).CompanyCode }
       }).then(response => {
         const type = Object.keys(response.data.data);
@@ -224,7 +224,7 @@ export default {
       this.typeOptions = [];
       this.axios({
         method: "get",
-        url: "https://api.hduhelp.com/gormja_wrapper/job/type/list",
+        url: "/job/type/list",
       }).then(response => {
         for (let i = 0; i < response.data.data.length; i++)
           this.typeOptions.push({
@@ -249,7 +249,7 @@ export default {
         this.loading = true;
         this.axios({
           method: "post",
-          url: "https://api.hduhelp.com/gormja_wrapper/job/publish",
+          url: "/job/publish",
           headers: { "Authorization": JSON.parse(localStorage.getItem("jw_ent_file")).authorization },
           data: {
             "Name": this.form.name,

@@ -38,7 +38,7 @@ export default {
         this.loading = true;
         this.axios({
           method: "put",
-          url: "https://api.hduhelp.com/gormja_wrapper/dataFile/resetNewable",
+          url: "/dataFile/resetNewable",
           headers: { Authorization: "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
           data: {
             staffID: JSON.parse(localStorage.getItem("jw_student_file")).staffID

@@ -202,7 +202,7 @@ export default {
       this.uName = JSON.parse(localStorage.getItem("jw_ent_file")).CompanyCode;
       this.axios({
         method: "post",
-        url: "https://api.hduhelp.com/gormja_wrapper/share/lookupShareLinkForCompany",
+        url: "/share/lookupShareLinkForCompany",
         headers: { "Authorization": JSON.parse(localStorage.getItem("jw_ent_file")).authorization },
         data: { "schoolCode": "1" }
       }).then((response) => {

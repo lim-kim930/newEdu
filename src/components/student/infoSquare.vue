@@ -24,7 +24,12 @@
         :value="item.value"
       ></el-option>
     </el-select>
-    <el-select v-model="MinSalary" filterable placeholder="最低薪资" style="width: 140px; margin: 0 10px">
+    <el-select
+      v-model="MinSalary"
+      filterable
+      placeholder="最低薪资"
+      style="width: 140px; margin: 0 10px"
+    >
       <el-option
         v-for="item in options[2].children"
         :key="item.value"
@@ -171,7 +176,7 @@ export default {
       let results = []
       this.axios({
         method: "get",
-        url: "https://api.hduhelp.com/gormja_wrapper/company/lookup",
+        url: "/company/lookup",
         // headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
         params: {
           name: queryString
@@ -218,7 +223,7 @@ export default {
       this.page = 0;
       this.axios({
         method: "post",
-        url: "https://api.hduhelp.com/gormja_wrapper/job/lookup",
+        url: "/job/lookup",
         // headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
         data: this.select
       }).then((response) => {
@@ -251,12 +256,12 @@ export default {
     this.loading = true;
     this.axios({
       method: "post",
-      url: "https://api.hduhelp.com/gormja_wrapper/job/lookup",
+      url: "/job/lookup",
       data: { "MinSalary": 0 }
     }).then((response) => {
       this.axios({
         method: "get",
-        url: "https://api.hduhelp.com/gormja_wrapper/job/type/list"
+        url: "/job/type/list"
       }).then((response2) => {
         if (response.data.data.length !== 0) {
           let temp = [];

@@ -307,7 +307,7 @@ export default {
       }
       this.axios({
         method: "post",
-        url: "https://api.hduhelp.com/gormja_wrapper/lookup?topic=" + this.typeValue,
+        url: "/lookup?topic=" + this.typeValue,
         headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
         data: tempData
       }).then((response) => {
@@ -336,7 +336,7 @@ export default {
             // 拿到学生档案明文
             this.axios({
               method: "post",
-              url: "https://api.hduhelp.com/gormja_wrapper/dataFile/get?staffID=" + JSON.parse(localStorage.getItem("jw_student_file")).staffID,
+              url: "/dataFile/get?staffID=" + JSON.parse(localStorage.getItem("jw_student_file")).staffID,
               headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
               data,
             }).then((response2) => {
@@ -536,7 +536,7 @@ export default {
       this.$emit("func3", 1);
       this.axios({
         method: "put",
-        url: "https://api.hduhelp.com/gormja_wrapper/confirm?topic=" + this.typeValue,
+        url: "/confirm?topic=" + this.typeValue,
         headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
         data
       }).then((response) => {

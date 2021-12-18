@@ -95,6 +95,11 @@
       <el-table-column prop="Value.OrgLevel.Value" label="组织等级"></el-table-column>
       <el-table-column prop="Value.StartAt.Value" label="开始时间"></el-table-column>
       <el-table-column prop="Value.EndAt.Value" label="结束时间"></el-table-column>
+      <el-table-column label="操作" width="120">
+        <template slot-scope="scope">
+          <el-button plain type="danger" size="mini" @click="deleteJob(scope.row.Value.ID.Value)">删除记录</el-button>
+        </template>
+      </el-table-column>
     </el-table>
     <el-table
       v-show="typeValue==='social'"
@@ -304,7 +309,7 @@ export default {
       data.append("dataFile", params.file);
       this.axios({
         method: "post",
-        url: "https://api.hduhelp.com/gormja_wrapper/dataFile/get?staffID=" + JSON.parse(localStorage.getItem("jw_student_file")).staffID,
+        url: "/dataFile/get?staffID=" + JSON.parse(localStorage.getItem("jw_student_file")).staffID,
         headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
         data
       }).then(() => {
@@ -366,10 +371,10 @@ export default {
       let url = "";
       switch (this.typeValue) {
         case "int":
-          url = "https://api.hduhelp.com/gormja_wrapper/lookup?topic=self_introduction";
+          url = "/lookup?topic=self_introduction";
           break;
         case "club":
-          url = "https://api.hduhelp.com/gormja_wrapper/lookup?topic=org_experience";
+          url = "/lookup?topic=org_experience";
           break;
         default:
           return;
@@ -405,6 +410,35 @@ export default {
         this.loading = false;
       });
     },
+    deleteJob(ID) {
+      this.$confirm("确定要删除此项工作记录吗?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+        center: true
+      }).then(() => {
+        this.loading = true;
+        this.axios({
+          method: "put",
+          url: "/delete?topic=org_experience",
+          headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
+          data: {
+            "Topic": "org_experience",
+            "CondMap": {
+              "SchoolCode": "1",
+              "StaffID": JSON.parse(localStorage.getItem("jw_student_file")).staffID,
+              "ID": ID
+            }
+          }
+        }).then(() => {
+          this.$message.success("删除成功!");
+          this.typeChange();
+        }).catch(() => {
+          this.$message.error("删除失败啦,请稍后再试");
+          this.loading = false;
+        });
+      });
+    },
     save() {
       if (this.typeValue === "club") {
         if (this.clubAddData.JobName.trim().length === 0 || this.clubAddData.OrgName.trim().length === 0 || this.clubAddData.OrgLevel.length === 0 || this.clubAddData.time.length === 0)
@@ -423,7 +457,7 @@ export default {
         let url = "", data = {};
         switch (this.typeValue) {
           case "int":
-            url = "https://api.hduhelp.com/gormja_wrapper/save?topic=self_introduction";
+            url = "/save?topic=self_introduction";
             data = {
               "Topic": "self_introduction",
               "ItemObj": {
@@ -432,7 +466,7 @@ export default {
             };
             break;
           case "club":
-            url = "https://api.hduhelp.com/gormja_wrapper/save?topic=org_experience";
+            url = "/save?topic=org_experience";
             data = {
               "Topic": "org_experience",
               "ItemObj": {
@@ -481,10 +515,10 @@ export default {
         let data = new FormData();
         data.append("dataFile", this.file);
         if (this.typeValue !== "int") {
-          data.append("condMap", "{\"SchoolCode\": 1,\"StaffID\": " + JSON.parse(localStorage.getItem("jw_student_file")).staffID + ", \"ID\": 5"+"}");
+          data.append("condMap", "{\"SchoolCode\": 1,\"StaffID\": " + JSON.parse(localStorage.getItem("jw_student_file")).staffID + "}");
           this.axios({
             method: "put",
-            url: "https://api.hduhelp.com/gormja_wrapper/confirm?topic=org_experience",
+            url: "/confirm?topic=org_experience",
             headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
             data
           }).then((response) => {
@@ -539,7 +573,7 @@ export default {
         }
         this.axios({
           method: "put",
-          url: "https://api.hduhelp.com/gormja_wrapper/save?topic=self_introduction",
+          url: "/save?topic=self_introduction",
           headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
           data: {
             "Topic": "self_introduction",
@@ -550,7 +584,7 @@ export default {
         }).then(() => {
           this.axios({
             method: "post",
-            url: "https://api.hduhelp.com/gormja_wrapper/lookup?topic=self_introduction",
+            url: "/lookup?topic=self_introduction",
             headers: {
               "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token
             },
@@ -565,7 +599,7 @@ export default {
               data.append("condMap", "{\"SchoolCode\": 1,\"StaffID\": " + JSON.parse(localStorage.getItem("jw_student_file")).staffID + ", \"SelfIntroduction\": " + JSON.stringify(Base64.decode(response.data.data[0].Value.SelfIntroduction.Value)) + "}");
               this.axios({
                 method: "put",
-                url: "https://api.hduhelp.com/gormja_wrapper/confirm?topic=self_introduction",
+                url: "/confirm?topic=self_introduction",
                 headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
                 data
               }).then((response) => {

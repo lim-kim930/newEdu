@@ -81,7 +81,7 @@ export default {
       data[i].id = i + 1;
       data[i].sortDate = +new Date(data[i].ExpireAt);
       data[i].date = new Date(+new Date(data[i].ExpireAt) + 8 * 3600 * 1000).toISOString().replace(/T/g, " ").replace(/\.[\d]{3}Z/, "");
-      data[i].url = "https://api.hduhelp.com/gormja_wrapper/share/verify?fileID=" + data[i].FileID + "&encryptedK1S=" + data[i].EncryptedK1S;
+      data[i].url = "/share/verify?fileID=" + data[i].FileID + "&encryptedK1S=" + data[i].EncryptedK1S;
     }
     const newData = data.sort((a, b) => {
       return a.sortDate - b.sortDate;

@@ -77,7 +77,7 @@ export default {
       this.loading = true;
       this.axios({
         method: "put",
-        url: "https://api.hduhelp.com/gormja_wrapper/company/putForCompany",
+        url: "/company/putForCompany",
         headers: { "Authorization": JSON.parse(localStorage.getItem("jw_ent_file")).authorization },
         data: {
           Passphrase: this.form.Passphrase
@@ -107,7 +107,7 @@ export default {
       this.loading = true;
       this.axios({
         method: "put",
-        url: "https://api.hduhelp.com/gormja_wrapper/company/putForCompany",
+        url: "/company/putForCompany",
         headers: { "Authorization": JSON.parse(localStorage.getItem("jw_ent_file")).authorization },
         data: {
           Description: this.form.Description

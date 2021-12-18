@@ -303,7 +303,7 @@ export default {
       this.loading = true;
       this.axios({
         method: "post",
-        url: "https://api.hduhelp.com/gormja_wrapper/expose/search",
+        url: "/expose/search",
         // headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
         data: {
           "Predicates": [
@@ -330,8 +330,6 @@ export default {
         var content = response.data.data.Results[0].Source.data_map;
         let range = Object.keys(content);
         let profileData = [];
-        let scoreData = [];
-        let levelData = [];
         let rewardData = [];
         let raceData = [];
         let rankData = [];
@@ -448,7 +446,7 @@ export default {
       data.append("dataFile", this.dataFile);
       this.axios({
         method: "post",
-        url: "https://api.hduhelp.com/gormja_wrapper/dataFile/get?staffID=" + JSON.parse(localStorage.getItem("jw_student_file")).staffID,
+        url: "/dataFile/get?staffID=" + JSON.parse(localStorage.getItem("jw_student_file")).staffID,
         headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
         data,
       }).then((response) => {
@@ -551,7 +549,7 @@ export default {
           else if (range[i] === "org_experience") {
             const club = Object.keys(this.content.org_experience);
             this.clubData = [];
-            for (let  i = 0; i < club.length; i++) {
+            for (let i = 0; i < club.length; i++) {
               this.clubData.push({
                 ID: this.content.org_experience[club[i]].ID,
                 title: club[i]
@@ -603,18 +601,18 @@ export default {
         if (this.gpa)
           ShareItems.push({ "Path": ["rank", Object.keys(this.content.profile)[0]] });
         if (this.ruleForm.intType.indexOf("org_experience") !== -1)
-          for(let i = 0; i<this.clubData.length;i++)
-            ShareItems.push({ "Path": ["org_experience", this.clubData[i].title]});
+          for (let i = 0; i < this.clubData.length; i++)
+            ShareItems.push({ "Path": ["org_experience", this.clubData[i].title] });
         if (this.ruleForm.rewardType.indexOf("race_reward") !== -1)
-          for(let i = 0; i<this.raceDataValue.length;i++)
-            ShareItems.push({ "Path": ["race_reward", this.raceDataValue[i]]});
+          for (let i = 0; i < this.raceDataValue.length; i++)
+            ShareItems.push({ "Path": ["race_reward", this.raceDataValue[i]] });
         if (this.ruleForm.rewardType.indexOf("reward") !== -1)
-          for(let i = 0; i<this.rewardDataValue.length;i++)
-            ShareItems.push({ "Path": ["reward", this.rewardDataValue[i]]});
+          for (let i = 0; i < this.rewardDataValue.length; i++)
+            ShareItems.push({ "Path": ["reward", this.rewardDataValue[i]] });
         data.append("body", JSON.stringify({ "ShareItems": ShareItems }));
         this.axios({
           method: "put",
-          url: "https://api.hduhelp.com/gormja_wrapper/expose/cache?topic=profile&staffID" + JSON.parse(localStorage.getItem("jw_student_file")).staffID,
+          url: "/expose/cache?topic=profile&staffID" + JSON.parse(localStorage.getItem("jw_student_file")).staffID,
           headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
           data,
         }).then(() => {

@@ -97,7 +97,7 @@ export default {
       }).then(() => {
         this.axios({
           method: "put",
-          url: "https://api.hduhelp.com/gormja_wrapper/company/delete",
+          url: "/company/delete",
           headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_manager_file")).token },
           data: {
             CompanyCode: row.CompanyCode
@@ -117,7 +117,7 @@ export default {
       this.loading = true;
       this.axios({
         method: "get",
-        url: "https://api.hduhelp.com/gormja_wrapper/company/lookup",
+        url: "/company/lookup",
       }).then((response) => {
         this.companyListData = response.data.data;
         this.loading = false;
@@ -132,7 +132,7 @@ export default {
       this.loading = true;
       this.axios({
         method: "post",
-        url: "https://api.hduhelp.com/gormja_wrapper/company/add",
+        url: "/company/add",
         headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_manager_file")).token },
         data: {
           CompanyCode: this.form.CompanyCode,

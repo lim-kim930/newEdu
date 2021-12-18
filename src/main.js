@@ -27,6 +27,7 @@ Vue.use(VueRouter);
 Vue.use(ElementUI);
 //axios cookies配置
 axios.defaults.withCredentials = true;
+axios.defaults.baseURL = "https://api.hduhelp.com/gormja_wrapper";
 Vue.prototype.axios = axios;
 
 const originalPush = VueRouter.prototype.push;

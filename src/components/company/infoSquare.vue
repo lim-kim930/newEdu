@@ -405,7 +405,7 @@ export default {
       }
       this.axios({
         method: "post",
-        url: "https://api.hduhelp.com/gormja_wrapper/expose/search",
+        url: "/expose/search",
         data: { "Predicates": this.Predicates }
       }).then((response) => {
         if (response.data.data.Results.length === 0)
@@ -447,7 +447,7 @@ export default {
       return new Promise((resolve, reject) => {
         this.axios({
           method: "post",
-          url: "https://api.hduhelp.com/gormja_wrapper/share/addFurtherShareRequest",
+          url: "/share/addFurtherShareRequest",
           headers: { "Authorization": JSON.parse(localStorage.getItem("jw_ent_file")).authorization },
           data: {
             "ExposeFileID": FileID,
@@ -479,7 +479,7 @@ export default {
         return this.batchRequest();
       this.axios({
         method: "post",
-        url: "https://api.hduhelp.com/gormja_wrapper/share/addFurtherShareRequest",
+        url: "/share/addFurtherShareRequest",
         headers: { "Authorization": JSON.parse(localStorage.getItem("jw_ent_file")).authorization },
         data: this.form
       }).then(() => {
@@ -511,7 +511,7 @@ export default {
     this.uname = JSON.parse(localStorage.getItem("jw_ent_file")).CompanyCode;
     this.axios({
       method: "get",
-      url: "https://api.hduhelp.com/gormja_wrapper/info/listMajor",
+      url: "/info/listMajor",
     }).then(response => {
       let units = {}, majors = [{ value: "", label: "不限" }], flag = 1;
       const data = response.data.data;
@@ -538,7 +538,7 @@ export default {
       this.options[0].children = majors;
       this.axios({
         method: "post",
-        url: "https://api.hduhelp.com/gormja_wrapper/job/lookup",
+        url: "/job/lookup",
         data: { "CompanyCode": this.uname }
       }).then(response => {
         const type = Object.keys(response.data.data);

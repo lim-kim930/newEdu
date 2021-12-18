@@ -55,7 +55,7 @@ export default {
       this.$router.push("/testSignIn");
     },
     byHDU() {
-      window.location.href = "https://api.hduhelp.com/gormja_wrapper/oauth/request";
+      window.location.href = "/oauth/request";
     },
     onSubmit() {
       this.btnLoad = true;
@@ -66,7 +66,7 @@ export default {
       }
       this.axios({
         method: "post",
-        url: "https://api.hduhelp.com/gormja_wrapper/company/login",
+        url: "/company/login",
         data: {
           "CompanyCode": this.name,
           "Passphrase": this.pwd
