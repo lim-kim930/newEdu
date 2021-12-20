@@ -163,7 +163,7 @@
           >
             <el-table-column type="selection" width="55"></el-table-column>
             <el-table-column prop="GPA" label="绩点"></el-table-column>
-            <el-table-column prop="Rank" label="学院排名"></el-table-column>
+            <el-table-column prop="Rank" label="专业排名"></el-table-column>
           </el-table>
         </el-form-item>
         <el-form-item label="目的企业和岗位" required>

@@ -21,7 +21,7 @@
         <el-badge :value="sent" :max="99" class="item" v-show="sent !== 0"></el-badge>
       </el-menu-item>
     </el-menu>
-    <router-view @func="getReceived"></router-view>
+    <router-view @func="getReceived" :received="received"></router-view>
   </el-form>
 </template>
 <script>
@@ -30,12 +30,12 @@ export default {
     return {
       activeIndex: "1",
       loading: false
-    }
+    };
   },
   props: ["wh", "received", "sent"],
   methods: {
     getReceived(received) {
-      this.$emit("func", received)
+      this.$emit("func", received);
     },
     msgRouteSwitch(key) {
       this.$router.push(key === "1" ? "/comMessage/received" : "/comMessage/sent");
@@ -44,16 +44,16 @@ export default {
       switch (this.$route.path) {
         case "/comMessage/received":
           this.activeIndex = "1";
-          break
+          break;
         case "/comMessage/sent":
           this.activeIndex = "2";
-          break
+          break;
       }
     },
   },
   watch: {
     $route() {
-      this.redirect()
+      this.redirect();
     }
   },
   mounted() {
