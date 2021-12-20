@@ -1,5 +1,5 @@
 <template>
-  <el-tabs tab-position="left" :style="{'max-height': this.wh - 230 + 'px', 'margin-top': '10px'}">
+  <el-tabs tab-position="left" class="received" :style="{'max-height': this.wh - 230 + 'px', 'margin-top': '10px'}">
     <el-tab-pane style="font-size: 17px">
       <span slot="label">
         <el-badge :value="received" :max="99" class="item" v-show="received !== 0"></el-badge>
@@ -147,12 +147,14 @@ export default {
         data[i].TargetJob = jobTranslation[data[i].TargetJobID];
         data[i].MajorName = majorTranslation[data[i].MetaData.MajorCode];
         data[i].index = i;
-        data[i].sortDate = +new Date(data[i].ExpireAt);
         data[i].date = new Date(+new Date(data[i].ExpireAt) + 8 * 3600 * 1000).toISOString().replace(/T/g, " ").replace(/\.[\d]{3}Z/, "");
         data[i].url = "/share/verify?fileID=" + data[i].FileID + "&encryptedK1S=" + data[i].EncryptedK1S;
       }
       this.$emit("func", this.received);
-      this.receivedMsgData = data;
+      const newData = response.data.data.sort((a, b) => {
+        return new Date(a.ExpireAt) - new Date(b.ExpireAt);
+      });
+      this.receivedMsgData = newData;
       this.$emit("func2", false);
     }).catch(() => {
       this.$message.error("获取站内信息出错啦,请稍后再试");
@@ -189,7 +191,7 @@ export default {
 .item {
   margin-top: -2px;
   margin-right: 3px;
-  padding-top: 7px;
+  padding-top: 8px;
 }
 </style>
 <style>
@@ -207,11 +209,18 @@ export default {
   overflow: auto;
 }
 .el-tabs .el-tabs__item {
-  font-size: 17px;
+  font-size: 16px;
   width: 180px;
+}
+.received #tab-1 {
+  border-top: 1px solid #ccc;
 }
 .el-tabs .el-divider--horizontal {
   width: 95%;
   margin-left: 2%;
+}
+.el-tabs .el-dropdown-link {
+  cursor: pointer;
+  color: #409eff;
 }
 </style>

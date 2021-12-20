@@ -74,7 +74,7 @@ export default {
   data() {
     return {
       loading: false,
-      sort: "发送时间▲",
+      sort: "发送时间▼",
       classify: "无",
       reqMsgData: [],
       noticeMsgData: []
@@ -106,11 +106,10 @@ export default {
       const data = response.data.data;
       if (data) {
         for (let i = 0; i < data.length; i++) {
-          data[i].sortDate = +new Date(data[i].CreatedAt);
           data[i].date = new Date(+new Date(data[i].CreatedAt) + 8 * 3600 * 1000).toISOString().replace(/T/g, " ").replace(/\.[\d]{3}Z/, "");
         }
         const newData = data.sort((a, b) => {
-          return a.sortDate - b.sortDate;
+          return new Date(b.CreatedAt) - new Date(a.CreatedAt);
         });
         this.reqMsgData = newData;
       }

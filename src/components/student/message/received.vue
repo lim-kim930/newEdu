@@ -18,12 +18,12 @@
       </el-dropdown>-->
       <el-dropdown @command="sortSwitch" style="cursor: pointer; margin: 10px 30px 0 80%">
         <span class="el-dropdown-link">
-          排序方式 : {{sort}}
+          排序方式 : {{reqSort}}
           <i class="el-icon-arrow-down el-icon--right"></i>
         </span>
         <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item command="时间▼">时间▼</el-dropdown-item>
-          <el-dropdown-item command="时间▲">时间▲</el-dropdown-item>
+          <el-dropdown-item command="请求时间▼">请求时间▼</el-dropdown-item>
+          <el-dropdown-item command="请求时间▲">请求时间▲</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
       <div
@@ -35,7 +35,7 @@
         <el-col :span="8" class="card">
           <el-card shadow="hover">
             <h5>请求公司: {{item.CompanyCode}}</h5>
-            <h5>发起时间: {{new Date(+new Date(item.CreatedAt) + 8 * 3600 * 1000).toISOString().replace(/T/g, " ").replace(/\.[\d]{3}Z/, "")}}</h5>
+            <h5>请求时间: {{new Date(+new Date(item.CreatedAt) + 8 * 3600 * 1000).toISOString().replace(/T/g, " ").replace(/\.[\d]{3}Z/, "")}}</h5>
             <h5>请求描述: {{item.Text}}</h5>
           </el-card>
         </el-col>
@@ -54,12 +54,12 @@
       </span>
       <el-dropdown @command="sortSwitch" style="cursor: pointer; margin: 10px 30px 0 80%">
         <span class="el-dropdown-link">
-          排序方式 : {{sort}}
+          排序方式 : {{noticeSort}}
           <i class="el-icon-arrow-down el-icon--right"></i>
         </span>
         <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item command="时间▼">时间▼</el-dropdown-item>
-          <el-dropdown-item command="时间▲">时间▲</el-dropdown-item>
+          <el-dropdown-item command="发送时间▼">发送时间▼</el-dropdown-item>
+          <el-dropdown-item command="发送时间▲">发送时间▲</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
       <div style="cursor: pointer;" v-for="item in noticeMsgData" v-bind:key="item.id">
@@ -90,7 +90,8 @@
 export default {
   data() {
     return {
-      sort: "时间▲",
+      reqSort: "请求时间▼",
+      noticeSort: "发送时间▼",
       classify: "无",
       requestMsgData: [],
       noticeMsgData: [],
@@ -105,7 +106,7 @@ export default {
     },
     sortSwitch(command) {
       if (command !== this.sort) {
-        this.sort = command;
+        this.reqSort = command;
         const temp = this.requestMsgData;
         this.requestMsgData = [];
         for (let i = 0; i < temp.length; i++)
@@ -131,8 +132,10 @@ export default {
       data: { "student": "any" }
     }).then((response) => {
       this.request = response.data.data.length;
-      console.log(this.request);
-      this.requestMsgData = response.data.data;
+      const newData = response.data.data.sort((a, b) => {
+        return new Date(b.CreatedAt) - new Date(a.CreatedAt);
+      });
+      this.requestMsgData = newData;
       return this.axios({
         method: "get",
         url: "/campusTalk/lookupForSelf",
@@ -179,7 +182,7 @@ export default {
 .item {
   margin-top: -2px;
   margin-right: 3px;
-  padding-top: 7px;
+  padding-top: 8px;
 }
 </style>
 <style>
@@ -187,7 +190,7 @@ export default {
   overflow: auto;
 }
 .el-tabs .el-tabs__item {
-  font-size: 17px;
+  font-size: 16px;
   width: 180px;
 }
 .el-tabs #tab-2 {
@@ -196,5 +199,9 @@ export default {
 .el-tabs .el-divider--horizontal {
   width: 95%;
   margin-left: 2%;
+}
+.el-tabs .el-dropdown-link {
+  cursor: pointer;
+  color: #409eff;
 }
 </style>

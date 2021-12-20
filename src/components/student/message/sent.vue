@@ -21,8 +21,8 @@
           <i class="el-icon-arrow-down el-icon--right"></i>
         </span>
         <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item command="时间▼">时间▼</el-dropdown-item>
-          <el-dropdown-item command="时间▲">时间▲</el-dropdown-item>
+          <el-dropdown-item command="过期时间▼">过期时间▼</el-dropdown-item>
+          <el-dropdown-item command="过期时间▲">过期时间▲</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
       <div
@@ -52,7 +52,7 @@
 export default {
   data() {
     return {
-      sort: "时间▲",
+      sort: "过期时间▲",
       classify: "无",
       sentMsgData: []// 
     };
@@ -80,7 +80,10 @@ export default {
       headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
       data: { "StaffID": JSON.parse(localStorage.getItem("jw_student_file")).staffID }
     }).then((response) => {
-      this.sentMsgData = response.data.data;
+      const newData = response.data.data.sort((a, b) => {
+        return new Date(a.ExpireAt) - new Date(b.ExpireAt);
+      });
+      this.sentMsgData = newData;
       this.$emit("func2", false);
     }).catch(() => {
       this.$message.error("获取已发送信息出错啦,请稍后再试");

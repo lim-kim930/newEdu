@@ -151,7 +151,6 @@ export default {
       this.xjConfirmed = confirmed;
     },
     getReceived(received) {
-      console.log(received);
       this.received = received;
     },
     //路由切换
