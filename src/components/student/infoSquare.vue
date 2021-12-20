@@ -164,16 +164,16 @@ export default {
       select: { "MinSalary": 0 },
       input: [],
       gpa: false
-    }
+    };
   },
   props: ["wh"],
   methods: {
     companySelect(v) {
       console.log(v);
-      this.CompanyCode = v.CompanyCode
+      this.CompanyCode = v.CompanyCode;
     },
     querySearch(queryString, cb) {
-      let results = []
+      let results = [];
       this.axios({
         method: "get",
         url: "/company/lookup",
@@ -186,15 +186,15 @@ export default {
           results.push({
             CompanyCode: response.data.data[i].CompanyCode,
             value: response.data.data[i].Name
-          })
+          });
         cb(results);
-      })
+      });
     },
     // handleSelect(item) {
     //   this.CompanyCode = item.CompanyCode
     // },
     currentChange(v) {
-      this.page = v - 1
+      this.page = v - 1;
     },
     handleEdit(index, row) {
       sessionStorage.setItem("com", JSON.stringify({
@@ -202,21 +202,21 @@ export default {
         Name: row.Company.Name,
         job: row.Name,
         JobID: row.JobID
-      }))
+      }));
       this.$router.push("/infoShare");
     },
     getInfo() {
       this.select = { "MinSalary": 0 };
       if (this.Name && this.Name.length !== 0)
-        this.select.Name = this.Name
+        this.select.Name = this.Name;
       if (this.JobTypeCode && this.JobTypeCode.length !== 0)
-        this.select.JobTypeCode = this.JobTypeCode
+        this.select.JobTypeCode = this.JobTypeCode;
       if (this.MinSalary.length !== 0)
-        this.select.MinSalary = this.MinSalary
+        this.select.MinSalary = this.MinSalary;
       if (this.CompanyCode.length !== 0)
-        this.select.CompanyCode = this.CompanyCode
+        this.select.CompanyCode = this.CompanyCode;
       if (this.location.length !== 0)
-        this.select.WorkLocation = CodeToText[this.location[0]] + (CodeToText[this.location[1]] === "市辖区" ? "" : CodeToText[this.location[1]])
+        this.select.WorkLocation = CodeToText[this.location[0]] + (CodeToText[this.location[1]] === "市辖区" ? "" : CodeToText[this.location[1]]);
       this.loading = true;
       this.tableData = [[]];
       this.total = 0;
@@ -232,23 +232,23 @@ export default {
           return;
         }
         let temp = [];
-        const type = Object.keys(response.data.data)
+        const type = Object.keys(response.data.data);
         for (let i = 0; i < type.length; i++)
           for (let j = 0; j < response.data.data[type[i]].length; j++)
-            temp.push(response.data.data[type[i]][j])
-        let count = 0
+            temp.push(response.data.data[type[i]][j]);
+        let count = 0;
         for (let i = 0; i < temp.length; i++) {
-          this.total++
+          this.total++;
           if (i !== 0 && i % 10 === 0) {
-            count++
-            this.tableData[count] = []
+            count++;
+            this.tableData[count] = [];
           }
           this.tableData[count].push(temp[i]);
         }
         this.loading = false;
       }).catch(() => {
-        this.$message.error("获取岗位信息出错啦,请稍后再试")
-        this.loading = false
+        this.$message.error("获取岗位信息出错啦,请稍后再试");
+        this.loading = false;
       });
     }
   },
@@ -266,25 +266,25 @@ export default {
         if (response.data.data.length !== 0) {
           let temp = [];
           let job = [];
-          const type = Object.keys(response.data.data)
+          const type = Object.keys(response.data.data);
           for (let i = 0; i < type.length; i++)
             for (let j = 0; j < response.data.data[type[i]].length; j++) {
-              temp.push(response.data.data[type[i]][j])
+              temp.push(response.data.data[type[i]][j]);
               if (job.indexOf(response.data.data[type[i]][j].Name) === -1)
-                job.push(response.data.data[type[i]][j].Name)
+                job.push(response.data.data[type[i]][j].Name);
             }
           for (let i = 0; i < job.length; i++) {
             this.options[0].children.push({
               label: job[i],
               value: job[i]
-            })
+            });
           }
-          let count = 0
+          let count = 0;
           for (let i = 0; i < temp.length; i++) {
-            this.total++
+            this.total++;
             if (i !== 0 && i % 10 === 0) {
-              count++
-              this.tableData[count] = []
+              count++;
+              this.tableData[count] = [];
             }
             this.tableData[count].push(temp[i]);
           }
@@ -293,16 +293,16 @@ export default {
           this.options[1].children.push({
             label: response2.data.data[i].Name,
             value: response2.data.data[i].JobTypeCode
-          })
+          });
         }
         this.loading = false;
       }).catch(() => {
-        this.$message.error("获取岗位大类信息出错啦,请稍后再试")
-        this.loading = false
+        this.$message.error("获取岗位大类信息出错啦,请稍后再试");
+        this.loading = false;
       });
     }).catch(() => {
-      this.$message.error("获取招聘信息出错啦,请稍后再试")
-      this.loading = false
+      this.$message.error("获取招聘信息出错啦,请稍后再试");
+      this.loading = false;
     });
   }
 };

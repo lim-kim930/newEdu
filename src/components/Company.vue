@@ -88,7 +88,6 @@
       <el-main :style="{'height': this.wh - 80 + 'px'}">
         <router-view
           @func="getReceived"
-          @func2="getSent"
           :received="received"
           :sent="sent"
           :wh="wh"
@@ -112,9 +111,6 @@ export default {
   methods: {
     getReceived(received) {
       this.received = received;
-    },
-    getSent(sent) {
-      this.sent = sent;
     },
     msgRouteSwitch(command) {
       this.$router.push("/comMessage/" + command);
@@ -181,13 +177,7 @@ export default {
       this.redirect();
     }
   },
-  mounted() {
-    this.wh = this.windowHeight() < 600 ? 600 : this.windowHeight();
-    document.querySelector(".el-main").style.height = this.wh - 80 + "px";
-    window.onresize = () => {
-      this.wh = this.windowHeight() < 600 ? 600 : this.windowHeight();
-    };
-    this.redirect();
+  created() {
     if (localStorage.getItem("jw_ent_file") === null)
       this.$confirm("您还未登录,请前往登录", "提示", {
         confirmButtonText: "确定",
@@ -200,47 +190,29 @@ export default {
       });
     else {
       this.uName = JSON.parse(localStorage.getItem("jw_ent_file")).CompanyCode;
-      let jobTranslation = {};
-      let majorTranslation = {};
       this.axios({
         method: "post",
-        url: "/job/lookup",
-        data: { "CompanyCode": JSON.parse(localStorage.getItem("jw_ent_file")).CompanyCode }
-      }).then(response => {
-        const data = response.data.data;
-        const type = Object.keys(data);
-        for (let i = 0; i < type.length; i++)
-          for (let j = 0; j < data[type[i]].length; j++)
-            jobTranslation[data[type[i]][j].JobID] = data[type[i]][j].JobType.Name;
-        return this.axios({
-          method: "get",
-          url: "/info/listMajor",
-        });
-      }).then(response => {
-        const data = response.data.data;
-        for (let i = 0; i < data.length; i++)
-          majorTranslation[data[i].MajorCode] = data[i].MajorName;
-        return this.axios({
-          method: "post",
-          url: "/share/lookupShareLinkForCompany",
-          headers: { "Authorization": JSON.parse(localStorage.getItem("jw_ent_file")).authorization },
-          data: { "schoolCode": "1" }
-        });
+        url: "/share/lookupShareLinkForCompany",
+        headers: { "Authorization": JSON.parse(localStorage.getItem("jw_ent_file")).authorization },
+        data: { "schoolCode": "1" }
       }).then((response) => {
         const data = response.data.data;
         for (let i = 0; i < data.length; i++) {
           if (!data[i].Read)
             this.received++;
-          data[i].TargetJob = jobTranslation[data[i].TargetJobID];
-          data[i].MajorName = majorTranslation[data[i].MetaData.MajorCode];
-          data[i].index = i;
         }
-        sessionStorage.setItem("message", JSON.stringify(data));
       }).catch(() => {
         this.$message.error("获取站内信息出错啦,请稍后再试");
       });
-
     }
+  },
+  mounted() {
+    this.wh = this.windowHeight() < 600 ? 600 : this.windowHeight();
+    document.querySelector(".el-main").style.height = this.wh - 80 + "px";
+    window.onresize = () => {
+      this.wh = this.windowHeight() < 600 ? 600 : this.windowHeight();
+    };
+    this.redirect();
   }
 };
 </script>

@@ -6,33 +6,19 @@
         <span>教务—学业分享系统</span>
       </div>
       <div class="user">
-        <el-dropdown
-          style="height: 50px; cursor: pointer; line-height: 80px"
-          @command="msgRouteSwitch"
+        <el-badge
+          title="消息中心"
+          :value="received"
+          :hidden="received === 0"
+          class="item"
+          style="width: 30px; height: 30px; margin-right: 20px; line-height: 30px !important"
         >
-          <el-badge
-            :value="received + sent"
-            :hidden="received + sent === 0"
-            class="item"
-            style="width: 30px; height: 30px; margin-right: 20px; line-height: 30px !important"
-          >
-            <i
-              class="el-icon-message el-dropdown-link"
-              style="font-size: 20px; color: #fff"
-              @click="msgRoute('received')"
-            ></i>
-          </el-badge>
-          <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item command="received" class="clearfix">
-              收信箱
-              <el-badge class="item" :value="received" :hidden="received === 0" />
-            </el-dropdown-item>
-            <el-dropdown-item command="sent" class="clearfix">
-              已发送
-              <el-badge class="item" :value="sent" :hidden="sent === 0" />
-            </el-dropdown-item>
-          </el-dropdown-menu>
-        </el-dropdown>
+          <i
+            class="el-icon-message el-dropdown-link"
+            style="font-size: 20px; color: #fff"
+            @click="msgRouteSwitch('received')"
+          ></i>
+        </el-badge>
         <el-avatar :size="25" :src="circleUrl"></el-avatar>
         <span style="color: #fff;" id="uname">{{uName === null?"":uName + " |"}}</span>
         <el-link
@@ -110,10 +96,10 @@
           element-loading-text="拼命加载中"
           @func="getFile"
           @func2="getConfirmed"
+          @func3="getReceived"
           :file="file"
           :xjConfirmed="xjConfirmed"
           :received="received"
-          :sent="sent"
           :wh="wh"
         ></router-view>
       </el-main>
@@ -130,7 +116,6 @@ export default {
       uName: "",// 用户名
       file: "",// 文件
       received: 0,// 收件箱数量
-      sent: 0,// 已发送数量
       xjConfirmed: "",// 学籍确认状态
       wh: ""// 屏幕高度
     };
@@ -164,6 +149,10 @@ export default {
     //拿到子组件传来的学籍确认状态,全局存储在student页面
     getConfirmed(confirmed) {
       this.xjConfirmed = confirmed;
+    },
+    getReceived(received) {
+      console.log(received);
+      this.received = received;
     },
     //路由切换
     indexRouteSwitch(key) {
@@ -280,30 +269,7 @@ export default {
       this.redirect();
     }
   },
-  mounted() {
-    // 刷新和关闭标签页提示
-    window.onbeforeunload = (e) => {
-      if (this.file !== "") {
-        console.log(e);
-        e = e || window.event;
-        // 兼容IE8和Firefox 4之前的版本
-        if (e)
-          e.returnValue = "done";
-        return this.$confirm("请确认您已经将最新的学业文件下载到了本地", "提示", {
-          confirmButtonText: "现在下载",
-          cancelButtonText: "已下载",
-          type: "warning"
-        }).then(() => {
-          this.downloadFile("学业文件.enc");
-        });
-      }
-    };
-    // 拿到屏幕高度
-    this.wh = this.windowHeight() < 650 ? 650 : this.windowHeight();
-    document.querySelector(".el-main").style.height = this.wh - 80 + "px";
-    window.onresize = () => {
-      this.wh = this.windowHeight() < 650 ? 650 : this.windowHeight();
-    };
+  created() {
     // 判断是否登录
     if (localStorage.getItem("jw_student_file") === null)
       this.$confirm("您还未登录,请前往登录", "提示", {
@@ -334,15 +300,14 @@ export default {
             data: { "student": "any" }
           }).then((response) => {
             this.received = response.data.data.length;
-            sessionStorage.setItem("message", JSON.stringify(response.data.data));
             return this.axios({
-              method: "post",
-              url: "/share/lookupShareLinkForSelf",
+              method: "get",
+              url: "/campusTalk/lookupForSelf",
               headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
               data: { "StaffID": JSON.parse(localStorage.getItem("jw_student_file")).staffID }
             });
           }).then((response) => {
-            sessionStorage.setItem("sent", JSON.stringify(response.data.data));
+            this.received += response.data.data.length;
             this.loading = false;
           }).catch(() => {
             this.$message.error("获取站内信息出错啦,请稍后再试");
@@ -356,6 +321,31 @@ export default {
         this.loading = false;
       });
     }
+  },
+  mounted() {
+    // 刷新和关闭标签页提示
+    window.onbeforeunload = (e) => {
+      if (this.file !== "") {
+        console.log(e);
+        e = e || window.event;
+        // 兼容IE8和Firefox 4之前的版本
+        if (e)
+          e.returnValue = "done";
+        return this.$confirm("请确认您已经将最新的学业文件下载到了本地", "提示", {
+          confirmButtonText: "现在下载",
+          cancelButtonText: "已下载",
+          type: "warning"
+        }).then(() => {
+          this.downloadFile("学业文件.enc");
+        });
+      }
+    };
+    // 拿到屏幕高度
+    this.wh = this.windowHeight() < 650 ? 650 : this.windowHeight();
+    document.querySelector(".el-main").style.height = this.wh - 80 + "px";
+    window.onresize = () => {
+      this.wh = this.windowHeight() < 650 ? 650 : this.windowHeight();
+    };
   },
   destroyed() {
     window.onbeforeunload = null;

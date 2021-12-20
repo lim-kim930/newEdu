@@ -138,7 +138,7 @@
             <el-table-column prop="value" label="获得时间"></el-table-column>
           </el-table>
         </el-form-item>
-        <el-form-item class="md" label="个人填写信息" required>
+        <el-form-item class="md" label="自我介绍" required>
           <h4 v-show="!selfData[0].md">暂无信息</h4>
           <el-checkbox v-show="selfData[0].md" v-model="ruleForm.selfChecked">选择</el-checkbox>
           <mavonEditor
@@ -150,6 +150,23 @@
             v-model="selfData[0].md"
             :style="{'width': '90%', 'margin-top': '10px', 'height': this.wh - 300 + 'px'}"
           />
+        </el-form-item>
+        <el-form-item class="md" label="班团工作" required>
+          <h4 v-show="clubData.length === 0">暂无信息</h4>
+          <!-- <el-checkbox v-show="selfData[1].data" v-model="ruleForm.clubChecked">选择</el-checkbox> -->
+          <el-table
+            :data="clubData"
+            tooltip-effect="dark"
+            style="width: 90%"
+            border
+            v-show="clubData.length !== 0"
+            @selection-change="clubSelectionChange"
+          >
+            <el-table-column type="selection" width="55"></el-table-column>
+            <el-table-column prop="JobName" label="工作名称"></el-table-column>
+            <el-table-column prop="OrgName" label="组织名称"></el-table-column>
+            <el-table-column prop="OrgLevel" label="组织等级"></el-table-column>
+          </el-table>
         </el-form-item>
         <el-form-item label="排名信息" required>
           <h4 v-show="rankData.length === 0">暂无信息</h4>
@@ -207,9 +224,9 @@
         type="primary"
         plain
         @click="dialogSwitch()"
-        :disabled="!this.ruleForm.selfChecked"
+        :disabled="!this.ruleForm.selfChecked && this.clubValue.length === 0"
         style="width: 150px; margin-bottom: 10px; margin-left: calc(100% - 630px)"
-      >{{this.ruleForm.selfChecked?(this.switch === 1?"查看个性化预览":"返回"):"未选择个人填写信息"}}</el-button>
+      >{{(this.ruleForm.selfChecked || this.clubValue.length !== 0)?(this.switch === 1?"查看个人填写预览":"返回"):"未选择个人信息"}}</el-button>
       <el-button
         type="primary"
         @click="confirm()"
@@ -230,7 +247,9 @@
         >
           <div class="hash">
             <span class="title">交易哈希</span>
-            <span id="hash_content">******************************************</span>
+            <span
+              id="hash_content"
+            >0x****************************************************************</span>
           </div>
           <div class="name">
             <span class="title">姓名</span>
@@ -393,15 +412,30 @@
           </div>
         </div>
       </div>
+      <h3 style="margin-left: 5%" v-show="this.switch===2 && selfData[0].md">自我介绍</h3>
       <mavonEditor
         :toolbars="toolbars"
         :autofocus="false"
         defaultOpen="preview"
         :editable="false"
-        v-show="this.switch===2"
+        v-show="this.switch===2 && selfData[0].md"
         v-model="selfData[0].md"
         :style="{'width': '90%', 'margin': ' 10px 5%', 'height': this.wh - 300 + 'px'}"
       />
+      <h3 style="margin-left: 5%" v-show="this.switch===2 && clubValue.length !== 0">班团工作</h3>
+      <el-table
+        :data="clubValue"
+        tooltip-effect="dark"
+        :style="{'width': '90%', 'margin': ' 10px 5%'}"
+        border
+        v-show="this.switch===2 && clubValue.length !== 0"
+      >
+        <el-table-column prop="JobName" label="工作名称"></el-table-column>
+        <el-table-column prop="OrgName" label="组织名称"></el-table-column>
+        <el-table-column prop="OrgLevel" label="组织等级"></el-table-column>
+        <el-table-column prop="StartAt" label="开始时间"></el-table-column>
+        <el-table-column prop="EndAt" label="结束时间"></el-table-column>
+      </el-table>
     </el-dialog>
     <el-dialog class="share" title="提示" :visible.sync="dialogVisible" width="35%">
       <span>
@@ -482,6 +516,7 @@ export default {
         rewardType: [],
         rankType: [],
         selfChecked: false,
+        clubType: [],
         raceType: []
       },
       profileData: [],//学籍信息数据
@@ -492,6 +527,8 @@ export default {
       raceData: [],
       rankData: [],
       selfData: [{}],
+      clubData: [],
+      clubValue: [],
       options: [],
       props: {
         lazy: true,
@@ -565,6 +602,12 @@ export default {
         this.ruleForm.raceType.push(item.key);
       });
     },
+    clubSelectionChange(val) {
+      this.ruleForm.clubType = [];
+      val.forEach(item => {
+        this.ruleForm.clubType.push(item.key);
+      });
+    },
     CheckAllChange(val) {
       this.ruleForm.profileType = val ? this.profileDataValue : [];
       this.isIndeterminate = false;
@@ -612,12 +655,14 @@ export default {
     resetForm() {
       this.ruleForm = {
         date: "",
-        hr: "",
+        hr: [],
         profileType: [],
         scoreType: [],
         levelType: [],
-        rankType: [],
         rewardType: [],
+        rankType: [],
+        selfChecked: false,
+        clubType: [],
         raceType: []
       };
       this.isIndeterminate = false;
@@ -752,10 +797,17 @@ export default {
             else if (range[i] === "self_introduction") {
               this.selfData = [];
               this.selfData.push({
-                value: "GPA",
                 md: Base64.decode(this.content.self_introduction[Object.keys(this.content.self_introduction)[0]].SelfIntroduction),
                 key: Object.keys(this.content.self_introduction)[0]
               });
+            }
+            else if (range[i] === "org_experience") {
+              this.clubData = [];
+              const keys = Object.keys(this.content.org_experience);
+              for (let i = 0; i < keys.length; i++) {
+                this.content.org_experience[keys[i]].key = keys[i];
+                this.clubData.push(this.content.org_experience[keys[i]]);
+              }
             }
           }
           this.loading = false;
@@ -800,41 +852,48 @@ export default {
               ShareItems.push({ "Path": Path });
             }
         }
-        if (this.ruleForm.scoreType.length != 0) {
+        if (this.ruleForm.scoreType.length !== 0) {
           for (var i = 0; i < this.ruleForm.scoreType.length; i++) {
             Path = ["score"];
             Path.push(this.ruleForm.scoreType[i]);
             ShareItems.push({ "Path": Path });
           }
         }
-        if (this.ruleForm.levelType.length != 0) {
+        if (this.ruleForm.levelType.length !== 0) {
           for (var i = 0; i < this.ruleForm.levelType.length; i++) {
             Path = ["level_exam"];
             Path.push(this.ruleForm.levelType[i]);
             ShareItems.push({ "Path": Path });
           }
         }
-        if (this.ruleForm.rewardType.length != 0) {
+        if (this.ruleForm.rewardType.length !== 0) {
           for (var i = 0; i < this.ruleForm.rewardType.length; i++) {
             Path = ["reward"];
             Path.push(this.ruleForm.rewardType[i]);
             ShareItems.push({ "Path": Path });
           }
         }
-        if (this.ruleForm.raceType.length != 0) {
+        if (this.ruleForm.raceType.length !== 0) {
           for (var i = 0; i < this.ruleForm.raceType.length; i++) {
             Path = ["race_reward"];
             Path.push(this.ruleForm.raceType[i]);
             ShareItems.push({ "Path": Path });
           }
         }
-        if (this.ruleForm.rankType.length != 0) {
+        if (this.ruleForm.rankType.length !== 0) {
           Path = ["rank", Object.keys(this.content.rank)[0]];
           ShareItems.push({ "Path": Path });
         }
         if (this.ruleForm.selfChecked) {
           Path = ["self_introduction", Object.keys(this.content.self_introduction)[0]];
           ShareItems.push({ "Path": Path });
+        }
+        if (this.ruleForm.clubType.length !== 0) {
+          for (var i = 0; i < this.ruleForm.clubType.length; i++) {
+            Path = ["org_experience"];
+            Path.push(this.ruleForm.clubType[i]);
+            ShareItems.push({ "Path": Path });
+          }
         }
         data.append("body", JSON.stringify({ "ShareItems": ShareItems }));
         this.axios({
@@ -896,7 +955,7 @@ export default {
               this.levelValue.push({
                 name: level_exam[this.ruleForm.levelType[i]].ExamName,
                 score: level_exam[this.ruleForm.levelType[i]].Score,
-                date: level_exam[this.ruleForm.levelType[i]].ExamDate,
+                date: level_exam[this.ruleForm.levelType[i]].ExamDate
               });
               count2++;
             }
@@ -907,7 +966,7 @@ export default {
               this.rewardValue.push({
                 name: reward[this.ruleForm.rewardType[i]].RewardName,
                 level: reward[this.ruleForm.rewardType[i]].RewardLevel,
-                date: reward[this.ruleForm.rewardType[i]].SchoolYear,
+                date: reward[this.ruleForm.rewardType[i]].SchoolYear
               });
               count3++;
             }
@@ -918,7 +977,7 @@ export default {
               this.raceValue.push({
                 name: race_reward[this.ruleForm.raceType[i]].RaceName,
                 level: race_reward[this.ruleForm.raceType[i]].RaceLevel + " " + race_reward[this.ruleForm.raceType[i]].RewardLevel,
-                date: race_reward[this.ruleForm.raceType[i]].RewardDate,
+                date: race_reward[this.ruleForm.raceType[i]].RewardDate
               });
               count4++;
             }
@@ -930,6 +989,13 @@ export default {
             };
           if (range.indexOf("self_introduction") !== -1)
             this.selfValue = { md: this.selfData[0].md };
+          if (range.indexOf("org_experience") !== -1) {
+            console.log(range);
+            const club = this.content.org_experience;
+            for (let i = 0; i < this.ruleForm.clubType.length; i++) {
+              this.clubValue.push(club[this.ruleForm.clubType[i]]);
+            }
+          }
           if (count < 4)
             count = 4;
           if (count2 < 5)
@@ -960,8 +1026,6 @@ export default {
         }).catch(() => {
           this.$message.error("数据处理或者加载预览出错啦，请稍后重试");
         });
-      }).catch(() => {
-        this.$message.info("分享已取消");
       });
     },
     confirm() {

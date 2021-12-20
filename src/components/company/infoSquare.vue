@@ -143,7 +143,14 @@
       type="primary"
       plain
       @click="askMore(0, { FileID: 0, Name: 'selected' });"
-    >批量发送</el-button>
+    >批量发送简历请求</el-button>
+    <el-button
+      style="float: right; margin: 0 10px 10px 10px"
+      :disabled="selected.length === 0"
+      type="primary"
+      plain
+      @click="editNotice(0, { FileID: 0, Name: 'selected' });"
+    >批量发送通知</el-button>
     <el-table
       v-show="exposeData.length !== 0"
       :data="exposeData"
@@ -161,6 +168,7 @@
       <el-table-column label="操作">
         <template slot-scope="scope">
           <el-button size="mini" @click="askMore(scope.$index, scope.row)">请求详细简历</el-button>
+          <el-button size="mini" @click="editNotice(scope.$index, scope.row)">发送宣讲会通知</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -180,7 +188,12 @@
               @click="template = !template"
             ></el-button>
             <br />由于您的信息与我们岗位: 【
-            <el-select style="width: 150px" v-model="form.FromJobID" filterable placeholder="请选择">
+            <el-select
+              style="width: 150px"
+              v-model="reqForm.FromJobID"
+              filterable
+              placeholder="请选择"
+            >
               <el-option
                 v-for="item in jobList"
                 :key="item.JobID"
@@ -188,17 +201,32 @@
                 :value="item.JobID"
               ></el-option>
             </el-select>】的需求高度匹配，为进一步了解，诚邀您提供一份完整的简历。如有意向，请尽快登录学业分享系统分享完整版简历。如有任何问题，请联系HR，联系方式:
-            <el-input v-model="form.Text" style="width: 150px;"></el-input>
+            <el-input v-model="reqForm.Text" style="width: 150px;"></el-input>
           </el-alert>
+          <el-select
+            v-show="!template"
+            style="width: 150px"
+            v-model="reqForm.FromJobID"
+            filterable
+            placeholder="请选择符合岗位"
+          >
+            <el-option
+              v-for="item in jobList"
+              :key="item.JobID"
+              :label="item.Name"
+              :value="item.JobID"
+            ></el-option>
+          </el-select>
+          <br />
           <el-input
             v-show="!template"
             type="textarea"
-            v-model="form.Text"
+            v-model="reqForm.Text"
             :rows="10"
             resize="none"
             show-word-limit
             maxlength="500"
-            style="width: 400px;"
+            style="width: 400px; margin-top: 10px"
           ></el-input>
           <el-button
             v-show="!template"
@@ -302,7 +330,12 @@ export default {
       method: "must",
       Predicates: [],// 要传给后端的筛选条件
       dialogFormVisible: false,
-      form: {
+      reqForm: {
+        "ExposeFileID": "",
+        "Text": "",
+        "FromJobID": ""
+      },
+      noticeForm: {
         "ExposeFileID": "",
         "Text": "",
         "FromJobID": ""
@@ -317,24 +350,31 @@ export default {
     resetConditions() {
       this.conditions = {
         GPA: [],
-        MajorCode: null,
-        UnitCode: null,
-        Sex: null,
-        OrgLevel: null,
-        Social: null,
-        RaceLevel: null,
-        RewardLevel: null,
-        method: "must"
+        MajorCode: "",
+        UnitCode: "",
+        Sex: "",
+        OrgLevel: "",
+        Social: "",
+        RewardLevel: "",
+        RaceLevel: "",
       };
     },
-    resetForm() {
-      this.form = {
+    resetReqForm() {
+      this.reqForm = {
+        "ExposeFileID": "",
+        "Text": "",
+        "FromJobID": ""
+      };
+    },
+    resetNoticeForm() {
+      this.reqForm = {
         "ExposeFileID": "",
         "Text": "",
         "FromJobID": ""
       };
     },
     selectionChange(v) {
+      this.selected = [];
       for (let i = 0; i < v.length; i++)
         this.selected.push(v[i].FileID);
     },
@@ -346,7 +386,7 @@ export default {
       }
       Promise.all(methods).then(() => {
         this.$message.success("已成功向求职者发送详细简历请求");
-        this.resetForm();
+        this.resetReqForm();
         this.dialogFormVisible = false;
         this.loading = false;
       }).catch(() => {
@@ -438,10 +478,13 @@ export default {
       });
     },
     askMore(index, row) {
-      this.resetForm();
-      this.form.ExposeFileID = row.FileID;
+      this.resetReqForm();
+      this.reqForm.ExposeFileID = row.FileID;
       this.chossenName = row.Name || "/";
       this.dialogFormVisible = true;
+    },
+    editNotice(index, row) {
+      
     },
     askRequest(FileID) {
       return new Promise((resolve, reject) => {
@@ -451,8 +494,8 @@ export default {
           headers: { "Authorization": JSON.parse(localStorage.getItem("jw_ent_file")).authorization },
           data: {
             "ExposeFileID": FileID,
-            "Text": this.form.Text,
-            "FromJobID": this.form.FromJobID
+            "Text": this.reqForm.Text,
+            "FromJobID": this.reqForm.FromJobID
           }
         }).then(() => {
           resolve();
@@ -462,18 +505,18 @@ export default {
       });
     },
     sendAsk() {
+      if (this.reqForm.FromJobID === "")
+        return this.$message.error("请选择岗位信息");
       this.loading = true;
       if (this.template) {
-        if (this.form.FromJobID === "")
-          return this.$message.error("请选择岗位信息");
         let JobName = "";
         for (let i = 0; i < this.jobList.length; i++) {
-          if (this.jobList[i].JobID === this.form.FromJobID) {
+          if (this.jobList[i].JobID === this.reqForm.FromJobID) {
             JobName = this.jobList[i].Name;
             break;
           }
         }
-        this.form.Text = "【" + this.uname + "】亲爱的同学你好，由于您的信息与我们岗位: 【" + JobName + "】的需求高度匹配，为进一步了解，诚邀您提供一份完整的简历。如有意向，请尽快登录学业分享系统分享完整版简历。如有任何问题，请联系HR，联系方式:" + this.form.Text;
+        this.reqForm.Text = "【" + this.uname + "】亲爱的同学你好，由于您的信息与我们岗位: 【" + JobName + "】的需求高度匹配，为进一步了解，诚邀您提供一份完整的简历。如有意向，请尽快登录学业分享系统分享完整版简历。如有任何问题，请联系HR，联系方式:" + this.reqForm.Text;
       }
       if (this.chossenName === "selected")
         return this.batchRequest();
@@ -481,10 +524,10 @@ export default {
         method: "post",
         url: "/share/addFurtherShareRequest",
         headers: { "Authorization": JSON.parse(localStorage.getItem("jw_ent_file")).authorization },
-        data: this.form
+        data: this.reqForm
       }).then(() => {
         this.$message.success("已成功向该求职者发送详细简历请求");
-        this.resetForm();
+        this.resetReqForm();
         this.dialogFormVisible = false;
         this.loading = false;
       }).catch(() => {

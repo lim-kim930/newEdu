@@ -26,7 +26,7 @@
           placeholder="请输入要核验的链接"
           v-model="queryUrl"
           clearable
-          style="width: 20%; margin: 0 10px 0 35%"
+          style="width: 20%; margin: 0 10px 0 40%"
         ></el-input>
         <el-button type="primary" icon="el-icon-search" @click="query()">查询</el-button>
         <el-button
@@ -39,13 +39,13 @@
         <br />
         <el-button
           type="primary"
-          style="margin-top: -10px"
+          style="margin-left: calc(5% + 980px)"
           :icon="this.switch===1?'el-icon-search':'el-icon-arrow-left'"
-          :disabled="!this.selfData.md"
+          :disabled="!this.selfData.md && this.clubData.length === 0"
           v-show="btnShow"
           plain
           @click="dialogSwitch()"
-        >{{this.selfData.md?(this.switch===1?"查看个人填写信息":"返回"):"未分享个人填写信息"}}</el-button>
+        >{{(this.selfData.md || this.clubData.length !== 0)?(this.switch===1?"查看个人填写的信息":"查看经过验证的信息"):"未分享个人填写信息"}}</el-button>
         <el-empty :image-size="200" description="输入链接即可核验" v-show="emptyShow"></el-empty>
         <div v-show="this.switch === 1">
           <div
@@ -228,15 +228,30 @@
             </div>
           </div>
         </div>
+        <h3 style="margin-left: 5%" v-show="this.switch===2 && selfData.md">自我介绍</h3>
         <mavonEditor
           :toolbars="toolbars"
           :autofocus="false"
           defaultOpen="preview"
           :editable="false"
-          v-show="this.switch===2"
+          v-show="this.switch===2 && selfData.md"
           v-model="selfData.md"
-          :style="{'width': '90%', 'margin': ' 10px 5%', 'height': this.wh - 300 + 'px'}"
+          :style="{'width': '1166px', 'margin': ' 10px 5%', 'height': this.wh - 300 + 'px'}"
         />
+        <h3 style="margin: 10px 0 0 5%" v-show="this.switch===2 && clubData.length !== 0">班团工作</h3>
+        <el-table
+          :data="clubData"
+          tooltip-effect="dark"
+          :style="{'width': '1166px', 'margin': ' 10px 5%'}"
+          border
+          v-show="this.switch===2 && clubData.length !== 0"
+        >
+          <el-table-column prop="JobName" label="工作名称"></el-table-column>
+          <el-table-column prop="OrgName" label="组织名称"></el-table-column>
+          <el-table-column prop="OrgLevel" label="组织等级"></el-table-column>
+          <el-table-column prop="StartAt" label="开始时间"></el-table-column>
+          <el-table-column prop="EndAt" label="结束时间"></el-table-column>
+        </el-table>
       </el-form>
     </div>
     <el-dialog title="交易详情" :visible.sync="blockInfoDialogShow">
@@ -265,13 +280,14 @@ export default {
       blockInfoDialogShow: false,// 交易详情dialog
       emptyShow: true,
       switch: 1,
-      title: "请输入要核验的链接, 点击即可核验",
+      title: "请输入要核验的链接",
       queryUrl: "",// 输入的核验链接
       canvasUrl: "",// canvas生成的图片
       file: "",
       profileData: {},
       rankData: {},
       selfData: {},
+      clubData: [],
       btnShow: false,
       toolbars: {
         readmodel: true
@@ -367,7 +383,7 @@ export default {
             if (!response.data.data[i].Read)
               received++;
           this.$emit("func", received);
-          sessionStorage.setItem("message", JSON.stringify(response.data.data));
+          sessionStorage.setItem("jw_req_msg", JSON.stringify(response.data.data));
         }).catch(() => {
           this.$message.error("获取站内信息出错啦,请稍后再试");
         });
@@ -472,6 +488,13 @@ export default {
           this.selfData = {
             md: Base64.decode(self_introduction[selfCode[0]].SelfIntroduction)
           };
+        }
+        if (response.data.data.ShareFile.data_map.org_experience != undefined) {
+          const club = response.data.data.ShareFile.data_map.org_experience;
+          const keys = Object.keys(club);
+          for (let i = 0; i < keys.length; i++) {
+            this.clubData.push(club[keys[i]]);
+          }
         }
         // 接下来对所有属于自适应高度的变量赋值
         count = count < 4 ? 4 : count;
