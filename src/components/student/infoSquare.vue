@@ -5,10 +5,16 @@
     label-width="0px"
     v-loading="loading"
     element-loading-text="拼命加载中"
-    :style="{'max-height': this.wh - 105 + 'px'}"
+    :style="{'max-height': wh - 105 + 'px'}"
   >
     <span>请选择筛选条件:</span>
-    <el-select v-model="Name" filterable placeholder="岗位名称" style="width: 180px; margin: 0 10px">
+    <el-select
+      v-model="Name"
+      clearable
+      filterable
+      placeholder="岗位名称"
+      style="width: 180px; margin: 0 10px"
+    >
       <el-option
         v-for="item in options[0].children"
         :key="item.value"
@@ -16,7 +22,7 @@
         :value="item.value"
       ></el-option>
     </el-select>
-    <el-select v-model="JobTypeCode" filterable placeholder="岗位大类" style="width: 180px">
+    <el-select v-model="JobTypeCode" clearable filterable placeholder="岗位大类" style="width: 180px">
       <el-option
         v-for="item in options[1].children"
         :key="item.value"
@@ -27,6 +33,7 @@
     <el-select
       v-model="MinSalary"
       filterable
+      clearable
       placeholder="最低薪资"
       style="width: 140px; margin: 0 10px"
     >
@@ -53,10 +60,10 @@
     <el-button type="primary" @click="getInfo()" style="margin: 20px" icon="el-icon-search">点击查询</el-button>
     <el-table
       v-show="tableData.length !== 0"
-      :data="tableData[page]"
+      :data="tableData.slice(page*parseInt((wh - 360)/55), (page+1)*parseInt((wh - 360)/55))"
       style="width: 100%"
       border
-      :default-sort="{prop: 'MaxSalary', order: 'descending'}"
+      @sort-change="sortChange"
     >
       <el-table-column type="expand">
         <template slot-scope="props">
@@ -108,7 +115,7 @@
     <el-pagination
       background
       @current-change="currentChange"
-      :page-size="10"
+      :page-size="parseInt((this.wh - 360)/52)"
       :pager-count="9"
       layout="prev, pager, next"
       :total="total"
@@ -134,7 +141,7 @@ export default {
       }, {
         value: "JobTypeCode",
         label: "岗位大类",
-        children: [{ value: "", label: "不限" }]
+        children: [{ value: "", label: "不限制此项" }]
       }, {
         value: "MinSalary",
         label: "最低薪资",
@@ -169,7 +176,6 @@ export default {
   props: ["wh"],
   methods: {
     companySelect(v) {
-      console.log(v);
       this.CompanyCode = v.CompanyCode;
     },
     querySearch(queryString, cb) {
@@ -196,6 +202,17 @@ export default {
     currentChange(v) {
       this.page = v - 1;
     },
+    sortChange(sort) {
+      if (sort.order)
+        if (sort.order === "ascending")
+          this.tableData = this.tableData.sort((a, b) => {
+            return a[sort.prop] - b[sort.prop];
+          });
+        else if (sort.order === "descending")
+          this.tableData = this.tableData.sort((a, b) => {
+            return b[sort.prop] - a[sort.prop];
+          });
+    },
     handleEdit(index, row) {
       sessionStorage.setItem("com", JSON.stringify({
         CompanyCode: row.Company.CompanyCode,
@@ -213,12 +230,12 @@ export default {
         this.select.JobTypeCode = this.JobTypeCode;
       if (this.MinSalary.length !== 0)
         this.select.MinSalary = this.MinSalary;
-      if (this.CompanyCode.length !== 0)
+      if (this.CompanyName.length !== 0)
         this.select.CompanyCode = this.CompanyCode;
       if (this.location.length !== 0)
         this.select.WorkLocation = CodeToText[this.location[0]] + (CodeToText[this.location[1]] === "市辖区" ? "" : CodeToText[this.location[1]]);
       this.loading = true;
-      this.tableData = [[]];
+      this.tableData = [];
       this.total = 0;
       this.page = 0;
       this.axios({
@@ -231,20 +248,12 @@ export default {
           this.loading = false;
           return;
         }
-        let temp = [];
         const type = Object.keys(response.data.data);
         for (let i = 0; i < type.length; i++)
-          for (let j = 0; j < response.data.data[type[i]].length; j++)
-            temp.push(response.data.data[type[i]][j]);
-        let count = 0;
-        for (let i = 0; i < temp.length; i++) {
-          this.total++;
-          if (i !== 0 && i % 10 === 0) {
-            count++;
-            this.tableData[count] = [];
+          for (let j = 0; j < response.data.data[type[i]].length; j++) {
+            this.total++;
+            this.tableData.push(response.data.data[type[i]][j]);
           }
-          this.tableData[count].push(temp[i]);
-        }
         this.loading = false;
       }).catch(() => {
         this.$message.error("获取岗位信息出错啦,请稍后再试");
@@ -264,12 +273,13 @@ export default {
         url: "/job/type/list"
       }).then((response2) => {
         if (response.data.data.length !== 0) {
-          let temp = [];
           let job = [];
+          this.tableData = [];
           const type = Object.keys(response.data.data);
           for (let i = 0; i < type.length; i++)
             for (let j = 0; j < response.data.data[type[i]].length; j++) {
-              temp.push(response.data.data[type[i]][j]);
+              this.total++;
+              this.tableData.push(response.data.data[type[i]][j]);
               if (job.indexOf(response.data.data[type[i]][j].Name) === -1)
                 job.push(response.data.data[type[i]][j].Name);
             }
@@ -278,15 +288,6 @@ export default {
               label: job[i],
               value: job[i]
             });
-          }
-          let count = 0;
-          for (let i = 0; i < temp.length; i++) {
-            this.total++;
-            if (i !== 0 && i % 10 === 0) {
-              count++;
-              this.tableData[count] = [];
-            }
-            this.tableData[count].push(temp[i]);
           }
         }
         for (let i = 0; i < response2.data.data.length; i++) {

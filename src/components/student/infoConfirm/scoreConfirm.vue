@@ -221,11 +221,11 @@ export default {
   },
   props: ["globalFile", "wh"],//拿到infoConfirmed页面file
   methods: {
-    selectable(row, index) {
+    selectable(row) {
       return row.Confirmed.value === "warning" ? true : false;
     },
     currentChange(v) {
-      this.page = v - 1
+      this.page = v - 1;
     },
     filterTag(value, row) {
       return row.tag === value;
@@ -250,7 +250,7 @@ export default {
       this.levelBtnDisabled = true;
       this.$emit("func", "");
     },
-    change(response, file, fileList) {
+    change() {
       sessionStorage.removeItem("score");
       sessionStorage.removeItem("level_exam");
       sessionStorage.removeItem("hj");
@@ -267,20 +267,20 @@ export default {
     },
     downloadFile(filename) {
       var Url = URL.createObjectURL(this.file);
-      const eleLink = document.createElement("a")
-      eleLink.download = filename
-      eleLink.style.display = "none"
-      eleLink.href = Url
-      document.body.appendChild(eleLink)
-      eleLink.click()
-      document.body.removeChild(eleLink)
+      const eleLink = document.createElement("a");
+      eleLink.download = filename;
+      eleLink.style.display = "none";
+      eleLink.href = Url;
+      document.body.appendChild(eleLink);
+      eleLink.click();
+      document.body.removeChild(eleLink);
       setTimeout(() => {
         this.$confirm("学业文件已经下载至浏览器默认下载位置,如未设置,请手动选择下载路径并妥善保存", "提示", {
           confirmButtonText: "确定",
           showCancelButton: false,
           type: "success"
-        })
-      }, 400)
+        });
+      }, 400);
     },
     //拿到学期成绩信息
     getScore() {//上传文件调用的,就不需要提示选择学期了
@@ -304,7 +304,7 @@ export default {
       }) : {
         SchoolCode: 1,
         StaffID: JSON.parse(localStorage.getItem("jw_student_file")).staffID
-      }
+      };
       this.axios({
         method: "post",
         url: "/lookup?topic=" + this.typeValue,
@@ -340,15 +340,15 @@ export default {
               headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
               data,
             }).then((response2) => {
-              let scores = []//存储学业文件内有成绩的学年和学期,避免每次查询都要请求一次文件明文
+              let scores = [];//存储学业文件内有成绩的学年和学期,避免每次查询都要请求一次文件明文
               if (JSON.stringify(response2.data.data.Body.data_map) !== "{}" && response2.data.data.Body.data_map[this.typeValue] !== undefined)
-                var courses = Object.keys(response2.data.data.Body.data_map[this.typeValue])
+                var courses = Object.keys(response2.data.data.Body.data_map[this.typeValue]);
               else
-                var courses = []
+                var courses = [];
               for (var i = 0; i < courses.length; i++) {
-                var term = courses[i]
+                var term = courses[i];
                 if (scores.indexOf(term) === -1)
-                  scores.push(term)
+                  scores.push(term);
               }
               if (this.typeValue === "score") {
                 let temp = response.data.data;
@@ -361,11 +361,11 @@ export default {
                     unconfirmed.push(temp[i]);
                 }
                 temp = confirmed.concat(unconfirmed);
-                let count = 0
+                let count = 0;
                 for (let i = 0; i < temp.length; i++) {
-                  this.total++
+                  this.total++;
                   if (i !== 0 && i % 10 === 0) {
-                    count++
+                    count++;
                     this.Score[count] = [];
                   }
                   this.Score[count].push(temp[i]);
@@ -374,18 +374,18 @@ export default {
                     label: scores.indexOf(temp[i].Key) !== -1 ? "已确认" : "未确认",
                     value: scores.indexOf(temp[i].Key) !== -1 ? "success" : "warning"
                   };
-                  this.Score[count][i - count * 10].ScoreMakeup = temp[i].Value.ScoreMakeup.Value === "" ? "无" : temp[i].Value.ScoreMakeup.Value
+                  this.Score[count][i - count * 10].ScoreMakeup = temp[i].Value.ScoreMakeup.Value === "" ? "无" : temp[i].Value.ScoreMakeup.Value;
                 }
                 this.scoreBtnDisabled = false;
               }
               else if (this.typeValue === "level_exam") {
                 let temp = response.data.data;
-                let count = 0
+                let count = 0;
                 for (let i = 0; i < temp.length; i++) {
-                  this.total++
+                  this.total++;
                   if (i !== 0 && i % 10 === 0) {
-                    count++
-                    this.LevelScore[count] = []
+                    count++;
+                    this.LevelScore[count] = [];
                   }
                   // if (scores.indexOf(temp[i].Key) === -1) {
                   // console.log(temp[i]);
@@ -396,7 +396,7 @@ export default {
                   };
                   // }
                 }
-                this.levelBtnDisabled = false
+                this.levelBtnDisabled = false;
               }
               // var data = response2.data.data.Body.data_map
               // if (data.reward !== undefined && data.race_reward !== undefined)
@@ -408,26 +408,26 @@ export default {
               // else if (data.reward === undefined && data.race_reward === undefined)
               //   sessionStorage.setItem("hj", JSON.stringify([]))
               // sessionStorage.setItem(this.typeValue, JSON.stringify(scores))
-              this.loading = false
-              this.secLoading = false
+              this.loading = false;
+              this.secLoading = false;
             }).catch((err) => {
               if (err.response.data.msg === "file hash does not equal to chain") {
-                this.$message.error("学业文件错误或者过期,请检查后再试")
-                this.reupload()
+                this.$message.error("学业文件错误或者过期,请检查后再试");
+                this.reupload();
               }
               else
-                this.$message.error("获取学业文件信息出错啦,请稍后再试")
+                this.$message.error("获取学业文件信息出错啦,请稍后再试");
               if (this.typeValue === "score") {
-                this.Score = response.data.data
-                this.scoreBtnDisabled = true
+                this.Score = response.data.data;
+                this.scoreBtnDisabled = true;
               }
               else if (this.typeValue === "level_exam") {
-                this.LevelScore = response.data.data
-                this.levelBtnDisabled = true
+                this.LevelScore = response.data.data;
+                this.levelBtnDisabled = true;
               }
-              this.reupload()
-              this.loading = false
-              this.secLoading = false
+              this.reupload();
+              this.loading = false;
+              this.secLoading = false;
             });
             // }
             // else {//如果有存过的score或者level,不用请求文件中的信息,直接比对
@@ -467,12 +467,12 @@ export default {
             if (this.typeValue === "score") {
               this.scoreConfirmed = false;
               let temp = response.data.data;
-              let count = 0
+              let count = 0;
               for (let i = 0; i < temp.length; i++) {
-                this.total++
+                this.total++;
                 if (i !== 0 && i % 10 === 0) {
-                  count++
-                  this.Score[count] = []
+                  count++;
+                  this.Score[count] = [];
                 }
                 this.Score[count].push(temp[i]);
                 this.Score[count][i - count * 10].Term = temp[i].Value.SchoolYear.Value + "-" + temp[i].Value.Semester.Value;
@@ -480,19 +480,19 @@ export default {
                   label: "未知",
                   value: "info"
                 };
-                this.Score[count][i - count * 10].ScoreMakeup = temp[i].Value.ScoreMakeup.Value === "" ? "无" : temp[i].Value.ScoreMakeup.Value
+                this.Score[count][i - count * 10].ScoreMakeup = temp[i].Value.ScoreMakeup.Value === "" ? "无" : temp[i].Value.ScoreMakeup.Value;
               }
               this.scoreBtnDisabled = true;
             }
             else if (this.typeValue === "level_exam") {
-              this.levelConfirmed = false
+              this.levelConfirmed = false;
               let temp = response.data.data;
-              let count = 0
+              let count = 0;
               for (let i = 0; i < temp.length; i++) {
-                this.total++
+                this.total++;
                 if (i !== 0 && i % 10 === 0) {
-                  count++
-                  this.LevelScore[count] = []
+                  count++;
+                  this.LevelScore[count] = [];
                 }
                 this.LevelScore[count].push(temp[i]);
                 this.LevelScore[count][i - count * 10].Confirmed = {
@@ -502,8 +502,8 @@ export default {
               }
               this.levelBtnDisabled = true;
             }
-            this.loading = false
-            this.secLoading = false
+            this.loading = false;
+            this.secLoading = false;
           }
         }
       }).catch(() => {
@@ -513,21 +513,21 @@ export default {
         });
         this.loading = false;
         this.secLoading = false;
-      })
+      });
     },
     confirm() {
-      let data = new FormData()
+      let data = new FormData();
       data.append("dataFile", this.file);
       if (this.typeValue === "score") {
-        let courseCodes = []
+        let courseCodes = [];
         for (let i = 0; i < this.multipleSelection.length; i++)
-          courseCodes.push(this.multipleSelection[i].Value.CourseCode.Value)
+          courseCodes.push(this.multipleSelection[i].Value.CourseCode.Value);
         data.append("condMap", "{\"SchoolCode\": 1,\"StaffID\": " + JSON.parse(localStorage.getItem("jw_student_file")).staffID + ", \"CourseCode\": " + JSON.stringify(courseCodes) + "}");
       }
       else {
-        let RecordIDs = []
+        let RecordIDs = [];
         for (let i = 0; i < this.multipleSelection.length; i++)
-          RecordIDs.push(this.multipleSelection[i].Value.RecordID.Value)
+          RecordIDs.push(this.multipleSelection[i].Value.RecordID.Value);
         data.append("condMap", "{\"SchoolCode\": 1,\"StaffID\": " + JSON.parse(localStorage.getItem("jw_student_file")).staffID + ", \"RecordID\": " + JSON.stringify(RecordIDs) + "}");
       }
       // data.append("condMap", "{\"SchoolCode\": 1,\"StaffID\": " + JSON.parse(localStorage.getItem("jw_student_file")).staffID + ", \"SchoolYear\": \"2020-2021\", \"Semester\": 1}");
@@ -540,50 +540,50 @@ export default {
         headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
         data
       }).then((response) => {
-        var block = response.data.data.TransactionDetail.detail.result[0]
-        var blockName = Object.keys(block)
+        var block = response.data.data.TransactionDetail.detail.result[0];
+        var blockName = Object.keys(block);
         const translation = {
           blockHash: "区块哈希",
           blockNumber: "交易号",
           blockTimestamp: "区块时间戳",
           blockWriteTime: "写入时间",
           hash: "交易内容"
-        }
-        this.blockDataInfo = []
+        };
+        this.blockDataInfo = [];
         for (var i = 0; i < blockName.length; i++) {
           this.blockDataInfo.push({
             value: block[blockName[i]],
             name: translation[blockName[i]]
-          })
+          });
         }
         sessionStorage.removeItem(this.typeValue);//清空之前存储的学期信息
         this.file = this.dataURLtoFile(response.data.data.DataFile, "学业文件");
         this.$emit("func", this.file);
         this.$emit("func2", true);
         this.$emit("func3", null);
-        this.$confirm("学业信息确认成功！继续确认请点击任意空白区域", "提示", {
+        this.$confirm("学业信息确认成功! 继续确认请点击任意空白区域", "提示", {
           confirmButtonText: "下载新的学业文件",
           cancelButtonText: "查看此次交易详情",
           distinguishCancelAndClose: true,
           beforeClose: (action, instance, done) => {
             if (action === "cancel")
-              this.blockInfoDialogShow = true
+              this.blockInfoDialogShow = true;
             if (action === "confirm" || action === "close")
-              done()
+              done();
           },
           dangerouslyUseHTMLString: true,
           type: "success"
         }).then(() => {
-          this.downloadFile("学业文件.enc")
+          this.downloadFile("学业文件.enc");
         }).catch(() => {
           this.$message({
             type: "info",
             message: "请在结束确认时下载最新的学业文件",
           });
         });
-        this.getScore()
+        this.getScore();
         this.loading = false;
-      }).catch((err) => {
+      }).catch(() => {
         this.$emit("func2", true);
         this.$emit("func3", null);
         this.$message.error("出错啦,请稍后再试");
@@ -643,14 +643,14 @@ export default {
   },
   mounted() {
     this.file = this.globalFile;
-    var grade = +JSON.parse(localStorage.getItem("jw_student_file")).staffID.substr(0, 2)
+    var grade = +JSON.parse(localStorage.getItem("jw_student_file")).staffID.substr(0, 2);
     //根据学号判断年级,提供对应的4年学年选择
     for (var i = 0; i < 4; i++)
       this.yearOptions.push({
         value: "20" + (grade + i) + " - 20" + (grade + i + 1),
         label: "20" + (grade + i) + " - 20" + (grade + i + 1)
-      })
-    this.getScore()
+      });
+    this.getScore();
   },
 };
 </script>
