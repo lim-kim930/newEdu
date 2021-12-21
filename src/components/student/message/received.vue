@@ -62,13 +62,17 @@
           <el-dropdown-item command="发送时间▲">发送时间▲</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
-      <div style="cursor: pointer;" v-for="item in noticeMsgData" v-bind:key="item.id">
+      <div
+        style="cursor: pointer; height: 150px"
+        v-for="item in noticeMsgData"
+        v-bind:key="item.id"
+      >
         <el-col :span="8" class="card">
           <el-card shadow="hover">
-            <h5>发送公司: {{item.CompanyCode}}</h5>
-            <h5>发送时间: {{new Date(+new Date(item.CreatedAt) + 8 * 3600 * 1000).toISOString().replace(/T/g, " ").replace(/\.[\d]{3}Z/, "")}}</h5>
-            <h5>宣讲时间: {{new Date(+new Date(item.CreatedAt) + 8 * 3600 * 1000).toISOString().replace(/T/g, " ").replace(/\.[\d]{3}Z/, "")}}</h5>
-            <h5>宣讲会描述: {{item.Text}}</h5>
+            <!-- <h5>发送公司: {{item.CompanyCode}}</h5> -->
+            <!-- <h5>发送时间: {{new Date(+new Date(item.CreatedAt) + 8 * 3600 * 1000).toISOString().replace(/T/g, " ").replace(/\.[\d]{3}Z/, "")}}</h5> -->
+            <h5>宣讲时间: {{new Date(+new Date(item.StartAt) + 8 * 3600 * 1000).toISOString().replace(/T/g, " ").replace(/\.[\d]{3}Z/, "")}}</h5>
+            <h5>宣讲会描述: {{item.Detail}}</h5>
           </el-card>
         </el-col>
       </div>
@@ -83,6 +87,21 @@
       <span slot="label">
         <i class="el-icon-setting"></i> 消息设置
       </span>
+      <el-form>
+        <h5 style="font-size: 16px; margin-bottom: 10px;">消息刷新频率（消息收件箱刷新的间隔时间）</h5>
+        <el-form-item>
+          <el-radio-group v-model="reqFrequency" @change="freChange">
+            <el-radio
+              style="margin: 0 5px"
+              border
+              :label="item.value"
+              v-for="item in freOptions"
+              :key="item.value"
+            >{{item.label}}</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-divider style="margin: 0"></el-divider>
+      </el-form>
     </el-tab-pane>
   </el-tabs>
 </template>
@@ -96,13 +115,23 @@ export default {
       requestMsgData: [],
       noticeMsgData: [],
       notice: 0,
-      request: 0
+      request: 0,
+      freOptions: [
+        { value: 0, label: "关闭" },
+        { value: 180, label: "3分钟" },
+        { value: 300, label: "5分钟" },
+        { value: 600, label: "10分钟" },
+      ],
+      reqFrequency: 300
     };
   },
-  props: ["wh"],
+  props: ["wh", "frequency"],
   methods: {
     classifySwitch(command) {
       this.classify = command;
+    },
+    freChange(v) {
+      this.$emit("func3", v);
     },
     sortSwitch(command) {
       if (command !== this.sort) {
@@ -153,6 +182,7 @@ export default {
     });
   },
   mounted() {
+    this.reqFrequency = this.frequency;
     this.$nextTick(() => {
       document.querySelector(".el-tabs .el-tabs__content").style.height = this.wh - 230 + "px";
       document.querySelector(".el-tabs .el-tabs__header").style.height = this.wh - 230 + "px";
@@ -162,6 +192,9 @@ export default {
 </script>
 
 <style scoped>
+.el-form {
+  padding: 20px;
+}
 .card {
   margin: 10px 2%;
   height: 130px;

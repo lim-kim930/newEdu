@@ -15,10 +15,11 @@
     >{{step===0?"添加企业":"返回"}}</el-button>
     <el-table
       v-show="step === 0"
-      :data="companyListData"
+      :data="companyListData.slice(page*parseInt((wh - 360)/55), (page+1)*parseInt((wh - 360)/55))"
       style="width: 100%"
       :max-height="this.wh - 240"
       border
+      @sort-change="sortChange"
     >
       <el-table-column type="expand">
         <template slot-scope="props">
@@ -35,8 +36,8 @@
           </el-form>
         </template>
       </el-table-column>
-      <el-table-column label="公司名称" prop="Name" sortable></el-table-column>
-      <el-table-column label="公司账号" prop="CompanyCode" sortable></el-table-column>
+      <el-table-column label="公司名称" prop="Name"></el-table-column>
+      <el-table-column label="公司账号" prop="CompanyCode"></el-table-column>
       <el-table-column label="创建时间" prop="CreatedAt" sortable></el-table-column>
       <el-table-column label="操作">
         <template slot-scope="scope">
@@ -44,6 +45,16 @@
         </template>
       </el-table-column>
     </el-table>
+    <el-pagination
+      v-show="step === 0"
+      background
+      @current-change="currentChange"
+      :page-size="parseInt((this.wh - 360)/52)"
+      :pager-count="9"
+      layout="prev, pager, next"
+      :total="total"
+      style="margin: 10px 0"
+    ></el-pagination>
     <div v-show="step === 1" style="margin-top: 30px">
       <el-form-item label="企业名称">
         <el-input v-model="form.Name" style="width: 150px"></el-input>
@@ -76,6 +87,8 @@ export default {
   data() {
     return {
       step: 0,
+      page: 0,
+      total: 0,
       loading: false,
       companyListData: [],
       form: {
@@ -88,6 +101,21 @@ export default {
   },
   props: ["wh"],
   methods: {
+    currentChange(v) {
+      this.page = v - 1;
+    },
+    sortChange(sort) {
+      console.log(sort);
+      if (sort.order)
+        if (sort.order === "ascending")
+          this.companyListData = this.companyListData.sort((a, b) => {
+            return +new Date(a[sort.prop]) - +new Date(b[sort.prop]);
+          });
+        else if (sort.order === "descending")
+          this.companyListData = this.companyListData.sort((a, b) => {
+            return +new Date(b[sort.prop]) - +new Date(a[sort.prop]);
+          });
+    },
     handleEdit(index, row) {
       this.$confirm("确定要删除该公司吗", "提示", {
         confirmButtonText: "确定",
@@ -119,7 +147,12 @@ export default {
         method: "get",
         url: "/company/lookup",
       }).then((response) => {
-        this.companyListData = response.data.data;
+        const data = response.data.data;
+        this.total = data.length;
+        for (let i = 0; i < this.total; i++) {
+          data[i].CreatedAt = new Date(+new Date(data[i].CreatedAt) + 8 * 3600 * 1000).toISOString().replace(/T/g, " ").replace(/\.[\d]{3}Z/, "");
+        }
+        this.companyListData = data;
         this.loading = false;
       }).catch(() => {
         this.$message.error("获取企业列表出错啦,请稍后再试");

@@ -6,8 +6,8 @@ import "element-ui/lib/theme-chalk/index.css";
 
 //导入组件
 // 导入自定义路由模块
-// import APP from "../src/components/Sign.vue"
-// import router from "./router_sign"
+// import APP from "../src/components/Sign.vue";
+// import router from "./router_sign";
 
 //剪切板组件
 import VueClipboard from "vue-clipboard2";
@@ -39,3 +39,4 @@ new Vue({
   render: c => c(APP),
   router
 });
+

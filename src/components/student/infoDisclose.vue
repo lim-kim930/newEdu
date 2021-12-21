@@ -108,7 +108,7 @@
           v-model="ruleForm.intType"
           style="margin-left: 30px; width: 960px"
         >
-          <el-checkbox label="org_experience">班团工作情况</el-checkbox>
+          <el-checkbox label="org_experience">班团经历情况</el-checkbox>
         </el-checkbox-group>
       </el-form-item>
       <!-- <el-form-item label="课程成绩信息" required>
@@ -409,7 +409,7 @@ export default {
           else if (range[i] === "org_experience") {
             clubData.push({
               content: "工作履历(只包含工作组织等级信息)",
-              name: "班团工作",
+              name: "班团经历",
               type: "个人填写信息"
             });
           }

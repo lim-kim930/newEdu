@@ -34,7 +34,7 @@
         </el-col>
       </div>
       <el-divider v-if="reqMsgData.length !== 0" style="padding: 2%">没有更多啦~</el-divider>
-      <el-empty v-show="reqMsgData.length === 0" :image-size="200" description="您还没有已发送的消息哦~"></el-empty>
+      <el-empty v-show="reqMsgData.length === 0" :image-size="200" description="您还没有发送过简历请求哦~"></el-empty>
     </el-tab-pane>
     <el-tab-pane>
       <span slot="label">
@@ -50,22 +50,21 @@
           <el-dropdown-item command="发送时间▲">发送时间▲</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
-      <div style="cursor: pointer;" v-for="item in noticeMsgData" v-bind:key="item.id">
+      <div
+        style="cursor: pointer; height: 150px"
+        v-for="item in noticeMsgData"
+        v-bind:key="item.id"
+      >
         <el-col :span="8" class="card">
           <el-card shadow="hover">
-            <h5>发送公司: {{item.CompanyCode}}</h5>
-            <h5>发送时间: {{new Date(+new Date(item.CreatedAt) + 8 * 3600 * 1000).toISOString().replace(/T/g, " ").replace(/\.[\d]{3}Z/, "")}}</h5>
-            <h5>宣讲时间: {{new Date(+new Date(item.CreatedAt) + 8 * 3600 * 1000).toISOString().replace(/T/g, " ").replace(/\.[\d]{3}Z/, "")}}</h5>
-            <h5>宣讲会描述: {{item.Text}}</h5>
+            <h5>宣讲会主题: {{item.Topic}}</h5>
+            <h5>宣讲时间: {{new Date(+new Date(item.StartAt) + 8 * 3600 * 1000).toISOString().replace(/T/g, " ").replace(/\.[\d]{3}Z/, "")}}</h5>
+            <h5>宣讲会描述: {{item.Detail}}</h5>
           </el-card>
         </el-col>
       </div>
       <el-divider v-if="noticeMsgData.length !== 0" style="padding: 2%">没有更多啦~</el-divider>
-      <el-empty
-        :image-size="200"
-        v-show="noticeMsgData.length === 0"
-        description="您还没有收到过宣讲会通知的消息哦~"
-      ></el-empty>
+      <el-empty :image-size="200" v-show="noticeMsgData.length === 0" description="您还没有发送过宣讲会通知哦~"></el-empty>
     </el-tab-pane>
   </el-tabs>
 </template>
@@ -73,7 +72,6 @@
 export default {
   data() {
     return {
-      loading: false,
       sort: "发送时间▼",
       classify: "无",
       reqMsgData: [],
@@ -119,7 +117,16 @@ export default {
         headers: { "Authorization": JSON.parse(localStorage.getItem("jw_ent_file")).authorization },
       });
     }).then((response) => {
-      this.noticeMsgData = response.data.data;
+      const data = response.data.data;
+      if (data) {
+        for (let i = 0; i < data.length; i++) {
+          data[i].date = new Date(+new Date(data[i].StartAt) + 8 * 3600 * 1000).toISOString().replace(/T/g, " ").replace(/\.[\d]{3}Z/, "");
+        }
+        const newData = data.sort((a, b) => {
+          return new Date(b.StartAt) - new Date(a.StartAt);
+        });
+        this.noticeMsgData = newData;
+      }
       this.$emit("func2", false);
     }).catch(() => {
       this.$message.error("获取信息出错啦,请稍后再试");

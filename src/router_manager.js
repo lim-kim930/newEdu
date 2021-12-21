@@ -1,6 +1,6 @@
-import VueRouter from "vue-router"
-import addCompany from "./components/manager/addCompany.vue"
-import profileReset from "./components/manager/profileReset.vue"
+import VueRouter from "vue-router";
+import addCompany from "./components/manager/addCompany.vue";
+import profileReset from "./components/manager/profileReset.vue";
 
 const router = new VueRouter({
   routes: [
@@ -8,6 +8,6 @@ const router = new VueRouter({
     { path: "/addCompany", component: addCompany },
     { path: "/profileReset", component: profileReset }
   ]
-})
+});
 
-export default router
+export default router;

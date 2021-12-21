@@ -13,6 +13,7 @@
         style="width: 100%"
         prefix-icon="el-icon-user"
         clearable
+        @keyup.enter.native="onSubmit()"
       ></el-input>
     </el-form-item>
     <el-form-item style="margin-bottom: 27px">
@@ -24,6 +25,7 @@
         prefix-icon="el-icon-key"
         clearable
         show-password
+        @keyup.enter.native="onSubmit()"
       ></el-input>
     </el-form-item>
     <el-form-item style="margin-bottom: 5px">
@@ -60,7 +62,7 @@ export default {
     onSubmit() {
       this.btnLoad = true;
       if (this.name.trim().length === 0 || this.pwd.trim().length === 0) {
-        this.$message.error("请正确填写账号和密码")
+        this.$message.error("请正确填写账号和密码");
         this.btnLoad = false;
         return;
       }
@@ -82,7 +84,7 @@ export default {
       }).catch(() => {
         this.$message.error("账号或密码错误,请检查后再试");
         this.btnLoad = false;
-      })
+      });
     }
   },
 };

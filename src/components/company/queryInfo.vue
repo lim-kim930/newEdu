@@ -238,7 +238,7 @@
           v-model="selfData.md"
           :style="{'width': '1166px', 'margin': ' 10px 5%', 'height': this.wh - 300 + 'px'}"
         />
-        <h3 style="margin: 10px 0 0 5%" v-show="this.switch===2 && clubData.length !== 0">班团工作</h3>
+        <h3 style="margin: 10px 0 0 5%" v-show="this.switch===2 && clubData.length !== 0">班团经历</h3>
         <el-table
           :data="clubData"
           tooltip-effect="dark"

@@ -62,12 +62,12 @@
     </el-select>
     <el-button
       :style="{'margin': '10px 0 0 calc(100% - 840px)'}"
-      v-show="typeValue !== 'int'"
+      v-show="typeValue === 'club' || typeValue === 'social'"
       @click="addDialogShow = true;"
-    >添加工作</el-button>
+    >添加经历</el-button>
     <el-button
       :style="{'margin': '10px 0 0 calc(100% - 840px)'}"
-      v-show="typeValue === 'int'"
+      v-show="typeValue === 'int' || typeValue === 'intention'"
       @click="save()"
     >暂时保存</el-button>
     <el-button plain type="primary" :disabled="file === ''" @click="confirm()">写入文件</el-button>
@@ -84,6 +84,16 @@
       v-model="content"
       :style="{'width': '99%', 'margin-top': '10px', 'height': this.wh - 300 + 'px'}"
     />
+    <el-form-item label="职位类别">
+      <el-checkbox-group v-model="jobValue">
+        <el-checkbox
+          :label="item.Name"
+          name="type"
+          v-for="item in jobOpitions"
+          v-bind:key="item.id"
+        ></el-checkbox>
+      </el-checkbox-group>
+    </el-form-item>
     <el-table
       v-show="typeValue==='club'"
       :data="clubData"
@@ -97,7 +107,12 @@
       <el-table-column prop="Value.EndAt.Value" label="结束时间"></el-table-column>
       <el-table-column label="操作" width="120">
         <template slot-scope="scope">
-          <el-button plain type="danger" size="mini" @click="deleteJob(scope.row.Value.ID.Value)">删除记录</el-button>
+          <el-button
+            plain
+            type="danger"
+            size="mini"
+            @click="deleteJob(scope.row.Value.ID.Value)"
+          >删除记录</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -112,7 +127,7 @@
       <el-table-column prop="department" label="工作地点"></el-table-column>
       <el-table-column prop="time" label="工作时间"></el-table-column>
     </el-table>
-    <el-dialog :title="typeValue==='club'?'添加班团工作经历':'添加实习工作经历'" :visible.sync="addDialogShow">
+    <el-dialog :title="typeValue==='club'?'添加班团经历':'添加实习经历'" :visible.sync="addDialogShow">
       <h3 style="margin: 0 0 15px 20px; color: #F56C6C">注: 由于信息用于应聘岗位,所以请确保以下填写的信息真实可靠,否则后果自负</h3>
       <div v-show="typeValue==='club'">
         <el-form-item label="工作名称" style="width: 300px">
@@ -161,7 +176,7 @@
         </el-form-item>
         <el-form-item label="工作类型">
           <el-select v-model="socialAddData.type" placeholder="请选择">
-            <el-option label="实习工作" value="club"></el-option>
+            <el-option label="实习经历" value="club"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="工作地点" style="width: 300px">
@@ -218,15 +233,20 @@ export default {
         value: "int",
         label: "自我介绍"
       }, {
+        value: "intention",
+        label: "就职意向"
+      }, {
         value: "club",
-        label: "班团工作"
+        label: "班团经历"
       }, {
         value: "social",
-        label: "实习工作"
+        label: "实习经历"
       }, {
         value: "volun",
         label: "志愿服务"
       }],
+      jobOpitions: [],
+      jobValue: [],
       typeValue: "int",
       clubData: [],
       socialData: [],
@@ -367,12 +387,26 @@ export default {
       // render 为 markdown 解析后的结果[html]
       this.html = render;
     },
+    getIntention() {
+      this.axios({
+        method: "get",
+        url: "/job/type/list",
+      }).then(response => {
+        this.jobOpitions = response.data.data;
+        this.loading = false;
+      }).catch(() => {
+        this.$message.error("获取岗位大类信息出错啦,请稍后再试");
+        this.loading = false;
+      });
+    },
     typeChange() {
       let url = "";
       switch (this.typeValue) {
         case "int":
           url = "/lookup?topic=self_introduction";
           break;
+        case "intention":
+          return this.getIntention();
         case "club":
           url = "/lookup?topic=org_experience";
           break;
@@ -698,5 +732,10 @@ export default {
   font-size: 16px;
   line-height: 40px;
   margin-left: 10px;
+}
+.el-checkbox {
+  width: 155px;
+  height: 40px;
+  line-height: 40px;
 }
 </style>

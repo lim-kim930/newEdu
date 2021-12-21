@@ -7,15 +7,15 @@
       </div>
       <div class="user">
         <el-badge
-          title="消息中心"
           :value="received"
           :hidden="received === 0"
           class="item"
           style="width: 30px; height: 30px; margin-right: 20px; line-height: 30px !important"
         >
           <i
+            title="消息中心"
             class="el-icon-message el-dropdown-link"
-            style="font-size: 20px; color: #fff"
+            style="font-size: 20px; color: #fff; cursor: pointer;"
             @click="msgRouteSwitch('received')"
           ></i>
         </el-badge>
@@ -97,6 +97,8 @@
           @func="getFile"
           @func2="getConfirmed"
           @func3="getReceived"
+          @func4="getFrequency"
+          :frequency="reqFrequency"
           :file="file"
           :xjConfirmed="xjConfirmed"
           :received="received"
@@ -117,12 +119,15 @@ export default {
       file: "",// 文件
       received: 0,// 收件箱数量
       xjConfirmed: "",// 学籍确认状态
+      reqFrequency: 300,
+      msgTimer: "",
       wh: ""// 屏幕高度
     };
   },
   methods: {
     msgRouteSwitch(command) {
-      this.$router.push("/message/" + command);
+      if (this.xjConfirmed)
+        this.$router.push("/message/" + command);
     },
     // 下载文件
     downloadFile(filename) {
@@ -148,10 +153,21 @@ export default {
     },
     //拿到子组件传来的学籍确认状态,全局存储在student页面
     getConfirmed(confirmed) {
+      let userData = JSON.parse(localStorage.getItem("jw_student_file"));
       this.xjConfirmed = confirmed;
+      userData.xjConfirmed = this.xjConfirmed;
+      localStorage.setItem("jw_student_file", JSON.stringify(userData));
     },
     getReceived(received) {
       this.received = received;
+    },
+    getFrequency(frequency) {
+      this.reqFrequency = frequency;
+      clearInterval(this.msgTimer);
+      if (frequency !== 0)
+        this.msgTimer = setInterval(() => {
+          this.getMsg(JSON.parse(localStorage.getItem("jw_student_file")));
+        }, this.reqFrequency * 1000);
     },
     //路由切换
     indexRouteSwitch(key) {
@@ -206,7 +222,7 @@ export default {
     },
     //根据路由匹配activeIndex
     redirect() {
-      if (this.xjConfirmed === true)
+      if (this.xjConfirmed)
         switch (this.$route.path) {
           case "/infoConfirm/scoreConfirm":
           case "/infoConfirm/rewardConfirm":
@@ -258,6 +274,28 @@ export default {
             }, 100);
         }
     },
+    getMsg(userData) {
+      this.axios({
+        method: "post",
+        url: "/share/listFurtherShareRequestForReceiver",
+        headers: { "Authorization": "token " + userData.token },
+        data: { "student": "any" }
+      }).then((response) => {
+        this.received = response.data.data.length;
+        return this.axios({
+          method: "get",
+          url: "/campusTalk/lookupForSelf",
+          headers: { "Authorization": "token " + userData.token },
+          data: { "StaffID": userData.staffID }
+        });
+      }).then((response) => {
+        this.received += response.data.data.length;
+        this.loading = false;
+      }).catch(() => {
+        this.$message.error("获取站内信息出错啦,请稍后再试");
+        this.loading = false;
+      });
+    },
     windowHeight() {
       const de = document.documentElement;
       return self.innerHeight || (de && de.clientHeight) || document.body.clientHeight;
@@ -281,37 +319,25 @@ export default {
         window.location.href = "https://edu.limkim.cn/sign";
       });
     else {
-      this.uName = JSON.parse(localStorage.getItem("jw_student_file")).staffID;
+      let userData = JSON.parse(localStorage.getItem("jw_student_file"));
+      this.uName = userData.staffID;
       this.loading = true;
       // 拿学籍确认状态
       this.axios({
         method: "get",
         url: "/dataFile/getFileID",
-        headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
+        headers: { "Authorization": "token " + userData.token },
       }).then((response) => {
         this.xjConfirmed = response.data.data.FileID === "null" ? false : true;
+        userData.xjConfirmed = this.xjConfirmed;
+        localStorage.setItem("jw_student_file", JSON.stringify(userData));
         this.redirect();
-        if (this.xjConfirmed)
-          this.axios({
-            method: "post",
-            url: "/share/listFurtherShareRequestForReceiver",
-            headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
-            data: { "student": "any" }
-          }).then((response) => {
-            this.received = response.data.data.length;
-            return this.axios({
-              method: "get",
-              url: "/campusTalk/lookupForSelf",
-              headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
-              data: { "StaffID": JSON.parse(localStorage.getItem("jw_student_file")).staffID }
-            });
-          }).then((response) => {
-            this.received += response.data.data.length;
-            this.loading = false;
-          }).catch(() => {
-            this.$message.error("获取站内信息出错啦,请稍后再试");
-            this.loading = false;
-          });
+        if (this.xjConfirmed) {
+          this.getMsg(userData);
+          this.msgTimer = setInterval(() => {
+            this.getMsg(userData);
+          }, this.reqFrequency * 1000);
+        }
         else
           this.loading = false;
       }).catch(() => {

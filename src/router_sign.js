@@ -1,6 +1,6 @@
-import VueRouter from "vue-router"
-import signIn from "./components/sign/signIn.vue"
-import comSignIn from "./components/sign/comSignIn.vue"
+import VueRouter from "vue-router";
+import signIn from "./components/sign/signIn.vue";
+import comSignIn from "./components/sign/comSignIn.vue";
 // import signUp from "./components/sign/signUp.vue"
 // import testSignIn from "./components/sign/testSignIn.vue"
 
@@ -12,6 +12,6 @@ const router = new VueRouter({
     // { path: "/signUp", component: signUp },
     // { path: "/testSignIn", component: testSignIn }
   ]
-})
+});
 
-export default router
+export default router;

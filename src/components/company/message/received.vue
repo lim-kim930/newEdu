@@ -1,5 +1,9 @@
 <template>
-  <el-tabs tab-position="left" class="received" :style="{'max-height': this.wh - 230 + 'px', 'margin-top': '10px'}">
+  <el-tabs
+    tab-position="left"
+    class="received"
+    :style="{'max-height': this.wh - 230 + 'px', 'margin-top': '10px'}"
+  >
     <el-tab-pane style="font-size: 17px">
       <span slot="label">
         <el-badge :value="received" :max="99" class="item" v-show="received !== 0"></el-badge>
@@ -57,6 +61,21 @@
       <span slot="label">
         <i class="el-icon-setting"></i> 消息设置
       </span>
+      <el-form>
+        <h5 style="font-size: 16px; margin-bottom: 10px;">消息刷新频率(消息收件箱的刷新频率)</h5>
+        <el-form-item>
+          <el-radio-group v-model="reqFrequency" @change="freChange">
+            <el-radio
+              style="margin: 0 5px"
+              border
+              :label="item.value"
+              v-for="item in freOptions"
+              :key="item.value"
+            >{{item.label}}</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-divider style="margin: 0"></el-divider>
+      </el-form>
     </el-tab-pane>
   </el-tabs>
 </template>
@@ -67,10 +86,17 @@ export default {
       sort: "过期时间▲",
       classify: "无",
       receivedMsgData: [],
+      freOptions: [
+        { value: 0, label: "关闭" },
+        { value: 180, label: "3分钟" },
+        { value: 300, label: "5分钟" },
+        { value: 600, label: "10分钟" },
+      ],
+      reqFrequency: 300,
       received: 0
     };
   },
-  props: ["wh"],
+  props: ["wh", "frequency"],
   methods: {
     classifySwitch(command) {
       this.classify = command;
@@ -83,6 +109,9 @@ export default {
         for (let i = 0; i < temp.length; i++)
           this.receivedMsgData[i] = temp[temp.length - i - 1];
       }
+    },
+    freChange(v) {
+      this.$emit("func3", v);
     },
     goQuery(url) {
       this.$router.push({
@@ -162,6 +191,7 @@ export default {
     });
   },
   mounted() {
+    this.reqFrequency = this.frequency;
     this.$nextTick(() => {
       document.querySelector(".el-tabs .el-tabs__content").style.height = this.wh - 230 + "px";
       document.querySelector(".el-tabs .el-tabs__header").style.height = this.wh - 230 + "px";
@@ -171,6 +201,9 @@ export default {
 </script>
 
 <style scoped>
+.el-form {
+  padding: 20px;
+}
 .card {
   margin: 10px 2%;
   height: 155px;

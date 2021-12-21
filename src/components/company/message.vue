@@ -17,6 +17,8 @@
       element-loading-text="拼命加载中"
       @func="getReceived"
       @func2="getLoading"
+      @func3="getFrequency"
+      :frequency="frequency"
       :wh="wh"
     ></router-view>
   </el-form>
@@ -25,17 +27,20 @@
 export default {
   data() {
     return {
-      activeIndex: "1",
+      activeIndex: "0",
       loading: false
     };
   },
-  props: ["wh", "received"],
+  props: ["wh", "received", "frequency"],
   methods: {
     getReceived(received) {
       this.$emit("func", received);
     },
     getLoading(loading) {
       this.loading = loading;
+    },
+    getFrequency(frequency) {
+      this.$emit("func2", frequency);
     },
     msgRouteSwitch(key) {
       this.$router.push(key === "1" ? "/comMessage/received" : "/comMessage/sent");

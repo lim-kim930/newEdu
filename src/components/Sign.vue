@@ -48,9 +48,9 @@ export default {
   methods: {
     signRouteSwitch(flag) {
       if (this.flag == 1 && flag == 0)
-        this.signRouteChange(0)
+        this.signRouteChange(0);
       else if (this.flag == 0 && flag == 1)
-        this.signRouteChange(1)
+        this.signRouteChange(1);
     },
     signRouteChange(flag) {
       this.codeIcon.color = this.codeIcon.borderBottomColor = flag === 0 ? "#5eacf0" : "#909399";
@@ -64,11 +64,14 @@ export default {
       switch (this.$route.path) {
         case "/signIn":
           // case "/testSignIn":
-          this.signRouteSwitch(1)
-          break
+          this.signRouteSwitch(1);
+          break;
         case "/comSignIn":
-          this.signRouteSwitch(0)
-          break
+          this.signRouteSwitch(0);
+          break;
+        default:
+          this.$router.push("/signIn");
+          this.signRouteSwitch(1);
       }
     },
     windowHeight() {
@@ -85,12 +88,12 @@ export default {
     this.wh = this.windowHeight() < 600 ? 600 : this.windowHeight();
     window.onresize = () => {
       this.wh = this.windowHeight() < 600 ? 600 : this.windowHeight();
-    }
+    };
     this.redirect();
     if (localStorage.getItem("jw_student_file") !== null && localStorage.getItem("jw_ent_file") === null)
-      window.location.href = "https://edu.limkim.cn/student"
+      window.location.href = "https://edu.limkim.cn/student";
     else if (localStorage.getItem("jw_student_file") === null && localStorage.getItem("jw_ent_file") !== null)
-      window.location.href = "https://edu.limkim.cn/company"
+      window.location.href = "https://edu.limkim.cn/company";
   }
 };
 </script>

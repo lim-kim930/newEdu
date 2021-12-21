@@ -1,7 +1,6 @@
 <template>
   <el-form
-    class="form"
-    ref="form"
+    class="form loadingForm"
     label-width="80px"
     v-loading="loading"
     element-loading-text="拼命加载中"
@@ -100,7 +99,7 @@
           >{{item.label}}</el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="班团工作">
+      <el-form-item label="班团经历">
         <el-radio-group v-model="conditions.OrgLevel">
           <el-radio
             style="margin: 0 5px"
@@ -139,14 +138,14 @@
     </el-divider>
     <el-button
       style="float: right; margin-bottom: 10px"
-      :disabled="selected.length === 0"
+      :disabled="selectedFileID.length === 0"
       type="primary"
       plain
       @click="askMore(0, { FileID: 0, Name: 'selected' });"
     >批量发送简历请求</el-button>
     <el-button
       style="float: right; margin: 0 10px 10px 10px"
-      :disabled="selected.length === 0"
+      :disabled="noticeForm.StaffIDs.length === 0"
       type="primary"
       plain
       @click="editNotice(0, { FileID: 0, Name: 'selected' });"
@@ -173,8 +172,8 @@
       </el-table-column>
     </el-table>
     <el-empty :image-size="200" v-show="exposeData.length === 0"></el-empty>
-    <el-dialog title="请填写您想详细了解的内容" :visible.sync="dialogFormVisible" style="width: 100%;">
-      <el-form :model="form" label-width="100px">
+    <el-dialog title="请填写您想详细了解的内容" :visible.sync="reqDialogVisible" style="width: 100%;">
+      <el-form label-width="100px">
         <el-form-item label="请求对象">
           <el-input style="width: 150px" disabled :placeholder="chossenName"></el-input>
         </el-form-item>
@@ -238,8 +237,42 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button @click="reqDialogVisible = false">取 消</el-button>
         <el-button type="primary" @click="sendAsk()">确 定</el-button>
+      </div>
+    </el-dialog>
+    <el-dialog title="请填写宣讲会相关信息" :visible.sync="noticeDialogVisible" style="width: 100%;">
+      <el-form label-width="100px">
+        <el-form-item label="发送对象">
+          <el-input style="width: 150px" disabled :placeholder="chossenName"></el-input>
+        </el-form-item>
+        <el-form-item label="宣讲会主题">
+          <el-input style="width: 200px" v-model="noticeForm.Topic" placeholder="请填写"></el-input>
+        </el-form-item>
+        <el-form-item label="宣讲时间" class="text">
+          <el-date-picker
+            v-model="noticeForm.StartAt"
+            :picker-options="pickerOptions"
+            value-format="timestamp"
+            type="datetime"
+            placeholder="选择日期时间"
+          ></el-date-picker>
+        </el-form-item>
+        <el-form-item label="其他细节">
+          <el-input
+            type="textarea"
+            v-model="noticeForm.Detail"
+            :rows="10"
+            resize="none"
+            show-word-limit
+            maxlength="500"
+            style="width: 400px; margin-top: 10px"
+          ></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="noticeDialogVisible =  false">取 消</el-button>
+        <el-button type="primary" @click="sendNotice()">确 定</el-button>
       </div>
     </el-dialog>
   </el-form>
@@ -295,7 +328,7 @@ export default {
         ]
       }, {
         value: "OrgLevel",
-        label: "班团工作",
+        label: "班团经历",
         children: [
           { value: "", label: "不限" },
           { value: "校级", label: "曾任校级工作" },
@@ -307,7 +340,7 @@ export default {
         label: "社会工作",
         children: [
           { value: "", label: "不限" },
-          { value: "1", label: "实习工作" }
+          { value: "1", label: "实习经历" }
         ]
       }, {
         value: "method",
@@ -329,20 +362,28 @@ export default {
       },// 选择的条件
       method: "must",
       Predicates: [],// 要传给后端的筛选条件
-      dialogFormVisible: false,
+      reqDialogVisible: false,
+      noticeDialogVisible: false,
       reqForm: {
         "ExposeFileID": "",
         "Text": "",
         "FromJobID": ""
       },
       noticeForm: {
-        "ExposeFileID": "",
-        "Text": "",
-        "FromJobID": ""
+        "Topic": "",
+        "SchoolCode": "",
+        "StaffIDs": [],
+        "StartAt": "",
+        "Detail": ""
       },
       chossenName: "",
+      pickerOptions: {
+        disabledDate(v) {
+          return v.getTime() < (Date.now() - 86400000);
+        }
+      },
       jobList: [],
-      selected: []
+      selectedFileID: []
     };
   },
   props: ["wh"],
@@ -367,27 +408,32 @@ export default {
       };
     },
     resetNoticeForm() {
-      this.reqForm = {
-        "ExposeFileID": "",
-        "Text": "",
-        "FromJobID": ""
+      this.noticeForm = {
+        "Topic": "",
+        "SchoolCode": "",
+        "StaffIDs": [],
+        "StartAt": "",
+        "Detail": ""
       };
     },
     selectionChange(v) {
-      this.selected = [];
-      for (let i = 0; i < v.length; i++)
-        this.selected.push(v[i].FileID);
+      this.selectedFileID = [];
+      this.noticeForm.StaffIDs = [];
+      for (let i = 0; i < v.length; i++) {
+        this.selectedFileID.push(v[i].FileID);
+        this.noticeForm.StaffIDs.push(v[i].StaffID);
+      }
     },
     batchRequest() {
       this.loading = true;
       let methods = [];
-      for (let i = 0; i < this.selected.length; i++) {
-        methods.push(this.askRequest(this.selected[i]));
+      for (let i = 0; i < this.selectedFileID.length; i++) {
+        methods.push(this.askRequest(this.selectedFileID[i]));
       }
       Promise.all(methods).then(() => {
         this.$message.success("已成功向求职者发送详细简历请求");
         this.resetReqForm();
-        this.dialogFormVisible = false;
+        this.reqDialogVisible = false;
         this.loading = false;
       }).catch(() => {
         this.$message.error("请求详细简历出错啦,请稍后再试");
@@ -481,10 +527,42 @@ export default {
       this.resetReqForm();
       this.reqForm.ExposeFileID = row.FileID;
       this.chossenName = row.Name || "/";
-      this.dialogFormVisible = true;
+      this.reqDialogVisible = true;
     },
     editNotice(index, row) {
-      
+      if (row.StaffID)
+        this.noticeForm.StaffIDs = [row.StaffID];
+      else {
+        const StaffIDs = this.noticeForm.StaffIDs;
+        this.resetNoticeForm();
+        this.noticeForm.StaffIDs = StaffIDs;
+      }
+      this.noticeForm.SchoolCode = "1";
+      this.chossenName = row.Name || "/";
+      this.noticeDialogVisible = true;
+    },
+    sendNotice() {
+      if (this.noticeForm.Topic === "")
+        return this.$message.error("请填写宣讲会主题");
+      if (this.noticeForm.StartAt === "")
+        return this.$message.error("请选择宣讲时间");
+      this.loading = true;
+      const date = new Date(this.noticeForm.StartAt);
+      this.noticeForm.StartAt = date.toISOString().split(".")[0] + "+08:00";
+      this.axios({
+        method: "post",
+        url: "/campusTalk/publish",
+        headers: { "Authorization": JSON.parse(localStorage.getItem("jw_ent_file")).authorization },
+        data: this.noticeForm
+      }).then(() => {
+        this.$message.success("已成功发送宣讲会通知");
+        this.resetNoticeForm();
+        this.noticeDialogVisible = false;
+        this.loading = false;
+      }).catch(() => {
+        this.$message.error("发送宣讲会通知出错啦,请稍后再试");
+        this.loading = false;
+      });
     },
     askRequest(FileID) {
       return new Promise((resolve, reject) => {
@@ -526,9 +604,9 @@ export default {
         headers: { "Authorization": JSON.parse(localStorage.getItem("jw_ent_file")).authorization },
         data: this.reqForm
       }).then(() => {
-        this.$message.success("已成功向该求职者发送详细简历请求");
+        this.$message.success("已成功发送详细简历请求");
         this.resetReqForm();
-        this.dialogFormVisible = false;
+        this.reqDialogVisible = false;
         this.loading = false;
       }).catch(() => {
         this.$message.error("请求详细简历出错啦,请稍后再试");
@@ -640,7 +718,7 @@ export default {
 .coditions .el-form-item {
   margin-bottom: 10px;
 }
-.form .el-loading-mask {
+.loadingForm .el-loading-mask {
   height: 1000px;
 }
 .text .el-alert .el-alert__description {

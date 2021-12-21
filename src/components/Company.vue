@@ -6,30 +6,19 @@
         <span>高校学业核验系统</span>
       </div>
       <div class="user">
-        <el-dropdown style="height: 50px; line-height: 80px" @command="msgRouteSwitch">
-          <el-badge
-            :value="received + sent"
-            :hidden="received + sent === 0"
-            class="item"
-            style="width: 30px; height: 25px; margin-right: 20px; line-height: 25px !important; cursor: pointer;"
-          >
-            <i
-              class="el-icon-message"
-              style="font-size: 20px; color: #fff"
-              @click="msgRoute('received')"
-            ></i>
-          </el-badge>
-          <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item command="received" class="clearfix">
-              收信箱
-              <el-badge class="item" :value="received" :hidden="received === 0" />
-            </el-dropdown-item>
-            <el-dropdown-item command="sent" class="clearfix">
-              已发送
-              <el-badge class="item" :value="sent" :hidden="sent === 0" />
-            </el-dropdown-item>
-          </el-dropdown-menu>
-        </el-dropdown>
+        <el-badge
+          :value="received + sent"
+          :hidden="received + sent === 0"
+          class="item"
+          style="width: 30px; height: 25px; margin-right: 20px; line-height: 25px !important;"
+        >
+          <i
+            title="消息中心"
+            class="el-icon-message"
+            style="font-size: 20px; color: #fff; cursor: pointer;"
+            @click="msgRouteSwitch('received')"
+          ></i>
+        </el-badge>
         <el-avatar :size="25" :src="circleUrl"></el-avatar>
         <span id="uname">{{uName === ""?"":uName + ' |'}}</span>
         <el-link
@@ -88,7 +77,9 @@
       <el-main :style="{'height': this.wh - 80 + 'px'}">
         <router-view
           @func="getReceived"
+          @func2="getFrequency"
           :received="received"
+          :frequency="reqFrequency"
           :sent="sent"
           :wh="wh"
         ></router-view>
@@ -103,6 +94,8 @@ export default {
       circleUrl: "https://edu.limkim.cn/static/user.png",// 头像地址
       activeIndex: "",// 侧边栏index
       received: 0,// 收信箱接收数
+      reqFrequency: 300,// 站内信请求频率,单位秒
+      msgTimer: "",
       sent: 0,// 收信箱发送数
       uName: "",// 用户名
       wh: ""//屏幕高度
@@ -111,6 +104,14 @@ export default {
   methods: {
     getReceived(received) {
       this.received = received;
+    },
+    getFrequency(frequency) {
+      this.reqFrequency = frequency;
+      clearInterval(this.msgTimer);
+      if (frequency !== 0)
+        this.msgTimer = setInterval(() => {
+          this.getMsg();
+        }, this.reqFrequency * 1000);
     },
     msgRouteSwitch(command) {
       this.$router.push("/comMessage/" + command);
@@ -170,6 +171,22 @@ export default {
     windowHeight() {
       const de = document.documentElement;
       return self.innerHeight || (de && de.clientHeight) || document.body.clientHeight;
+    },
+    getMsg() {
+      this.axios({
+        method: "post",
+        url: "/share/lookupShareLinkForCompany",
+        headers: { "Authorization": JSON.parse(localStorage.getItem("jw_ent_file")).authorization },
+        data: { "schoolCode": "1" }
+      }).then((response) => {
+        const data = response.data.data;
+        for (let i = 0; i < data.length; i++) {
+          if (!data[i].Read)
+            this.received++;
+        }
+      }).catch(() => {
+        this.$message.error("获取站内信息出错啦,请稍后再试");
+      });
     }
   },
   watch: {
@@ -190,20 +207,10 @@ export default {
       });
     else {
       this.uName = JSON.parse(localStorage.getItem("jw_ent_file")).CompanyCode;
-      this.axios({
-        method: "post",
-        url: "/share/lookupShareLinkForCompany",
-        headers: { "Authorization": JSON.parse(localStorage.getItem("jw_ent_file")).authorization },
-        data: { "schoolCode": "1" }
-      }).then((response) => {
-        const data = response.data.data;
-        for (let i = 0; i < data.length; i++) {
-          if (!data[i].Read)
-            this.received++;
-        }
-      }).catch(() => {
-        this.$message.error("获取站内信息出错啦,请稍后再试");
-      });
+      this.getMsg();
+      this.msgTimer = setInterval(() => {
+        this.getMsg();
+      }, this.reqFrequency * 1000);
     }
   },
   mounted() {

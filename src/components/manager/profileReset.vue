@@ -33,15 +33,15 @@ export default {
           data: { staffID: this.staffID }
         }).then(() => {
           this.$message.success("重置成功");
-          this.loading = false
-          this.staffID = ""
+          this.loading = false;
+          this.staffID = "";
         }).catch(() => {
-          this.$message.error("重置出错啦,请稍后重试")
-          this.loading = false
+          this.$message.error("重置出错啦,请稍后重试");
+          this.loading = false;
         });
       }).catch(() => {
-        this.$message.info("重置已取消")
-      })
+        this.$message.info("重置已取消");
+      });
     }
   }
 };

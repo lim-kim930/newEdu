@@ -62,7 +62,7 @@ export default {
       this.$router.push("/testSignIn");
     },
     byHDU() {
-      window.location.href = "/oauth/request";
+      window.location.href = "https://api.hduhelp.com/gormja_wrapper/oauth/request";
     },
     onSubmit() {
     }

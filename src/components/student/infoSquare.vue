@@ -131,7 +131,7 @@ export default {
     return {
       total: 0,
       page: 0,
-      tableData: [[]],
+      tableData: [],
       loading: false,
       locations: provinceAndCityData,
       options: [{

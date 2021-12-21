@@ -151,7 +151,7 @@
             :style="{'width': '90%', 'margin-top': '10px', 'height': this.wh - 300 + 'px'}"
           />
         </el-form-item>
-        <el-form-item class="md" label="班团工作" required>
+        <el-form-item class="md" label="班团经历" required>
           <h4 v-show="clubData.length === 0">暂无信息</h4>
           <!-- <el-checkbox v-show="selfData[1].data" v-model="ruleForm.clubChecked">选择</el-checkbox> -->
           <el-table
@@ -422,7 +422,7 @@
         v-model="selfData[0].md"
         :style="{'width': '90%', 'margin': ' 10px 5%', 'height': this.wh - 300 + 'px'}"
       />
-      <h3 style="margin-left: 5%" v-show="this.switch===2 && clubValue.length !== 0">班团工作</h3>
+      <h3 style="margin-left: 5%" v-show="this.switch===2 && clubValue.length !== 0">班团经历</h3>
       <el-table
         :data="clubValue"
         tooltip-effect="dark"
