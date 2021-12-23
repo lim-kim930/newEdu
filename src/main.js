@@ -10,13 +10,13 @@ import "element-ui/lib/theme-chalk/index.css";
 // import router from "./router_sign";
 
 //剪切板组件
-import VueClipboard from "vue-clipboard2";
-import APP from "../src/components/Student.vue";
-import router from "./router_student";
-Vue.use(VueClipboard);
+// import VueClipboard from "vue-clipboard2";
+// import APP from "../src/components/Student.vue";
+// import router from "./router_student";
+// Vue.use(VueClipboard);
 
-// import APP from "../src/components/Company.vue";
-// import router from "./router_company";
+import APP from "../src/components/Company.vue";
+import router from "./router_company";
 
 // import APP from "../src/components/Manager.vue"
 // import router from "./router_manager"

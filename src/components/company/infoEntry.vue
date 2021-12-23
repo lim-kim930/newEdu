@@ -83,14 +83,21 @@
           <el-input style="width: 150px" disabled :placeholder="nameHolder"></el-input>
         </el-form-item>
         <el-form-item label="职位类别">
-          <el-radio-group v-model="form.type">
-            <el-radio
-              :label="item.name"
-              name="type"
-              v-for="item in typeOptions"
-              v-bind:key="item.id"
-            ></el-radio>
-          </el-radio-group>
+          <el-form-item
+            class="type"
+            :label="item.name"
+            v-for="(item, index) in translation"
+            v-bind:key="item.name"
+          >
+            <el-radio-group v-model="form.type">
+              <el-radio
+                :label="item.Name"
+                name="type"
+                v-for="item in typeOptions[index]"
+                v-bind:key="item.id"
+              ></el-radio>
+            </el-radio-group>
+          </el-form-item>
         </el-form-item>
         <el-form-item label="岗位名称">
           <el-input v-model="form.name" style="width: 200px;" maxlength="50"></el-input>
@@ -152,9 +159,25 @@ export default {
         num: "",
         jobReq: ""
       },
+      translation: [{
+        name: "不限",
+        value: ["不限"]
+      }, {
+        name: "IT互联网",
+        value: ["编程/IT开发", "测试", "IT运维", "通信工程", "数字多媒体", "产品", "运营"]
+      }, {
+        name: "会计管理",
+        value: ["财务/会计", "金融", "审计", "出纳", "采购", "行政", "人力资源", "贸易/进出口", "质量管理", "项目管理", "项目实施"]
+      }, {
+        name: "设计制造",
+        value: ["工业设计", "工程设计", "平面设计", "室内设计", "生产/制造"]
+      }, {
+        name: "其他",
+        value: ["法务", "科研", "教师", "翻译", "编辑/文案", "培训", "其他"]
+      }],
       jobList: [],// 发布的岗位数据
       locations: provinceAndCityData,
-      typeOptions: [],// 职位类别选项
+      typeOptions: [[], [], [], [], []],// 职位类别选项
       marks: {
         0: "0k",
         10: "10k",
@@ -220,16 +243,39 @@ export default {
       });
     },
     next() {
-      this.loading = true;
-      this.typeOptions = [];
       this.axios({
         method: "get",
         url: "/job/type/list",
       }).then(response => {
-        for (let i = 0; i < response.data.data.length; i++)
-          this.typeOptions.push({
-            name: response.data.data[i].Name
-          });
+        const data = response.data.data;
+        this.typeOptions = [[], [], [], [], []];
+        let other = null;
+        for (let i = 0; i < data.length; i++) {
+          for (let j = 0; j < 5; j++) {
+            if (this.translation[j].value.indexOf(data[i].Name) !== -1) {
+              switch (data[i].Name) {
+                case "编程/IT开发":
+                  this.typeOptions[j].unshift(data[i]);
+                  break;
+                case "测试":
+                  if (this.typeOptions[j][0].Name && this.typeOptions[j][0].Name === "编程/IT开发")
+                    this.typeOptions[j].splice(1, 0, data[i]);
+                  else
+                    this.typeOptions[j].unshift(data[i]);
+                  break;
+                case "其他":
+                  other = data[i];
+                  break;
+                default:
+                  this.typeOptions[j].push(data[i]);
+                  break;
+              }
+              break;
+            }
+          }
+        }
+        if (other)
+          this.typeOptions[4].push(other);
         this.step = 1;
         this.loading = false;
       }).catch(() => {
@@ -296,9 +342,15 @@ export default {
   margin: 0;
 }
 .el-radio {
-  width: 155px;
+  width: 100px;
   height: 40px;
   line-height: 40px;
+}
+.form .type {
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid rgba(204, 204, 204, 0.336);
 }
 </style>
 <style>

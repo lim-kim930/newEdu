@@ -157,6 +157,7 @@ export default {
           { value: 8000, label: "8K" },
           { value: 9000, label: "9K" },
           { value: 10000, label: "10K" },
+          { value: 15000, label: "20K" },
           { value: 15000, label: "15K" }
         ]
       }],

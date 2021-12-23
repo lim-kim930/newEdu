@@ -40,77 +40,81 @@
         :value="item.value"
       ></el-option>
     </el-select>-->
-    <span>请选择筛选条件:</span>
-    <el-button type="primary" @click="getInfo()" style="margin: 10px 0 0 10px">点击筛选</el-button>
-    <el-button type="primary" plain @click="resetConditions()" style="margin-bottom: 10px">清空</el-button>
-    <el-form class="coditions" label-width="110px">
-      <el-form-item label="匹配规则">
-        <el-radio-group v-model="method">
-          <el-radio
-            style="margin: 0 5px"
-            :label="item.value"
-            v-for="item in options[7].children"
-            :key="item.value"
-            border
-          >{{item.label}}</el-radio>
-        </el-radio-group>
-      </el-form-item>
-      <el-form-item label="就读专业">
-        <el-cascader
-          placeholder="请选择"
-          style="width: 190px; margin-left: 5px"
-          filterable
-          v-model="conditions.MajorCode"
-          :options="options[0].children"
-          clearable
-        ></el-cascader>
-      </el-form-item>
-      <el-form-item label="GPA">
-        <el-input
-          style="width: 90px; margin-left: 5px"
-          v-model="conditions.GPA[0]"
-          placeholder="gpa下限"
-        ></el-input>
-        <el-input
-          style="width: 90px; margin: 0 10px"
-          v-model="conditions.GPA[1]"
-          placeholder="gpa上限"
-        ></el-input>
-      </el-form-item>
-      <el-form-item label="奖学金获得情况">
-        <el-radio-group v-model="conditions.RewardLevel">
-          <el-radio
-            style="margin: 0 5px"
-            :label="item.value"
-            border
-            v-for="item in options[3].children"
-            :key="item.value"
-          >{{item.label}}</el-radio>
-        </el-radio-group>
-      </el-form-item>
-      <el-form-item label="竞赛获奖情况">
-        <el-radio-group v-model="conditions.RaceLevel">
-          <el-radio
-            style="margin: 0 5px"
-            border
-            :label="item.value"
-            v-for="item in options[4].children"
-            :key="item.value"
-          >{{item.label}}</el-radio>
-        </el-radio-group>
-      </el-form-item>
-      <el-form-item label="班团经历">
-        <el-radio-group v-model="conditions.OrgLevel">
-          <el-radio
-            style="margin: 0 5px"
-            :label="item.value"
-            border
-            v-for="item in options[5].children"
-            :key="item.value"
-          >{{item.label}}</el-radio>
-        </el-radio-group>
-      </el-form-item>
-      <!-- <el-form-item label="社会工作">
+    <el-collapse value="1">
+      <el-collapse-item name="1">
+        <template slot="title">
+          <span style="font-size: 16px">请选择筛选条件:</span>
+          <el-button type="primary" @click.stop="getInfo()" style="margin: 0 0 0 10px">点击筛选</el-button>
+          <el-button type="primary" plain @click.stop="resetConditions()" style>清空</el-button>
+        </template>
+        <el-form class="coditions" label-width="110px" style="user-select: none;">
+          <el-form-item label="匹配规则">
+            <el-radio-group v-model="method">
+              <el-radio
+                style="margin: 0 5px"
+                :label="item.value"
+                v-for="item in options[7].children"
+                :key="item.value"
+                border
+              >{{item.label}}</el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item label="就读专业">
+            <el-cascader
+              placeholder="请选择"
+              style="width: 190px; margin-left: 5px"
+              filterable
+              v-model="conditions.MajorCode"
+              :options="options[0].children"
+              clearable
+            ></el-cascader>
+          </el-form-item>
+          <el-form-item label="GPA">
+            <el-input
+              style="width: 90px; margin-left: 5px"
+              v-model="conditions.GPA[0]"
+              placeholder="gpa下限"
+            ></el-input>
+            <el-input
+              style="width: 90px; margin: 0 10px"
+              v-model="conditions.GPA[1]"
+              placeholder="gpa上限"
+            ></el-input>
+          </el-form-item>
+          <el-form-item label="奖学金获得情况">
+            <el-radio-group v-model="conditions.RewardLevel">
+              <el-radio
+                style="margin: 0 5px"
+                :label="item.value"
+                border
+                v-for="item in options[3].children"
+                :key="item.value"
+              >{{item.label}}</el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item label="竞赛获奖情况">
+            <el-radio-group v-model="conditions.RaceLevel">
+              <el-radio
+                style="margin: 0 5px"
+                border
+                :label="item.value"
+                v-for="item in options[4].children"
+                :key="item.value"
+              >{{item.label}}</el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item label="班团经历">
+            <el-radio-group v-model="conditions.OrgLevel">
+              <el-radio
+                style="margin: 0 5px"
+                :label="item.value"
+                border
+                v-for="item in options[5].children"
+                :key="item.value"
+              >{{item.label}}</el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <!-- <el-form-item label="社会工作">
         <el-radio-group v-model="conditions.Social">
           <el-radio
             style="margin: 0 5px"
@@ -120,19 +124,21 @@
             :key="item.value"
           >{{item.label}}</el-radio>
         </el-radio-group>
-      </el-form-item>-->
-      <el-form-item label="性别">
-        <el-radio-group v-model="conditions.Sex">
-          <el-radio
-            style="margin: 0 5px"
-            border
-            :label="item.value"
-            v-for="item in options[2].children"
-            :key="item.value"
-          >{{item.label}}</el-radio>
-        </el-radio-group>
-      </el-form-item>
-    </el-form>
+          </el-form-item>-->
+          <el-form-item label="性别">
+            <el-radio-group v-model="conditions.Sex">
+              <el-radio
+                style="margin: 0 5px"
+                border
+                :label="item.value"
+                v-for="item in options[2].children"
+                :key="item.value"
+              >{{item.label}}</el-radio>
+            </el-radio-group>
+          </el-form-item>
+        </el-form>
+      </el-collapse-item>
+    </el-collapse>
     <el-divider>
       <i class="el-icon-collection-tag">为您找到以下结果</i>
     </el-divider>
@@ -692,6 +698,9 @@ export default {
   padding: 20px;
   background-color: rgba(243, 243, 243, 0.541);
 }
+.el-collapse {
+  border: none;
+}
 </style>
 <style>
 /* table里下拉菜单的样式表 */
@@ -723,5 +732,9 @@ export default {
 }
 .text .el-alert .el-alert__description {
   font-size: 14px;
+}
+.form .el-collapse-item__wrap,
+.form .el-collapse-item__header {
+  border: none;
 }
 </style>
