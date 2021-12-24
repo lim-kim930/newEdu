@@ -41,11 +41,11 @@
           type="primary"
           style="margin-left: calc(5% + 980px)"
           :icon="this.switch===1?'el-icon-search':'el-icon-arrow-left'"
-          :disabled="!this.selfData.md && this.clubData.length === 0"
+          :disabled="!this.selfData.md && this.clubData.length === 0&& this.volunData.length === 0"
           v-show="btnShow"
           plain
           @click="dialogSwitch()"
-        >{{(this.selfData.md || this.clubData.length !== 0)?(this.switch===1?"查看个人填写的信息":"查看经过验证的信息"):"未分享个人填写信息"}}</el-button>
+        >{{(this.selfData.md || this.clubData.length !== 0|| this.volunData.length !== 0)?(this.switch===1?"查看个人填写的信息":"查看经过验证的信息"):"未分享个人填写信息"}}</el-button>
         <el-empty :image-size="200" description="输入链接即可核验" v-show="emptyShow"></el-empty>
         <div v-show="this.switch === 1">
           <div
@@ -218,8 +218,6 @@
               <span class="title">注意事项</span>
               <div class="info_content">
                 <span>1.该信息仅供高校学业核验系统核验使用,禁止他用</span>
-                <span>1.该信息仅供高校学业核验系统核验使用,禁止他用</span>
-                <span>1.该信息仅供高校学业核验系统核验使用,禁止他用</span>
               </div>
               <div class="end_time">
                 <span>有效期至:</span>
@@ -249,6 +247,34 @@
           <el-table-column prop="JobName" label="工作名称"></el-table-column>
           <el-table-column prop="OrgName" label="组织名称"></el-table-column>
           <el-table-column prop="OrgLevel" label="组织等级"></el-table-column>
+          <el-table-column prop="StartAt" label="开始时间"></el-table-column>
+          <el-table-column prop="EndAt" label="结束时间"></el-table-column>
+        </el-table>
+        <h3 style="margin-left: 5%" v-show="this.switch===2 && volunData.length !== 0">志愿经历</h3>
+        <el-table
+          :data="volunData"
+          tooltip-effect="dark"
+          :style="{'width': '90%', 'margin': ' 10px 5%'}"
+          border
+          v-show="this.switch===2 && volunData.length !== 0"
+        >
+          <el-table-column prop="ActName" label="活动名称"></el-table-column>
+          <el-table-column prop="Content" label="活动内容"></el-table-column>
+          <el-table-column prop="ActDate" label="活动日期"></el-table-column>
+          <el-table-column prop="ActLength" label="志愿时长"></el-table-column>
+        </el-table>
+        <h3 style="margin-left: 5%" v-show="this.switch===2 && internshipData.length !== 0">实习经历</h3>
+        <el-table
+          :data="internshipData"
+          tooltip-effect="dark"
+          :style="{'width': '90%', 'margin': ' 10px 5%'}"
+          border
+          v-show="this.switch === 2 && internshipData.length !== 0"
+        >
+          <el-table-column prop="JobName" label="岗位名称"></el-table-column>
+          <el-table-column prop="CompanyName" label="公司名称"></el-table-column>
+          <el-table-column prop="WorkLocation" label="实习地点"></el-table-column>
+          <el-table-column prop="WorkContent" label="实习内容"></el-table-column>
           <el-table-column prop="StartAt" label="开始时间"></el-table-column>
           <el-table-column prop="EndAt" label="结束时间"></el-table-column>
         </el-table>
@@ -288,6 +314,8 @@ export default {
       rankData: {},
       selfData: {},
       clubData: [],
+      volunData: [],
+      internshipData: [],
       btnShow: false,
       toolbars: {
         readmodel: true
@@ -493,7 +521,26 @@ export default {
           const club = response.data.data.ShareFile.data_map.org_experience;
           const keys = Object.keys(club);
           for (let i = 0; i < keys.length; i++) {
+            club[keys[i]].StartAt = club[keys[i]].StartAt.substr(0, 10);
+            club[keys[i]].EndAt = club[keys[i]].EndAt.substr(0, 10);
             this.clubData.push(club[keys[i]]);
+          }
+        }
+        if (response.data.data.ShareFile.data_map.voluntary_experience != undefined) {
+          const volun = response.data.data.ShareFile.data_map.voluntary_experience;
+          const keys = Object.keys(volun);
+          for (let i = 0; i < keys.length; i++) {
+            volun[keys[i]].ActDate = volun[keys[i]].ActDate.substr(0, 10);
+            this.volunData.push(volun[keys[i]]);
+          }
+        }
+        if (response.data.data.ShareFile.data_map.internship_experience != undefined) {
+          const internship = response.data.data.ShareFile.data_map.internship_experience;
+          const keys = Object.keys(internship);
+          for (let i = 0; i < keys.length; i++) {
+            internship[keys[i]].StartAt = internship[keys[i]].StartAt.substr(0, 10);
+            internship[keys[i]].EndAt = internship[keys[i]].EndAt.substr(0, 10);
+            this.internshipData.push(internship[keys[i]]);
           }
         }
         // 接下来对所有属于自适应高度的变量赋值
@@ -513,7 +560,7 @@ export default {
         this.reward_height = count3 * 41 + "px";
         this.info_top = (count * 51 + (count2 + count3) * 41 + 240) + "px";
         // 设置水印
-        setWaterMark("仅供高校学业核验系统核验使用", "有效期至:" + this.profileData.expired_at, (500 + (count + count2 + count3) * 41));
+        setWaterMark("仅供高校学业核验系统核验使用", "有效期至:" + this.profileData.expired_at, (500 + count * 51 + (count2 + count3) * 41));
         this.createMySeal();
         this.title = "为您核验到以下信息: ";
         this.emptyShow = false;

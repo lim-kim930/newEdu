@@ -77,11 +77,9 @@ export default {
       this.loading = true;
       this.axios({
         method: "put",
-        url: "/company/putForCompany",
+        url: "/company/updatePassphraseForCompany",
         headers: { "Authorization": JSON.parse(localStorage.getItem("jw_ent_file")).authorization },
-        data: {
-          Passphrase: this.form.Passphrase
-        }
+        data: { "Passphrase": this.form.Passphrase }
       }).then(() => {
         localStorage.removeItem("jw_ent_file");
         this.$confirm("成功修改! 请重新登录", "提示", {
@@ -107,11 +105,9 @@ export default {
       this.loading = true;
       this.axios({
         method: "put",
-        url: "/company/putForCompany",
+        url: "company/updatePassphraseForAdmin",
         headers: { "Authorization": JSON.parse(localStorage.getItem("jw_ent_file")).authorization },
-        data: {
-          Description: this.form.Description
-        }
+        data: { "Description": this.form.Description }
       }).then(() => {
         localStorage.removeItem("jw_ent_file");
         this.$message.success("修改成功!");

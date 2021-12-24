@@ -36,20 +36,18 @@ export default {
         method: "post",
         url: "https://api.limkim.xyz/changeXj",
         data: { staffID: JSON.parse(localStorage.getItem("jw_student_file")).staffID, confirmed: false }
-      })
-        .then((response) => {
-          this.$message.success("重置成功");
-          location.reload()
-        })
-        .catch(error => {
-          if (error.response.data.status === "staffID Required")
-            this.$message.error("您还未登录或登陆出错,请重新登录后重试")
-          else if (error.response.data.status === "Error")
-            this.$message.error("服务器出错")
-          else
-            this.$message.error("出错啦,请稍后重试")
-          this.loading = false
-        });
+      }).then(() => {
+        this.$message.success("重置成功");
+        location.reload();
+      }).catch(error => {
+        if (error.response.data.status === "staffID Required")
+          this.$message.error("您还未登录或登陆出错,请重新登录后重试");
+        else if (error.response.data.status === "Error")
+          this.$message.error("服务器出错");
+        else
+          this.$message.error("出错啦,请稍后重试");
+        this.loading = false;
+      });
     },
     resetForm(formName) {
       this.$refs[formName].resetFields();

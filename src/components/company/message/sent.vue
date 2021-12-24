@@ -25,9 +25,9 @@
           <el-dropdown-item command="发送时间▲">发送时间▲</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
-      <div style="cursor: pointer; height: 150px" v-for="item in reqMsgData" v-bind:key="item.id">
+      <div style="height: 150px" v-for="item in reqMsgData" v-bind:key="item.id">
         <el-col :span="8" class="card">
-          <el-card shadow="hover">
+          <el-card shadow="hover" style="cursor: pointer;">
             <h5>发送时间: {{item.date}}</h5>
             <h5>请求内容: {{item.Text}}</h5>
           </el-card>
@@ -50,13 +50,9 @@
           <el-dropdown-item command="发送时间▲">发送时间▲</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
-      <div
-        style="cursor: pointer; height: 150px"
-        v-for="item in noticeMsgData"
-        v-bind:key="item.id"
-      >
+      <div style="height: 150px" v-for="item in noticeMsgData" v-bind:key="item.id">
         <el-col :span="8" class="card">
-          <el-card shadow="hover">
+          <el-card shadow="hover" style="cursor: pointer;">
             <h5>宣讲会主题: {{item.Topic}}</h5>
             <h5>宣讲时间: {{new Date(+new Date(item.StartAt) + 8 * 3600 * 1000).toISOString().replace(/T/g, " ").replace(/\.[\d]{3}Z/, "")}}</h5>
             <h5>宣讲会描述: {{item.Detail}}</h5>

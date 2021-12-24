@@ -43,7 +43,7 @@
         class="info-select"
         :style="{overflow: 'auto', 'max-height': this.wh-280+'px'}"
       >
-        <el-form-item label="要分享的学籍信息" required>
+        <el-form-item label="要分享的学籍信息">
           <el-checkbox
             :indeterminate="isIndeterminate"
             v-model="checkAll"
@@ -65,7 +65,7 @@
             >{{item.name}}</el-checkbox>
           </el-checkbox-group>
         </el-form-item>
-        <el-form-item label="课程成绩信息" required>
+        <el-form-item label="课程成绩信息">
           <h4 v-show="scoreData.length === 0">暂无信息</h4>
           <el-table
             ref="multipleTable"
@@ -83,7 +83,7 @@
             <el-table-column prop="gp" label="绩点" width="100"></el-table-column>
           </el-table>
         </el-form-item>
-        <el-form-item label="等级考试信息" required>
+        <el-form-item label="等级考试信息">
           <h4 v-show="levelData.length === 0">暂无信息</h4>
           <el-table
             ref="multipleTable"
@@ -101,7 +101,7 @@
             <el-table-column prop="value" label="考试时间"></el-table-column>
           </el-table>
         </el-form-item>
-        <el-form-item label="个人荣誉信息" required>
+        <el-form-item label="个人荣誉信息">
           <h4 v-show="rewardData.length === 0">暂无信息</h4>
           <el-table
             ref="multipleTable"
@@ -120,7 +120,7 @@
             <el-table-column prop="semValue" label="获得学期"></el-table-column>
           </el-table>
         </el-form-item>
-        <el-form-item label="创新学分信息" required>
+        <el-form-item label="创新学分信息">
           <h4 v-show="raceData.length === 0">暂无信息</h4>
           <el-table
             ref="multipleTable"
@@ -138,7 +138,7 @@
             <el-table-column prop="value" label="获得时间"></el-table-column>
           </el-table>
         </el-form-item>
-        <el-form-item class="md" label="自我介绍" required>
+        <el-form-item class="md" label="自我介绍">
           <h4 v-show="!selfData[0].md">暂无信息</h4>
           <el-checkbox v-show="selfData[0].md" v-model="ruleForm.selfChecked">选择</el-checkbox>
           <mavonEditor
@@ -151,9 +151,8 @@
             :style="{'width': '90%', 'margin-top': '10px', 'height': this.wh - 300 + 'px'}"
           />
         </el-form-item>
-        <el-form-item class="md" label="班团经历" required>
+        <el-form-item label="班团经历">
           <h4 v-show="clubData.length === 0">暂无信息</h4>
-          <!-- <el-checkbox v-show="selfData[1].data" v-model="ruleForm.clubChecked">选择</el-checkbox> -->
           <el-table
             :data="clubData"
             tooltip-effect="dark"
@@ -168,7 +167,40 @@
             <el-table-column prop="OrgLevel" label="组织等级"></el-table-column>
           </el-table>
         </el-form-item>
-        <el-form-item label="排名信息" required>
+        <el-form-item label="志愿经历">
+          <h4 v-show="volunData.length === 0">暂无信息</h4>
+          <el-table
+            :data="volunData"
+            tooltip-effect="dark"
+            style="width: 90%"
+            border
+            v-show="volunData.length !== 0"
+            @selection-change="volunSelectionChange"
+          >
+            <el-table-column type="selection" width="55"></el-table-column>
+            <el-table-column prop="ActName" label="活动名称"></el-table-column>
+            <el-table-column prop="ActDate" label="活动日期"></el-table-column>
+            <el-table-column prop="ActLength" label="志愿时长"></el-table-column>
+          </el-table>
+        </el-form-item>
+        <el-form-item label="实习经历">
+          <h4 v-show="internshipData.length === 0">暂无信息</h4>
+          <el-table
+            :data="internshipData"
+            tooltip-effect="dark"
+            style="width: 90%"
+            border
+            v-show="internshipData.length !== 0"
+            @selection-change="internshipSelectionChange"
+          >
+            <el-table-column type="selection" width="55"></el-table-column>
+            <el-table-column prop="JobName" label="岗位名称"></el-table-column>
+            <el-table-column prop="CompanyName" label="公司名称"></el-table-column>
+            <el-table-column prop="StartAt" label="开始时间"></el-table-column>
+            <el-table-column prop="EndAt" label="结束时间"></el-table-column>
+          </el-table>
+        </el-form-item>
+        <el-form-item label="排名信息">
           <h4 v-show="rankData.length === 0">暂无信息</h4>
           <el-table
             :data="rankData"
@@ -183,7 +215,7 @@
             <el-table-column prop="Rank" label="专业排名"></el-table-column>
           </el-table>
         </el-form-item>
-        <el-form-item label="目的企业和岗位" required>
+        <el-form-item label="目的企业和岗位">
           <span
             v-show="target_show"
             style="color: #67C23A; background-color: #f0f9eb; padding: 10px; border-radius: 5px;"
@@ -202,9 +234,9 @@
           label="有效时间"
           prop="date"
           :rules="[
-        { type: 'number', message: '有效日期须为数字', trigger: 'change'},
-        { type: 'number', max: 9999, message: '数值过大', trigger: 'change'}
-      ]"
+            { type: 'number', message: '有效日期须为数字', trigger: 'change'},
+            { type: 'number', max: 9999, message: '数值过大', trigger: 'change'}
+          ]"
         >
           <el-input v-model.number="ruleForm.date" style="width: 150px" placeholder="默认为10天"></el-input>
         </el-form-item>
@@ -224,9 +256,9 @@
         type="primary"
         plain
         @click="dialogSwitch()"
-        :disabled="!this.ruleForm.selfChecked && this.clubValue.length === 0"
+        :disabled="!this.ruleForm.selfChecked && this.clubValue.length === 0 && this.volunValue.length === 0 && this.internshipValue.length === 0"
         style="width: 150px; margin-bottom: 10px; margin-left: calc(100% - 630px)"
-      >{{(this.ruleForm.selfChecked || this.clubValue.length !== 0)?(this.switch === 1?"查看个人填写预览":"返回"):"未选择个人信息"}}</el-button>
+      >{{(this.ruleForm.selfChecked || this.clubValue.length !== 0 || this.volunValue.length !== 0 || this.internshipData.length !== 0)?(this.switch === 1?"查看个人填写预览":"返回"):"未选择个人信息"}}</el-button>
       <el-button
         type="primary"
         @click="confirm()"
@@ -402,8 +434,6 @@
             <span class="title">注意事项</span>
             <div class="info_content">
               <span>1.该信息仅供高校学业核验系统核验使用,禁止他用</span>
-              <span>1.该信息仅供高校学业核验系统核验使用,禁止他用</span>
-              <span>1.该信息仅供高校学业核验系统核验使用,禁止他用</span>
             </div>
             <div class="end_time">
               <span>有效期至:</span>
@@ -412,14 +442,14 @@
           </div>
         </div>
       </div>
-      <h3 style="margin-left: 5%" v-show="this.switch===2 && selfData[0].md">自我介绍</h3>
+      <h3 style="margin-left: 5%" v-show="this.switch===2 && selfValue.md">自我介绍</h3>
       <mavonEditor
         :toolbars="toolbars"
         :autofocus="false"
         defaultOpen="preview"
         :editable="false"
-        v-show="this.switch===2 && selfData[0].md"
-        v-model="selfData[0].md"
+        v-show="this.switch===2 && selfValue.md"
+        v-model="selfValue.md"
         :style="{'width': '90%', 'margin': ' 10px 5%', 'height': this.wh - 300 + 'px'}"
       />
       <h3 style="margin-left: 5%" v-show="this.switch===2 && clubValue.length !== 0">班团经历</h3>
@@ -433,6 +463,34 @@
         <el-table-column prop="JobName" label="工作名称"></el-table-column>
         <el-table-column prop="OrgName" label="组织名称"></el-table-column>
         <el-table-column prop="OrgLevel" label="组织等级"></el-table-column>
+        <el-table-column prop="StartAt" label="开始时间"></el-table-column>
+        <el-table-column prop="EndAt" label="结束时间"></el-table-column>
+      </el-table>
+      <h3 style="margin-left: 5%" v-show="this.switch===2 && volunValue.length !== 0">志愿经历</h3>
+      <el-table
+        :data="volunValue"
+        tooltip-effect="dark"
+        :style="{'width': '90%', 'margin': ' 10px 5%'}"
+        border
+        v-show="this.switch===2 && volunValue.length !== 0"
+      >
+        <el-table-column prop="ActName" label="活动名称"></el-table-column>
+        <el-table-column prop="Content" label="活动内容"></el-table-column>
+        <el-table-column prop="ActDate" label="活动日期"></el-table-column>
+        <el-table-column prop="ActLength" label="志愿时长"></el-table-column>
+      </el-table>
+      <h3 style="margin-left: 5%" v-show="this.switch===2 && internshipValue.length !== 0">实习经历</h3>
+      <el-table
+        :data="internshipValue"
+        tooltip-effect="dark"
+        :style="{'width': '90%', 'margin': ' 10px 5%'}"
+        border
+        v-show="this.switch === 2 && internshipValue.length !== 0"
+      >
+        <el-table-column prop="JobName" label="岗位名称"></el-table-column>
+        <el-table-column prop="CompanyName" label="公司名称"></el-table-column>
+        <el-table-column prop="WorkLocation" label="实习地点"></el-table-column>
+        <el-table-column prop="WorkContent" label="实习内容"></el-table-column>
         <el-table-column prop="StartAt" label="开始时间"></el-table-column>
         <el-table-column prop="EndAt" label="结束时间"></el-table-column>
       </el-table>
@@ -517,7 +575,9 @@ export default {
         rankType: [],
         selfChecked: false,
         clubType: [],
-        raceType: []
+        raceType: [],
+        volunType: [],
+        internshipType: []
       },
       profileData: [],//学籍信息数据
       profileDataValue: [],//学籍全选辅助
@@ -529,6 +589,10 @@ export default {
       selfData: [{}],
       clubData: [],
       clubValue: [],
+      volunData: [],
+      volunValue: [],
+      internshipData: [],
+      internshipValue: [],
       options: [],
       props: {
         lazy: true,
@@ -608,6 +672,18 @@ export default {
         this.ruleForm.clubType.push(item.key);
       });
     },
+    volunSelectionChange(val) {
+      this.ruleForm.volunType = [];
+      val.forEach(item => {
+        this.ruleForm.volunType.push(item.key);
+      });
+    },
+    internshipSelectionChange(val) {
+      this.ruleForm.internshipType = [];
+      val.forEach(item => {
+        this.ruleForm.internshipType.push(item.key);
+      });
+    },
     CheckAllChange(val) {
       this.ruleForm.profileType = val ? this.profileDataValue : [];
       this.isIndeterminate = false;
@@ -663,6 +739,8 @@ export default {
         rankType: [],
         selfChecked: false,
         clubType: [],
+        volunType: [],
+        internshipType: [],
         raceType: []
       };
       this.isIndeterminate = false;
@@ -806,7 +884,28 @@ export default {
               const keys = Object.keys(this.content.org_experience);
               for (let i = 0; i < keys.length; i++) {
                 this.content.org_experience[keys[i]].key = keys[i];
+                this.content.org_experience[keys[i]].StartAt = this.content.org_experience[keys[i]].StartAt.substr(0, 10);
+                this.content.org_experience[keys[i]].EndAt = this.content.org_experience[keys[i]].EndAt.substr(0, 10);
                 this.clubData.push(this.content.org_experience[keys[i]]);
+              }
+            }
+            else if (range[i] === "voluntary_experience") {
+              this.volunData = [];
+              const keys = Object.keys(this.content.voluntary_experience);
+              for (let i = 0; i < keys.length; i++) {
+                this.content.voluntary_experience[keys[i]].key = keys[i];
+                this.content.voluntary_experience[keys[i]].ActDate = this.content.voluntary_experience[keys[i]].ActDate.substr(0, 10);
+                this.volunData.push(this.content.voluntary_experience[keys[i]]);
+              }
+            }
+            else if (range[i] === "internship_experience") {
+              this.internshipData = [];
+              const keys = Object.keys(this.content.internship_experience);
+              for (let i = 0; i < keys.length; i++) {
+                this.content.internship_experience[keys[i]].key = keys[i];
+                this.content.internship_experience[keys[i]].StartAt = this.content.internship_experience[keys[i]].StartAt.substr(0, 10);
+                this.content.internship_experience[keys[i]].EndAt = this.content.internship_experience[keys[i]].EndAt.substr(0, 10);
+                this.internshipData.push(this.content.internship_experience[keys[i]]);
               }
             }
           }
@@ -895,6 +994,20 @@ export default {
             ShareItems.push({ "Path": Path });
           }
         }
+        if (this.ruleForm.volunType.length !== 0) {
+          for (var i = 0; i < this.ruleForm.volunType.length; i++) {
+            Path = ["voluntary_experience"];
+            Path.push(this.ruleForm.volunType[i]);
+            ShareItems.push({ "Path": Path });
+          }
+        }
+        if (this.ruleForm.internshipType.length !== 0) {
+          for (var i = 0; i < this.ruleForm.internshipType.length; i++) {
+            Path = ["internship_experience"];
+            Path.push(this.ruleForm.internshipType[i]);
+            ShareItems.push({ "Path": Path });
+          }
+        }
         data.append("body", JSON.stringify({ "ShareItems": ShareItems }));
         this.axios({
           method: "get",
@@ -914,6 +1027,9 @@ export default {
           this.levelValue = [];
           this.rewardValue = [];
           this.raceValue = [];
+          this.clubValue = [];
+          this.volunValue = [];
+          this.internshipValue = [];
           this.rankValue = {};
           this.selfValue = {};
           let count = 2;
@@ -990,10 +1106,21 @@ export default {
           if (range.indexOf("self_introduction") !== -1)
             this.selfValue = { md: this.selfData[0].md };
           if (range.indexOf("org_experience") !== -1) {
-            console.log(range);
             const club = this.content.org_experience;
             for (let i = 0; i < this.ruleForm.clubType.length; i++) {
               this.clubValue.push(club[this.ruleForm.clubType[i]]);
+            }
+          }
+          if (range.indexOf("voluntary_experience") !== -1) {
+            const volun = this.content.voluntary_experience;
+            for (let i = 0; i < this.ruleForm.volunType.length; i++) {
+              this.volunValue.push(volun[this.ruleForm.volunType[i]]);
+            }
+          }
+          if (range.indexOf("internship_experience") !== -1) {
+            const volun = this.content.internship_experience;
+            for (let i = 0; i < this.ruleForm.internshipType.length; i++) {
+              this.internshipValue.push(volun[this.ruleForm.internshipType[i]]);
             }
           }
           if (count < 4)

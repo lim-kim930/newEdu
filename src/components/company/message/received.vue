@@ -31,19 +31,19 @@
         </el-dropdown-menu>
       </el-dropdown>
       <div
-        style="cursor: pointer; height: 175px"
+        style="height: 175px"
         v-for="item in receivedMsgData"
         v-bind:key="item.index"
         @click="goQuery(item.url)"
       >
         <el-col :span="8" class="card">
-          <el-card shadow="hover">
+          <el-card shadow="hover" style="cursor: pointer;">
             <el-link
               type="danger"
               style="float: right"
               @click.stop="deleteMsg(item.ShareLinkID, item.index, item.Read)"
             >删除</el-link>
-            <h5>就读学校: {{item.SchoolCode}}</h5>
+            <h5>就读学校: {{item.SchoolCode === "1"?"杭州电子科技大学":item.SchoolCode}}</h5>
             <h5>就读专业: {{item.MajorName}}</h5>
             <h5>应聘岗位: {{item.TargetJob}}</h5>
             <h5>过期时间: {{item.date}}</h5>
@@ -153,7 +153,7 @@ export default {
       const type = Object.keys(data);
       for (let i = 0; i < type.length; i++)
         for (let j = 0; j < data[type[i]].length; j++)
-          jobTranslation[data[type[i]][j].JobID] = data[type[i]][j].JobType.Name;
+          jobTranslation[data[type[i]][j].JobID] = data[type[i]][j].Name;
       return this.axios({
         method: "get",
         url: "/info/listMajor",

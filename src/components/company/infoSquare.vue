@@ -69,6 +69,16 @@
               clearable
             ></el-cascader>
           </el-form-item>
+          <el-form-item label="意向岗位">
+            <el-cascader
+              placeholder="请选择"
+              style="width: 190px; margin-left: 5px"
+              filterable
+              v-model="conditions.JobTypeIntent"
+              :options="options[8].children"
+              clearable
+            ></el-cascader>
+          </el-form-item>
           <el-form-item label="GPA">
             <el-input
               style="width: 90px; margin-left: 5px"
@@ -151,7 +161,7 @@
     >批量发送简历请求</el-button>
     <el-button
       style="float: right; margin: 0 10px 10px 10px"
-      :disabled="noticeForm.StaffIDs.length === 0"
+      :disabled="selectedFileID.length === 0"
       type="primary"
       plain
       @click="editNotice(0, { FileID: 0, Name: 'selected' });"
@@ -170,10 +180,10 @@
       <el-table-column label="年级" prop="Grade" width="150px" sortable></el-table-column>
       <el-table-column label="学院" prop="UnitName"></el-table-column>
       <el-table-column label="专业" prop="MajorName"></el-table-column>
-      <el-table-column label="操作">
+      <el-table-column label="发送">
         <template slot-scope="scope">
-          <el-button size="mini" @click="askMore(scope.$index, scope.row)">请求详细简历</el-button>
-          <el-button size="mini" @click="editNotice(scope.$index, scope.row)">发送宣讲会通知</el-button>
+          <el-button size="mini" @click="askMore(scope.$index, scope.row)">详细简历请求</el-button>
+          <el-button size="mini" @click="editNotice(scope.$index, scope.row)">宣讲会通知</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -272,6 +282,7 @@
             resize="none"
             show-word-limit
             maxlength="500"
+            placeholder="请填写宣讲会地点、形式等其他细节内容"
             style="width: 400px; margin-top: 10px"
           ></el-input>
         </el-form-item>
@@ -355,6 +366,31 @@ export default {
           { value: "must", label: "全部符合" },
           { value: "should", label: "满足一项及以上" }
         ]
+      }, {
+        value: "JobTypeIntent",
+        label: "意向职位",
+        children: [
+          {
+            value: "不限",
+            label: "不限",
+          }, {
+            value: "IT互联网",
+            label: "IT互联网",
+            children: []
+          }, {
+            value: "会计管理",
+            label: "会计管理",
+            children: []
+          }, {
+            value: "设计制造",
+            label: "设计制造",
+            children: []
+          }, {
+            value: "其他",
+            label: "其他",
+            children: []
+          },
+        ]
       }],
       conditions: {
         GPA: [],
@@ -366,6 +402,22 @@ export default {
         RewardLevel: "",
         RaceLevel: "",
       },// 选择的条件
+      translation: [{
+        name: "不限",
+        value: ["不限"]
+      }, {
+        name: "IT互联网",
+        value: ["编程/IT开发", "测试", "IT运维", "通信工程", "数字多媒体", "产品", "运营"]
+      }, {
+        name: "会计管理",
+        value: ["财务/会计", "金融", "审计", "出纳", "采购", "行政", "人力资源", "贸易/进出口", "质量管理", "项目管理", "项目实施"]
+      }, {
+        name: "设计制造",
+        value: ["工业设计", "工程设计", "平面设计", "室内设计", "生产/制造"]
+      }, {
+        name: "其他",
+        value: ["法务", "科研", "教师", "翻译", "编辑/文案", "培训", "其他"]
+      }],
       method: "must",
       Predicates: [],// 要传给后端的筛选条件
       reqDialogVisible: false,
@@ -385,7 +437,7 @@ export default {
       chossenName: "",
       pickerOptions: {
         disabledDate(v) {
-          return v.getTime() < (Date.now() - 86400000);
+          return v.getTime() < Date.now();
         }
       },
       jobList: [],
@@ -471,15 +523,19 @@ export default {
               pre = { "value": this.conditions[index[i]] };
               break;
             case "RaceLevel":
-              path = ["data_map", "race_reward", "*", "RaceLevel"];
+              path = ["data_map", "race_reward", "*", "RaceLevel.keyword"];
               pre = { "value": this.conditions[index[i]] };
               break;
             case "RewardLevel":
-              path = ["data_map", "reward", "*", "RewardLevel"];
+              path = ["data_map", "reward", "*", "RewardLevel.keyword"];
               pre = { "value": this.conditions[index[i]] };
               break;
             case "MajorCode":
               path = ["data_map", "profile", "*", "MajorCode"];
+              pre = { "value": this.conditions[index[i]][1] };
+              break;
+            case "JobTypeIntent":
+              path = ["data_map", "career_intent", "*", "JobTypeIntent"];
               pre = { "value": this.conditions[index[i]][1] };
               break;
             default:
@@ -553,7 +609,8 @@ export default {
       if (this.noticeForm.StartAt === "")
         return this.$message.error("请选择宣讲时间");
       this.loading = true;
-      const date = new Date(this.noticeForm.StartAt);
+      const date = new Date(+new Date(this.noticeForm.StartAt) + 8 * 3600 * 1000);
+      console.log(date);
       this.noticeForm.StartAt = date.toISOString().split(".")[0] + "+08:00";
       this.axios({
         method: "post",
@@ -663,22 +720,43 @@ export default {
         }
       }
       this.options[0].children = majors;
-      this.axios({
+      return;
+    }).then(() => {
+      return this.axios({
         method: "post",
         url: "/job/lookup",
         data: { "CompanyCode": this.uname }
-      }).then(response => {
-        const type = Object.keys(response.data.data);
-        for (let i = 0; i < type.length; i++)
-          for (let j = 0; j < response.data.data[type[i]].length; j++)
-            this.jobList.push(response.data.data[type[i]][j]);
-        this.getInfo();
-      }).catch(() => {
-        this.$message.error("获取招聘信息出错啦,请稍后再试");
-        this.loading = false;
       });
+    }).then(response => {
+      const type = Object.keys(response.data.data);
+      for (let i = 0; i < type.length; i++)
+        for (let j = 0; j < response.data.data[type[i]].length; j++)
+          this.jobList.push(response.data.data[type[i]][j]);
+      return this.axios({
+        method: "get",
+        url: "/job/type/list"
+      });
+    }).then((response) => {
+      const data = response.data.data;
+      let other = null;
+      // this.options[8].children = [];
+      for (let i = 0; i < data.length; i++) {
+        for (let j = 1; j < 5; j++) {
+          if (this.translation[j].value.indexOf(data[i].Name) !== -1) {
+            this.options[8].children[j].children.push({
+              value: data[i].JobTypeCode,
+              label: data[i].Name
+            });
+          }
+        }
+      }
+      if (other)
+        this.jobOpitions[4].push(other);
+      this.getInfo();
+    }).catch(() => {
+      this.$message.error("获取筛选条件失败啦,请稍后重试");
+      this.loading = false;
     });
-
   }
 };
 </script>

@@ -103,12 +103,10 @@
         </el-checkbox-group>
       </el-form-item>
       <el-form-item label="个人填写信息">
-        <el-checkbox-group
-          v-show="clubData.length !== 0"
-          v-model="ruleForm.intType"
-          style="margin-left: 30px; width: 960px"
-        >
-          <el-checkbox label="org_experience">班团经历情况</el-checkbox>
+        <el-checkbox-group v-model="ruleForm.intType" style="margin-left: 30px; width: 960px">
+          <el-checkbox label="career_intent" v-show="intentData.length !== 0">就职意向</el-checkbox>
+          <el-checkbox label="org_experience" v-show="clubData.length !== 0">班团经历情况</el-checkbox>
+          <el-checkbox label="internship_experience" v-show="internshipData.length !== 0">实习经历</el-checkbox>
         </el-checkbox-group>
       </el-form-item>
       <!-- <el-form-item label="课程成绩信息" required>
@@ -188,12 +186,13 @@
       </el-form-item>-->
       <el-form-item>
         <el-button
+          :disabled="loading"
           type="primary"
           @click="submitForm()"
           style="margin: 0 0 30px 0; width: 150px"
         >点击更改</el-button>
         <!-- <el-button @click="resetForm()" style="width: 100px">重置</el-button> -->
-        <el-button @click="back()" style="width: 100px">返回查看</el-button>
+        <el-button @click="back()" :disabled="loading" style="width: 100px">返回查看</el-button>
       </el-form-item>
     </div>
   </el-form>
@@ -228,6 +227,8 @@ export default {
       rewardData: [],
       rankData: [],
       clubData: [],
+      intentData: [],
+      internshipData: [],
       rewardDataValue: [],
       raceData: [],
       raceDataValue: [],
@@ -312,7 +313,7 @@ export default {
                 "data_map",
                 "profile",
                 "*",
-                "StaffID"
+                "StaffID.keyword"
               ],
               "RelationType": "must",
               "NodeType": "match",
@@ -334,6 +335,8 @@ export default {
         let raceData = [];
         let rankData = [];
         let clubData = [];
+        let intentData = [];
+        let internshipData = [];
         for (let i = 0; i < range.length; i++) {
           if (range[i] === "profile") {
             const translation = {
@@ -350,57 +353,17 @@ export default {
             for (let j = 0; j < profile.length; j++) {
               if (translation[profile[j]])
                 profileData.push({
-                  content: profile[j] !== "Photo" ? content.profile[Object.keys(content["profile"])][profile[j]] : "/",
+                  content: content.profile[Object.keys(content["profile"])][profile[j]] + (profile[j] === "Name" ? " (脱敏处理)" : ""),
                   name: translation[profile[j]],
                   type: "学籍信息"
                 });
             }
           }
-          // else if (range[i] === "score") {
-          //   let score = Object.keys(content.score);
-          //   for (let j = 0; j < score.length; j++) {
-          //     scoreData.push({
-          //       content: "最终成绩: " + content.score[score[j]].ScoreFinal + " / " + content.score[score[j]].SchoolYear + "第" + content.score[score[j]].Semester + "学期",
-          //       name: content.score[score[j]].CourseName,
-          //       type: "成绩信息"
-          //     });
-          //   }
-          // }
-          // else if (range[i] === "level_exam") {
-          //   let level = Object.keys(content.level_exam);
-          //   for (let j = 0; j < level.length; j++) {
-          //     levelData.push({
-          //       content: "成绩: " + content.level_exam[level[j]].Score + " / " + content.level_exam[level[j]].ExamDate,
-          //       name: content.level_exam[level[j]].ExamName,
-          //       type: "等级考试信息",
-          //     });
-          //   }
-          // }
-          // else if (range[i] === "reward") {
-          //   let reward = Object.keys(content.reward);
-          //   for (let j = 0; j < reward.length; j++) {
-          //     rewardData.push({
-          //       content: content.reward[reward[j]].Semester === 0 ? "第一学期" : "第二学期",
-          //       name: content.reward[reward[j]].RewardName,
-          //       type: "个人荣誉信息"
-          //     });
-          //   }
-          // }
-          // else if (range[i] === "race_reward") {
-          //   let race = Object.keys(content.race_reward);
-          //   for (let j = 0; j < race.length; j++) {
-          //     raceData.push({
-          //       content: "获奖类型: " + content.race_reward[race[j]].RaceLevel + "-" + content.race_reward[race[j]].RewardLevel + " / " + content.race_reward[race[j]].RewardDate,
-          //       name: content.race_reward[race[j]].RaceName,
-          //       type: "创新学分类型"
-          //     });
-          //   }
-          // }
           else if (range[i] === "rank") {
             let rank = Object.keys(content.rank);
             for (let j = 0; j < rank.length; j++) {
               rankData.push({
-                content: "GPA: " + content.rank[rank[j]].GPA + " / 排名: " + content.rank[rank[j]].Rank,
+                content: "GPA: " + content.rank[rank[j]].GPA.toFixed(2) + " / 排名: " + content.rank[rank[j]].Rank,
                 name: "GPA排名",
                 type: "排名信息"
               });
@@ -427,8 +390,25 @@ export default {
               type: "综合素质信息"
             });
           }
+          else if (range[i] === "career_intent") {
+            let intent = Object.keys(content.career_intent);
+            for (let j = 0; j < intent.length; j++) {
+              intentData.push({
+                content: "职位: " + content.career_intent[intent[j]].JobTypeIntent[0] + "... / 地点: " + content.career_intent[intent[j]].LocationIntent[0] + "...",
+                name: "意向职位和地点",
+                type: "个人填写信息"
+              });
+            }
+          }
+          else if (range[i] === "internship_experience") {
+            internshipData.push({
+              content: "仅包含是否有实习经历",
+              name: "实习经历",
+              type: "个人填写信息"
+            });
+          }
         }
-        this.tableData = [...profileData, ...rewardData, ...raceData, ...rankData, ...clubData];
+        this.tableData = [...profileData, ...rewardData, ...raceData, ...rankData, ...clubData, ...intentData, ...internshipData];
         this.loading = false;
       }).catch(() => {
         this.$message.error("出错啦,请稍后再试");
@@ -542,7 +522,7 @@ export default {
             const rank = this.content.rank[Object.keys(this.content.rank)[0]];
             this.rankData = [{
               GPA: rank.GPA,
-              MajorName: rank.MajorName,
+              StaffID: rank.StaffID,
               Rank: rank.Rank
             }];
           }
@@ -553,6 +533,20 @@ export default {
               this.clubData.push({
                 ID: this.content.org_experience[club[i]].ID,
                 title: club[i]
+              });
+            }
+          }
+          else if (range[i] === "career_intent") {
+            const intent = Object.keys(this.content.career_intent);
+            this.intentData = intent;
+          }
+          else if (range[i] === "internship_experience") {
+            const internship = Object.keys(this.content.internship_experience);
+            this.internshipData = [];
+            for (let i = 0; i < internship.length; i++) {
+              this.internshipData.push({
+                ID: this.content.internship_experience[internship[i]].ID,
+                title: internship[i]
               });
             }
           }
@@ -603,6 +597,14 @@ export default {
         if (this.ruleForm.intType.indexOf("org_experience") !== -1)
           for (let i = 0; i < this.clubData.length; i++)
             ShareItems.push({ "Path": ["org_experience", this.clubData[i].title] });
+        if (this.ruleForm.intType.indexOf("career_intent") !== -1)
+          for (let i = 0; i < this.intentData.length; i++) {
+            ShareItems.push({ "Path": ["career_intent", this.intentData[i], "JobTypeIntent"] });
+            ShareItems.push({ "Path": ["career_intent", this.intentData[i], "LocationIntent"] });
+          }
+        if (this.ruleForm.intType.indexOf("internship_experience") !== -1)
+          for (let i = 0; i < this.internshipData.length; i++)
+            ShareItems.push({ "Path": ["internship_experience", this.internshipData[i].title] });
         if (this.ruleForm.rewardType.indexOf("race_reward") !== -1)
           for (let i = 0; i < this.raceDataValue.length; i++)
             ShareItems.push({ "Path": ["race_reward", this.raceDataValue[i]] });
@@ -625,18 +627,16 @@ export default {
           });
           this.dialogVisible = true;
           this.loading = false;
-        })
-          .catch(() => {
-            this.$message.error("出错啦,请稍后再试");
-            this.loading = false;
-          });
-      })
-        .catch(() => {
-          this.$message({
-            type: "info",
-            message: id ? "操作已取消" : "公开已取消",
-          });
+        }).catch(() => {
+          this.$message.error("出错啦,请稍后再试");
+          this.loading = false;
         });
+      }).catch(() => {
+        this.$message({
+          type: "info",
+          message: id ? "操作已取消" : "公开已取消",
+        });
+      });
     },
   },
   mounted() {

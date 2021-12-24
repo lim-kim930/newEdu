@@ -25,7 +25,7 @@
     <el-select v-model="JobTypeCode" clearable filterable placeholder="岗位大类" style="width: 180px">
       <el-option
         v-for="item in options[1].children"
-        :key="item.value"
+        :key="item.id"
         :label="item.label"
         :value="item.value"
       ></el-option>
@@ -39,7 +39,7 @@
     >
       <el-option
         v-for="item in options[2].children"
-        :key="item.value"
+        :key="item.id"
         :label="item.label"
         :value="item.value"
       ></el-option>
@@ -53,7 +53,8 @@
       prefix-icon="el-icon-search"
       :fetch-suggestions="querySearch"
       @select="companySelect"
-      placeholder="公司"
+      @change="ddd"
+      placeholder="公司(请输入后选择)"
       :trigger-on-focus="false"
       style="margin-left: 10px"
     ></el-autocomplete>
@@ -77,17 +78,17 @@
             <el-form-item label="岗位名称">
               <span>{{ props.row.Name }}</span>
             </el-form-item>
-            <el-form-item label="岗位大类">
-              <span>{{ props.row.JobType.Name }}</span>
+            <el-form-item label="薪资类型">
+              <span>{{ props.row.SalaryMode + (props.row.SalaryCount?(" - " + props.row.SalaryCount + "薪"):"") }}</span>
             </el-form-item>
-            <el-form-item label="最低薪资">
+            <el-form-item label="最低薪资" v-if="props.row.SalaryMode !== '面议'">
               <span>{{ props.row.MinSalary }}</span>
             </el-form-item>
-            <el-form-item label="最高薪资">
+            <el-form-item label="最高薪资" v-if="props.row.SalaryMode !== '面议'">
               <span>{{ props.row.MaxSalary }}</span>
             </el-form-item>
             <el-form-item label="发布时间">
-              <span>{{ props.row.CreatedAt }}</span>
+              <span>{{ new Date(+new Date(props.row.CreatedAt) + 8 * 3600 * 1000).toISOString().replace(/T/g, " ").replace(/\.[\d]{3}Z/, "")}}</span>
             </el-form-item>
             <el-form-item label="工作地点">
               <span>{{ props.row.WorkLocation }}</span>
@@ -96,7 +97,7 @@
               <span style="display: inline-block; width: 500px;">{{ props.row.Description }}</span>
             </el-form-item>
             <el-form-item label="岗位要求">
-              <span style="display: inline-block; width: 500px;">{{ props.row.requirement }}</span>
+              <span style="display: inline-block; width: 500px;">{{ props.row.Requirement }}</span>
             </el-form-item>
           </el-form>
         </template>
@@ -176,6 +177,11 @@ export default {
   },
   props: ["wh"],
   methods: {
+    ddd() {
+      this.CompanyCode = "";
+      if (this.CompanyCode === "")
+        this.CompanyName = "";
+    },
     companySelect(v) {
       this.CompanyCode = v.CompanyCode;
     },
@@ -253,6 +259,10 @@ export default {
         for (let i = 0; i < type.length; i++)
           for (let j = 0; j < response.data.data[type[i]].length; j++) {
             this.total++;
+            if (response.data.data[type[i]][j].SalaryMode === "面议") {
+              response.data.data[type[i]][j].MinSalary = "/";
+              response.data.data[type[i]][j].MaxSalary = "/";
+            }
             this.tableData.push(response.data.data[type[i]][j]);
           }
         this.loading = false;
@@ -280,6 +290,10 @@ export default {
           for (let i = 0; i < type.length; i++)
             for (let j = 0; j < response.data.data[type[i]].length; j++) {
               this.total++;
+              if (response.data.data[type[i]][j].SalaryMode === "面议") {
+                response.data.data[type[i]][j].MinSalary = "/";
+                response.data.data[type[i]][j].MaxSalary = "/";
+              }
               this.tableData.push(response.data.data[type[i]][j]);
               if (job.indexOf(response.data.data[type[i]][j].Name) === -1)
                 job.push(response.data.data[type[i]][j].Name);

@@ -26,13 +26,13 @@
         </el-dropdown-menu>
       </el-dropdown>
       <div
-        style="cursor: pointer; height: 150px"
+        style="height: 150px"
         v-for="item in sentMsgData"
         v-bind:key="item.id"
         @click="goQuery()"
       >
         <el-col :span="8" class="card">
-          <el-card shadow="hover">
+          <el-card shadow="hover" style="cursor: pointer;">
             <h5>请求公司: {{item.TargetCompanyCode}}</h5>
             <h5>应聘岗位: {{item.TargetJobID}}</h5>
             <h5>过期时间: {{new Date(+new Date(item.ExpireAt) + 8 * 3600 * 1000).toISOString().replace(/T/g, " ").replace(/\.[\d]{3}Z/, "")}}</h5>

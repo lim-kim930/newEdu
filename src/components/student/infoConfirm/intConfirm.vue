@@ -85,7 +85,7 @@
       :style="{'width': '99%', 'margin-top': '10px', 'height': this.wh - 310 + 'px'}"
     />
     <el-form-item label="意向岗位" v-show="typeValue==='intention'">
-      <el-form-item style="height: 50px">
+      <el-form-item style="min-height: 50px">
         <h3 style="display: inline-block; padding-left: 10px;">已选择:</h3>
         <div style="display: inline-block">
           <el-tag
@@ -120,6 +120,23 @@
       </el-form-item>
     </el-form-item>
     <el-form-item label="意向城市" v-show="typeValue==='intention'">
+      <el-form-item style="min-height: 50px;">
+        <h3 style="display: inline-block; padding-left: 10px;">已选择:</h3>
+        <div style="display: inline-block">
+          <el-tag
+            :disable-transitions="true"
+            v-show="intentionAddData.locationFormated.length === 0"
+            type="info"
+            style="font-size: 14px; margin-bottom: 10px"
+          >暂无</el-tag>
+          <el-tag
+            :disable-transitions="true"
+            v-for="item in intentionAddData.locationFormated"
+            v-bind:key="item.id"
+            style="font-size: 14px; margin-bottom: 10px"
+          >{{item}}</el-tag>
+        </div>
+      </el-form-item>
       <el-cascader
         style="width: 180px"
         v-model="location"
@@ -150,7 +167,7 @@
             type="danger"
             size="mini"
             @click="deleteJob(scope.row.Value.ID.Value)"
-          >删除记录</el-button>
+          >删除经历</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -160,21 +177,12 @@
       border
       style="width: 100%; margin-top: 10px;"
     >
-      <el-table-column prop="name" label="工作名称"></el-table-column>
-      <el-table-column prop="type" label="工作类型"></el-table-column>
-      <el-table-column prop="department" label="工作地点"></el-table-column>
-      <el-table-column prop="time" label="工作时间"></el-table-column>
-    </el-table>
-    <el-table
-      v-show="typeValue==='volun'"
-      :data="volunData"
-      border
-      style="width: 100%; margin-top: 10px;"
-    >
-      <el-table-column prop="Value.actName.Value" label="活动名称"></el-table-column>
-      <el-table-column prop="Value.content.Value" label="活动内容"></el-table-column>
-      <el-table-column prop="Value.StartAt.Value" label="活动日期"></el-table-column>
-      <el-table-column prop="Value.actLength.Value" label="志愿时长"></el-table-column>
+      <el-table-column prop="Value.JobName.Value" label="岗位名称"></el-table-column>
+      <el-table-column prop="Value.CompanyName.Value" label="公司名称"></el-table-column>
+      <el-table-column prop="Value.WorkLocation.Value" label="实习地点"></el-table-column>
+      <el-table-column prop="Value.WorkContent.Value" label="实习内容"></el-table-column>
+      <el-table-column prop="Value.StartAt.Value" label="开始时间"></el-table-column>
+      <el-table-column prop="Value.EndAt.Value" label="结束时间"></el-table-column>
       <el-table-column label="操作" width="120">
         <template slot-scope="scope">
           <el-button
@@ -182,7 +190,28 @@
             type="danger"
             size="mini"
             @click="deleteJob(scope.row.Value.ID.Value)"
-          >删除记录</el-button>
+          >删除经历</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <el-table
+      v-show="typeValue==='volun'"
+      :data="volunData"
+      border
+      style="width: 100%; margin-top: 10px;"
+    >
+      <el-table-column prop="Value.ActName.Value" label="活动名称"></el-table-column>
+      <el-table-column prop="Value.Content.Value" label="活动内容"></el-table-column>
+      <el-table-column prop="Value.ActDate.Value" label="活动日期"></el-table-column>
+      <el-table-column prop="Value.ActLength.Value" label="志愿时长"></el-table-column>
+      <el-table-column label="操作" width="120">
+        <template slot-scope="scope">
+          <el-button
+            plain
+            type="danger"
+            size="mini"
+            @click="deleteJob(scope.row.Value.ID.Value)"
+          >删除经历</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -206,67 +235,64 @@
           </el-select>
         </el-form-item>
         <el-form-item label="工作时间:">
-          <el-col :span="11">
-            <el-date-picker
-              v-model="clubAddData.time"
-              type="daterange"
-              value-format="yyyy-MM-dd"
-              range-separator="-"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-            ></el-date-picker>
-          </el-col>
+          <el-date-picker
+            v-model="clubAddData.StartAt"
+            type="date"
+            value-format="yyyy-MM-dd"
+            placeholder="开始日期"
+            @change="compareDate"
+          ></el-date-picker>-
+          <el-date-picker
+            v-model="clubAddData.EndAt"
+            type="date"
+            value-format="yyyy-MM-dd"
+            placeholder="结束日期"
+            @change="compareDate"
+          ></el-date-picker>
         </el-form-item>
-        <!-- <el-form-item label="备注" style="width: 500px">
-          <el-input
-            type="textarea"
-            :rows="10"
-            v-model="clubAddData.desc"
-            resize="none"
-            show-word-limit
-            maxlength="500"
-          ></el-input>
-        </el-form-item>-->
         <el-form-item>
           <el-button @click="save" type="primary">立即添加</el-button>
           <el-button @click="resetDialogForm()">重置</el-button>
         </el-form-item>
       </el-form>
       <el-form v-show="typeValue==='social'" label-width="110px">
-        <el-form-item label="工作名称:" style="width: 300px">
-          <el-input v-model="socialAddData.name" placeholder="请填写"></el-input>
+        <el-form-item label="岗位名称:" style="width: 300px">
+          <el-input v-model="socialAddData.JobName" placeholder="请填写"></el-input>
         </el-form-item>
-        <el-form-item label="工作类型:">
-          <el-select v-model="socialAddData.type" placeholder="请选择">
-            <el-option label="实习经历:" value="club"></el-option>
-          </el-select>
+        <el-form-item label="公司名称:" style="width: 300px">
+          <el-input v-model="socialAddData.CompanyName" placeholder="请填写"></el-input>
         </el-form-item>
-        <el-form-item label="工作地点:" style="width: 300px">
-          <el-input v-model="socialAddData.department" placeholder="请填写"></el-input>
+        <el-form-item label="实习地点:" style="width: 300px">
+          <el-input v-model="socialAddData.WorkLocation" placeholder="请填写"></el-input>
         </el-form-item>
-        <el-form-item label="工作时间:">
-          <el-col :span="11">
-            <el-date-picker
-              v-model="socialAddData.time"
-              type="daterange"
-              range-separator="-"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-            ></el-date-picker>
-          </el-col>
+        <el-form-item label="实习时间:">
+          <el-date-picker
+            v-model="socialAddData.StartAt"
+            type="date"
+            value-format="yyyy-MM-dd"
+            placeholder="开始日期"
+            @change="compareDate"
+          ></el-date-picker>-
+          <el-date-picker
+            v-model="socialAddData.EndAt"
+            type="date"
+            value-format="yyyy-MM-dd"
+            placeholder="结束日期"
+            @change="compareDate"
+          ></el-date-picker>
         </el-form-item>
-        <el-form-item label="备注" style="width: 500px">
+        <el-form-item label="工作内容" style="width: 500px">
           <el-input
             type="textarea"
             :rows="10"
-            v-model="socialAddData.desc"
+            v-model="socialAddData.WorkContent"
             resize="none"
             show-word-limit
-            maxlength="500"
+            maxlength="200"
           ></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary">立即创建</el-button>
+          <el-button @click="save" type="primary">立即创建</el-button>
           <el-button @click="resetDialogForm()">重置</el-button>
         </el-form-item>
       </el-form>
@@ -277,7 +303,7 @@
         <el-form-item label="工作时间:">
           <el-col :span="11">
             <el-date-picker
-              v-model="volunAddData.StartAt"
+              v-model="volunAddData.ActDate"
               type="date"
               value-format="yyyy-MM-dd"
               placeholder="选择日期"
@@ -356,18 +382,20 @@ export default {
         JobName: "",
         OrgName: "",
         OrgLevel: "",
-        time: []
+        StartAt: "",
+        EndAt: ""
       },
       socialAddData: {
-        name: "",
-        type: "",
-        time: "",
-        department: "",
-        desc: ""
+        JobName: "",
+        EndAt: "",
+        StartAt: "",
+        CompanyName: "",
+        WorkLocation: "",
+        WorkContent: ""
       },
       volunAddData: {
         ActName: "",
-        StartAt: "",
+        ActDate: "",
         ActLength: 0,
         Content: ""
       },
@@ -426,25 +454,36 @@ export default {
   props: ["globalFile", "wh"],
   components: { mavonEditor },
   methods: {
+    compareDate() {
+      if (this.typeValue === "club") {
+        if (this.clubAddData.StartAt.length === 0 || this.clubAddData.StartAt.length === 0)
+          return;
+        if (new Date(this.clubAddData.StartAt) > new Date(this.clubAddData.EndAt)) {
+          this.$message.error("时间信息选取有误");
+          this.clubAddData.EndAt = "";
+        }
+      }
+      else if (this.typeValue === "social") {
+        if (this.socialAddData.StartAt.length === 0 || this.socialAddData.StartAt.length === 0)
+          return;
+        if (new Date(this.socialAddData.StartAt) > new Date(this.socialAddData.EndAt)) {
+          this.$message.error("时间信息选取有误");
+          this.socialAddData.EndAt = "";
+        }
+      }
+    },
     imageFilter() {
       return;
     },
     resetDialogForm() {
+      console.log(this.typeValue);
       if (this.typeValue === "club")
         this.clubAddData = {
           JobName: "",
           OrgName: "",
           OrgLevel: "",
-          time: []
-        };
-      else if (this.typeValue === "social")
-        this.clubAddData = {
-          name: "",
-          type: "",
-          time: "",
-          level: "",
-          department: "",
-          desc: ""
+          StartAt: "",
+          EndAt: ""
         };
       else if (this.typeValue === "volun")
         this.volunAddData = {
@@ -453,6 +492,17 @@ export default {
           dura: 0,
           content: ""
         };
+      else if (this.typeValue === "social") {
+        this.socialAddData = {
+          JobName: "",
+          EndAt: "",
+          StartAt: "",
+          CompanyName: "",
+          WorkLocation: "",
+          WorkContent: ""
+        };
+      }
+
     },
     getFile(params) {
       this.loading = true;
@@ -526,6 +576,7 @@ export default {
       }).then(response => {
         const data = response.data.data;
         this.jobOpitions = [[], [], [], [], []];
+        this.job = [[], [], [], [], []];
         let other = null;
         for (let i = 0; i < data.length; i++) {
           for (let j = 0; j < 5; j++) {
@@ -563,21 +614,16 @@ export default {
           })
         });
       }).then(response => {
-        this.intentionAddData.jobFormated = [];
-        this.job = [[], [], [], [], []];
-        const data = response.data.data;
-        for (let i = 0; i < data.length; i++) {
-          this.intentionAddData.jobFormated.push(data[i].Name);
-          for (let j = 0; j < 5; j++) {
-            if (this.translation[j].value.indexOf(data[i].Name) !== -1) {
-              this.job[j].push(data[i].Name);
-              break;
-            }
-          }
+        if (response.data.data.length === 0) {
+          this.loading = false;
+          return;
         }
         this.loading = false;
+        const data = response.data.data[0].Value;
+        this.intentionAddData.jobFormated = data.JobTypeIntent.Value;
+        this.intentionAddData.locationFormated = data.LocationIntent.Value;
       }).catch(() => {
-        this.$message.error("获取岗位信息出错啦,请稍后再试");
+        this.$message.error("获取就职意向信息出错啦,请稍后再试");
         this.loading = false;
       });
     },
@@ -594,6 +640,9 @@ export default {
           break;
         case "volun":
           url = "/lookup?topic=voluntary_experience";
+          break;
+        case "social":
+          url = "/lookup?topic=internship_experience";
           break;
         default:
           return;
@@ -625,33 +674,57 @@ export default {
           this.loading = false;
         }
         else if (this.typeValue === "volun") {
-          // if (response.data.data.length !== 0)
-          //   for (let i = 0; i < response.data.data.length; i++) {
-          //     response.data.data[i].Value.StartAt.Value = response.data.data[i].Value.StartAt.Value.substr(0, 10);
-          //     response.data.data[i].Value.EndAt.Value = response.data.data[i].Value.EndAt.Value.substr(0, 10);
-          //   }
+          if (response.data.data.length !== 0)
+            for (let i = 0; i < response.data.data.length; i++) {
+              response.data.data[i].Value.ActDate.Value = response.data.data[i].Value.ActDate.Value.substr(0, 10);
+            }
           this.volunData = response.data.data;
           this.loading = false;
         }
+        else if (this.typeValue === "social") {
+          if (response.data.data.length !== 0)
+            for (let i = 0; i < response.data.data.length; i++) {
+              response.data.data[i].Value.StartAt.Value = response.data.data[i].Value.StartAt.Value.substr(0, 10);
+              response.data.data[i].Value.EndAt.Value = response.data.data[i].Value.EndAt.Value.substr(0, 10);
+            }
+          this.socialData = response.data.data;
+          this.loading = false;
+        }
       }).catch(() => {
-        this.$message.error("获取" + (this.typeValue === "club" ? "班团经历" : (this.typeValue === "scoial" ? "实习经历" : "志愿经历")) + "信息出错啦,请稍后再试");
+        this.$message.error("获取个人填写信息出错啦,请稍后再试");
         this.loading = false;
       });
     },
     deleteJob(ID) {
-      this.$confirm("确定要删除此项工作记录吗?", "提示", {
+      this.$confirm("确定要删除此项经历吗?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning",
         center: true
       }).then(() => {
         this.loading = true;
+        let url = "";
+        let topic = "";
+        switch (this.typeValue) {
+          case "club":
+            url = "/delete?topic=org_experience";
+            topic = "org_experience";
+            break;
+          case "volun":
+            url = "/delete?topic=voluntary_experience";
+            topic = "voluntary_experience";
+            break;
+          case "social":
+            url = "/delete?topic=internship_experience";
+            topic = "internship_experience";
+            break;
+        }
         this.axios({
           method: "put",
-          url: "/delete?topic=org_experience",
+          url,
           headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
           data: {
-            "Topic": "org_experience",
+            "Topic": topic,
             "CondMap": {
               "SchoolCode": "1",
               "StaffID": JSON.parse(localStorage.getItem("jw_student_file")).staffID,
@@ -669,7 +742,7 @@ export default {
     },
     save() {
       if (this.typeValue === "club") {
-        if (this.clubAddData.JobName.trim().length === 0 || this.clubAddData.OrgName.trim().length === 0 || this.clubAddData.OrgLevel.length === 0 || this.clubAddData.time.length === 0)
+        if (this.clubAddData.JobName.trim().length === 0 || this.clubAddData.OrgName.trim().length === 0 || this.clubAddData.OrgLevel.length === 0 || this.clubAddData.StartAt.length === 0 || this.clubAddData.EndAt.length === 0)
           return this.$message.error("请将表单填写完整");
       }
       else if (this.typeValue === "int") {
@@ -677,11 +750,15 @@ export default {
           return this.$message.error("请先填写你的自我介绍吧");
       }
       else if (this.typeValue === "intention") {
-        if (this.intentionAddData.locationFormated === "" || this.intentionAddData.jobFormated.length === 0)
+        if (this.intentionAddData.locationFormated.length === 0 || this.intentionAddData.jobFormated.length === 0)
           return this.$message.error("请先勾选你的求职意向岗位和工作城市");
       }
       else if (this.typeValue === "volun") {
-        if (this.volunAddData.ActName.trim().length === 0 || this.volunAddData.StartAt.length === 0 || this.volunAddData.Content.trim().length === 0)
+        if (this.volunAddData.ActName.trim().length === 0 || this.volunAddData.ActDate.length === 0 || this.volunAddData.Content.trim().length === 0)
+          return this.$message.error("请将表单填写完整");
+      }
+      else if (this.typeValue === "social") {
+        if (this.socialAddData.JobName.trim().length === 0 || this.socialAddData.CompanyName.length === 0 || this.socialAddData.StartAt.trim().length === 0 || this.socialAddData.EndAt.trim().length === 0 || this.socialAddData.WorkLocation.trim().length === 0)
           return this.$message.error("请将表单填写完整");
       }
       this.$confirm("系统会为您保存，但不会写入学业文件，后续可以继续完善" + (this.typeValue === "int" ? "" : "但请确保信息真实可信"), "提示", {
@@ -710,9 +787,9 @@ export default {
                 "JobName": this.clubAddData.JobName,
                 "OrgName": this.clubAddData.OrgName,
                 "OrgLevel": this.clubAddData.OrgLevel,
-                "StartAt": this.clubAddData.time[0],
+                "StartAt": this.clubAddData.StartAt,
                 "ID": 0,
-                "EndAt": this.clubAddData.time[1]
+                "EndAt": this.clubAddData.EndAt
               }
             };
             break;
@@ -721,16 +798,28 @@ export default {
             data = {
               "Topic": "career_intent",
               "ItemObj": {
-                "locationIntent": JSON.stringify(this.intentionAddData.locationFormated),
-                "jobTypeIntent": JSON.stringify(this.intentionAddData.jobFormated)
+                "LocationIntent": this.intentionAddData.locationFormated,
+                "JobTypeIntent": this.intentionAddData.jobFormated
               }
             };
             break;
           case "volun":
             url = "/save?topic=voluntary_experience";
+            this.volunAddData.ActDate = new Date(this.volunAddData.ActDate).toISOString().split(".")[0] + "+08:00";
+            this.volunAddData.ID = 0;
             data = {
               "Topic": "voluntary_experience",
               "ItemObj": this.volunAddData
+            };
+            break;
+          case "social":
+            url = "/save?topic=internship_experience";
+            this.socialAddData.StartAt = new Date(this.socialAddData.StartAt).toISOString().split(".")[0] + "+08:00";
+            this.socialAddData.EndAt = new Date(this.socialAddData.EndAt).toISOString().split(".")[0] + "+08:00";
+            this.socialAddData.ID = 0;
+            data = {
+              "Topic": "internship_experience",
+              "ItemObj": this.socialAddData
             };
             break;
           default:
@@ -746,9 +835,8 @@ export default {
           if (this.typeValue === "club" || this.typeValue === "social" || this.typeValue === "volun") {
             this.resetDialogForm();
             this.addDialogShow = false;
-            return this.typeChange();
           }
-          this.loading = false;
+          return this.typeChange();
         }).catch(() => {
           this.$message.error("保存个人填写信息出错啦,请稍后再试");
           this.loading = false;
@@ -756,25 +844,95 @@ export default {
       });
     },
     confirm() {
-      if (this.typeValue === "int")
-        if (this.content.length === 0)
+      if (this.typeValue === "int") {
+        if (this.content.trim().length === 0)
           return this.$message.error("请先填写你的自我介绍吧");
-      this.$confirm("请确认您已经将个人填写信息完善, 是否继续确认?", "提示", {
+      }
+      else if (this.typeValue === "intention") {
+        if (this.intentionAddData.locationFormated.length === 0 || this.intentionAddData.jobFormated.length === 0)
+          return this.$message.error("请先勾选你的求职意向岗位和工作城市");
+      }
+      let title = "";
+      switch (this.typeValue) {
+        case "int":
+          title = "自我介绍";
+          break;
+        case "volun":
+          title = "志愿经历";
+          break;
+        case "club":
+          title = "班团经历";
+          break;
+        case "intention":
+          title = "就职意向";
+          break;
+        case "social":
+          title = "实习经历";
+          break;
+      }
+      this.$confirm("请确认您已经将" + title + "信息完善, 是否继续确认?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning",
         center: true
       }).then(() => {
         this.loading = true;
-        this.$emit("func2", false);
-        this.$emit("func3", 3);
-        let data = new FormData();
-        data.append("dataFile", this.file);
-        if (this.typeValue !== "int") {
+        let url = "", data = {};
+        switch (this.typeValue) {
+          case "int":
+            url = "/save?topic=self_introduction";
+            data = {
+              "Topic": "self_introduction",
+              "ItemObj": {
+                "SelfIntroduction": this.content
+              }
+            };
+            break;
+          case "intention":
+            url = "/save?topic=career_intent";
+            data = {
+              "Topic": "career_intent",
+              "ItemObj": {
+                "LocationIntent": this.intentionAddData.locationFormated,
+                "JobTypeIntent": this.intentionAddData.jobFormated
+              }
+            };
+            break;
+          default:
+            url = "https://api.limkim.xyz/put";
+        }
+        this.axios({
+          method: "put",
+          url,
+          headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
+          data
+        }).then(() => {
+          this.$emit("func2", false);
+          this.$emit("func3", 3);
+          let data = new FormData();
+          data.append("dataFile", this.file);
+          let url = "";
+          switch (this.typeValue) {
+            case "int":
+              url = "/confirm?topic=self_introduction";
+              break;
+            case "club":
+              url = "/confirm?topic=org_experience";
+              break;
+            case "volun":
+              url = "/confirm?topic=voluntary_experience";
+              break;
+            case "intention":
+              url = "/confirm?topic=career_intent";
+              break;
+            case "social":
+              url = "/confirm?topic=internship_experience";
+              break;
+          }
           data.append("condMap", "{\"SchoolCode\": 1,\"StaffID\": " + JSON.parse(localStorage.getItem("jw_student_file")).staffID + "}");
           this.axios({
             method: "put",
-            url: "/confirm?topic=org_experience",
+            url,
             headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
             data
           }).then((response) => {
@@ -819,109 +977,9 @@ export default {
               });
             });
             this.loading = false;
-          }).catch(() => {
-            this.$emit("func2", true);
-            this.$emit("func3", null);
-            this.$message.error("确认个人填写信息出错啦,请稍后再试");
-            this.loading = false;
           });
-          return;
-        }
-        this.axios({
-          method: "put",
-          url: "/save?topic=self_introduction",
-          headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
-          data: {
-            "Topic": "self_introduction",
-            "ItemObj": {
-              "SelfIntroduction": this.content
-            }
-          }
-        }).then(() => {
-          this.axios({
-            method: "post",
-            url: "/lookup?topic=self_introduction",
-            headers: {
-              "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token
-            },
-            data: JSON.stringify({
-              SchoolCode: 1,
-              StaffID: JSON.parse(localStorage.getItem("jw_student_file")).staffID
-            })
-          }).then((response) => {
-            if (response.data.data.length === 0)
-              return this.$message.error("个人填写信息为空,请保存后再试");
-            else {
-              data.append("condMap", "{\"SchoolCode\": 1,\"StaffID\": " + JSON.parse(localStorage.getItem("jw_student_file")).staffID + ", \"SelfIntroduction\": " + JSON.stringify(Base64.decode(response.data.data[0].Value.SelfIntroduction.Value)) + "}");
-              this.axios({
-                method: "put",
-                url: "/confirm?topic=self_introduction",
-                headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
-                data
-              }).then((response) => {
-                var block = response.data.data.TransactionDetail.detail.result[0];
-                var blockName = Object.keys(block);
-                const translation = {
-                  blockHash: "区块哈希",
-                  blockNumber: "交易号",
-                  blockTimestamp: "区块时间戳",
-                  blockWriteTime: "写入时间",
-                  hash: "交易内容"
-                };
-                this.blockDataInfo = [];
-                for (var i = 0; i < blockName.length; i++) {
-                  this.blockDataInfo.push({
-                    value: block[blockName[i]],
-                    name: translation[blockName[i]]
-                  });
-                }
-                this.file = this.dataURLtoFile(response.data.data.DataFile, "学业文件");
-                this.$emit("func", this.file);
-                this.$emit("func2", true);
-                this.$emit("func3", null);
-                this.$confirm("个人填写信息确认成功! 继续确认请点击任意空白区域", "提示", {
-                  confirmButtonText: "下载新的学业文件",
-                  cancelButtonText: "查看此次交易详情",
-                  distinguishCancelAndClose: true,
-                  beforeClose: (action, instance, done) => {//将左边的按钮改为打开交易详情，且不关闭此弹框
-                    if (action === "cancel")
-                      this.dialogTableVisible = true;
-                    if (action === "confirm" || action === "close")
-                      done();
-                  },
-                  dangerouslyUseHTMLString: true,
-                  type: "success"
-                }).then(() => {
-                  this.downloadFile("学业文件.enc");
-                }).catch(() => {
-                  this.$message({
-                    type: "info",
-                    message: "请在结束确认时下载最新的学业文件",
-                  });
-                });
-                this.loading = false;
-              }).catch(() => {
-                this.$emit("func2", true);
-                this.$emit("func3", null);
-                this.$message.error("确认个人填写信息出错啦,请稍后再试");
-                this.loading = false;
-              });
-            }
-          }).catch(() => {
-            this.$emit("func2", true);
-            this.$emit("func3", null);
-            this.$message.error("获取个人填写信息出错啦,请稍后再试");
-            this.loading = false;
-          });
-        }).catch(() => {
-          this.$emit("func2", true);
-          this.$emit("func3", null);
-          this.$message.error("保存个人填写信息出错啦,请稍后再试");
-          this.loading = false;
         });
-      }).catch(() => {
-        this.$message.error("操作已取消");
-        this.loading = false;
+
       });
     }
   },
@@ -948,10 +1006,11 @@ export default {
     },
     location: {
       handler() {
-        if (this.location.length > 100) {
-          this.location = this.location.splice(0, 100);
+        if (this.location.length > 10) {
+          this.location = this.location.splice(0, 10);
           this.$message.error("太多啦~");
         }
+        this.intentionAddData.locationFormated = [];
         for (let i = 0; i < this.location.length; i++) {
           this.intentionAddData.locationFormated.push(CodeToText[this.location[i][0]] + (CodeToText[this.location[i][1]] === "市辖区" ? "" : CodeToText[this.location[i][1]]));
         }

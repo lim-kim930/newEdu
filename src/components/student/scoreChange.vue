@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-form label-width="140px" v-loading="loading" element-loading-text="拼命加载中" class="form">
-      <el-form-item label="课程代码(课程号)" required>
+      <!-- <el-form-item label="课程代码(课程号)" required>
         <el-input v-model="form.course" style="width: 200px"></el-input>
       </el-form-item>
       <el-form-item label="原有成绩" required>
@@ -24,9 +24,19 @@
       </el-upload>
       <el-form-item>
         <el-button type="primary" @click="onSubmit" style="width: 150px; margin: 10px 0 0 10px">提交申请</el-button>
-      </el-form-item>
+      </el-form-item> -->
+      <h3 style="margin-left: 20px">请先联系教务处更改有错误的成绩信息,然后在本系统提交更改申请</h3>
+      <h3 style="margin: 10px 0 0 20px">教务处联系方式:</h3>
+      <div class="content">
+        <span style="dispaly: block">电话: 0571-86915011</span>
+        <span>邮箱地址: hdujwc@hdu.edu.cn</span>
+        <span>地址: 行政楼</span>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="dialogVisible = false">我已经更改</el-button>
+      </span>
     </el-form>
-    <el-dialog title="提示" :visible.sync="dialogVisible" width="30%">
+    <!-- <el-dialog title="提示" :visible.sync="dialogVisible" width="30%">
       <h3 style="margin-left: 20px">请先联系教务处更改有错误的成绩信息,然后在本系统提交更改申请</h3>
       <h3 style="margin: 10px 0 0 20px">教务处联系方式:</h3>
       <div class="content">
@@ -37,7 +47,7 @@
       <span slot="footer" class="dialog-footer">
         <el-button type="primary" @click="dialogVisible = false">我已经更改</el-button>
       </span>
-    </el-dialog>
+    </el-dialog> -->
   </div>
 </template>
 <script>
@@ -139,6 +149,11 @@ export default {
   font-size: 14px;
   color: #409eff;
   border-radius: 5px;
+}
+
+.content span {
+  margin: 20px;
+  display: block;
 }
 </style>
 <style>

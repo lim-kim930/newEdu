@@ -82,7 +82,7 @@ export default {
           type: "warning",
           center: true
         }).then(() => {
-          localStorage.removeItem("jw_ent_file");
+          localStorage.removeItem("jw_manager_file");
           window.location.href = "https://edu.limkim.cn/sign";
         });
       }

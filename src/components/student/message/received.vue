@@ -27,14 +27,17 @@
         </el-dropdown-menu>
       </el-dropdown>
       <div
-        style="cursor: pointer; height: 150px"
+        style="height: 150px"
         v-for="item in requestMsgData"
         v-bind:key="item.id"
-        @click="goQuery(item.CompanyCode, item.JobID)"
+        @click="goQuery(item.CompanyCode, item.JobID, item.ID)"
       >
         <el-col :span="8" class="card">
-          <el-card shadow="hover">
-            <h5>请求公司: {{item.CompanyCode}}</h5>
+          <el-card shadow="hover" style="cursor: pointer;">
+            <h5>
+              请求公司: {{item.CompanyCode}}
+              <el-badge style="float: right" :hidden="item.Read" value="new" class="badge"></el-badge>
+            </h5>
             <h5>请求时间: {{new Date(+new Date(item.CreatedAt) + 8 * 3600 * 1000).toISOString().replace(/T/g, " ").replace(/\.[\d]{3}Z/, "")}}</h5>
             <h5>请求描述: {{item.Text}}</h5>
           </el-card>
@@ -58,19 +61,23 @@
           <i class="el-icon-arrow-down el-icon--right"></i>
         </span>
         <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item command="发送时间▼">发送时间▼</el-dropdown-item>
-          <el-dropdown-item command="发送时间▲">发送时间▲</el-dropdown-item>
+          <el-dropdown-item command="宣讲时间▼">宣讲时间▼</el-dropdown-item>
+          <el-dropdown-item command="宣讲时间▲">宣讲时间▲</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
       <div
-        style="cursor: pointer; height: 150px"
-        v-for="item in noticeMsgData"
+        style="height: 150px"
+        v-for="(item, index) in noticeMsgData"
         v-bind:key="item.id"
+        @click="noticeRead(item.ID,index)"
       >
         <el-col :span="8" class="card">
-          <el-card shadow="hover">
-            <!-- <h5>发送公司: {{item.CompanyCode}}</h5> -->
-            <!-- <h5>发送时间: {{new Date(+new Date(item.CreatedAt) + 8 * 3600 * 1000).toISOString().replace(/T/g, " ").replace(/\.[\d]{3}Z/, "")}}</h5> -->
+          <el-card shadow="hover" style="cursor: pointer;">
+            <h5>
+              宣讲主题: {{item.Topic}}
+              <el-badge style="float: right" :hidden="item.Read" value="new" class="badge"></el-badge>
+            </h5>
+            <!-- <h5>宣讲时间: {{new Date(+new Date(item.CreatedAt) + 8 * 3600 * 1000).toISOString().replace(/T/g, " ").replace(/\.[\d]{3}Z/, "")}}</h5> -->
             <h5>宣讲时间: {{new Date(+new Date(item.StartAt) + 8 * 3600 * 1000).toISOString().replace(/T/g, " ").replace(/\.[\d]{3}Z/, "")}}</h5>
             <h5>宣讲会描述: {{item.Detail}}</h5>
           </el-card>
@@ -110,7 +117,7 @@ export default {
   data() {
     return {
       reqSort: "请求时间▼",
-      noticeSort: "发送时间▼",
+      noticeSort: "宣讲时间▼",
       classify: "无",
       requestMsgData: [],
       noticeMsgData: [],
@@ -142,14 +149,41 @@ export default {
           this.requestMsgData[i] = temp[temp.length - i - 1];
       }
     },
-    goQuery(CompanyCode, JobID) {
-      sessionStorage.setItem("com", JSON.stringify({
-        CompanyCode,
-        Name: "",
-        job: "",
-        JobID
-      }));
-      this.$router.push("/infoShare");
+    goQuery(CompanyCode, JobID, ID) {
+      this.axios({
+        method: "put",
+        url: "/share/markFurtherShareRequestRead",
+        headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
+        data: { "ID": ID }
+      }).then(() => {
+        if (this.request !== 0)
+          this.request--;
+        this.$emit("func", this.request + this.notice);
+        sessionStorage.setItem("com", JSON.stringify({
+          CompanyCode,
+          Name: "",
+          job: "",
+          JobID
+        }));
+        this.$router.push("/infoShare");
+      }).catch(() => {
+        this.$message.error("状态更改出错啦,请稍后再试");
+      });
+    },
+    noticeRead(ID, index) {
+      this.axios({
+        method: "put",
+        url: "/campusTalk/markCampusTalkRead",
+        headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
+        data: { "ID": ID }
+      }).then(() => {
+        if (this.notice !== 0)
+          this.notice--;
+        this.$emit("func", this.request + this.notice);
+        this.noticeMsgData[index].Read = true;
+      }).catch(() => {
+        this.$message.error("状态更改出错啦,请稍后再试");
+      });
     }
   },
   created() {
@@ -160,11 +194,21 @@ export default {
       headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
       data: { "student": "any" }
     }).then((response) => {
-      this.request = response.data.data.length;
-      const newData = response.data.data.sort((a, b) => {
+      this.request = 0;
+      const data = response.data.data;
+      const newData = data.sort((a, b) => {
         return new Date(b.CreatedAt) - new Date(a.CreatedAt);
       });
-      this.requestMsgData = newData;
+      let readed = [], unReaded = [];
+      for (let i = 0; i < newData.length; i++) {
+        if (!newData[i].Read) {
+          this.request++;
+          unReaded.push(newData[i]);
+          continue;
+        }
+        readed.push(newData[i]);
+      }
+      this.requestMsgData = [...unReaded, ...readed];
       return this.axios({
         method: "get",
         url: "/campusTalk/lookupForSelf",
@@ -172,8 +216,21 @@ export default {
         data: { "StaffID": JSON.parse(localStorage.getItem("jw_student_file")).staffID }
       });
     }).then((response) => {
-      this.notice = response.data.data.length;
-      this.noticeMsgData = response.data.data;
+      this.notice = 0;
+      const data = response.data.data;
+      const newData = data.sort((a, b) => {
+        return new Date(b.StartAt) - new Date(a.StartAt);
+      });
+      let readed = [], unReaded = [];
+      for (let i = 0; i < newData.length; i++) {
+        if (!newData[i].Read) {
+          this.notice++;
+          unReaded.push(newData[i]);
+          continue;
+        }
+        readed.push(newData[i]);
+      }
+      this.noticeMsgData = [...unReaded, ...readed];
       this.$emit("func2", false);
       this.$emit("func", this.request + this.notice);
     }).catch(() => {
@@ -219,6 +276,13 @@ export default {
 }
 </style>
 <style>
+/* 未读状态 */
+.badge {
+  width: 50px;
+}
+.badge .el-badge__content {
+  line-height: 12px;
+}
 .el-tabs .el-tabs__content {
   overflow: auto;
 }

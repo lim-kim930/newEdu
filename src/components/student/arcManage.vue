@@ -1,6 +1,6 @@
 <template>
   <div class="pwd">
-    <h4>提交档案找回申请</h4>
+    <h4>提交档案重置申请</h4>
     <el-divider></el-divider>
     <el-form
       status-icon
@@ -9,15 +9,24 @@
       v-loading="loading"
       element-loading-text="拼命加载中"
     >
-      <h5></h5>
-      <el-alert type="info" :closable="false" style="margin-bottom: 10px">
+      <!-- <el-alert type="info" :closable="false" style="margin-bottom: 10px">
         <h5>提示:</h5>
         <h5>如果档案丢失,无法使用系统,可以在这里向管理员提交档案状态重置的申请</h5>
         <h5>重置后,之前确认的信息将需要重新确认,所以请在文件确实丢失的情况下提交</h5>
+      </el-alert> -->
+      <el-alert type="info" :closable="false" style="margin-bottom: 10px">
+        <h5>提示:</h5>
+        <h5>如果档案丢失,无法使用系统,可以在QQ答疑群向管理员发出档案状态重置的申请</h5>
+        <h5>重置后,之前确认的信息将需要重新确认,所以请在文件确实丢失的情况下提交</h5>
       </el-alert>
-      <el-form-item>
+      <el-link
+        type="primary"
+        target="_blank"
+        href="https://qm.qq.com/cgi-bin/qm/qr?k=Ci04wLsNSUcKO6UpX61kBoypUmHYzkWJ&jump_from=webapi"
+      >加入QQ答疑群</el-link>
+      <!-- <el-form-item>
         <el-button type="primary" @click="submitForm()">确认提交</el-button>
-      </el-form-item>
+      </el-form-item> -->
     </el-form>
   </div>
 </template>

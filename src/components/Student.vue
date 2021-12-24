@@ -63,7 +63,7 @@
                   index="1-3"
                   style="padding:0 0 0 80px; font-size: 18px !important"
                   :disabled="!xjConfirmed"
-                >档案找回</el-menu-item>
+                >档案重置</el-menu-item>
               </el-submenu>
               <el-menu-item index="2" :disabled="!xjConfirmed">
                 <i class="el-icon-share"></i>
@@ -81,10 +81,10 @@
                 <i class="el-icon-message-solid"></i>
                 <span slot="title" style="font-size: 20px">消息中心</span>
               </el-menu-item>
-              <el-menu-item index="6" :disabled="!xjConfirmed">
+              <!-- <el-menu-item index="6" :disabled="!xjConfirmed">
                 <i class="el-icon-s-custom"></i>
                 <span slot="title" style="font-size: 20px">账号设置</span>
-              </el-menu-item>
+              </el-menu-item> -->
             </el-menu>
           </el-col>
         </el-row>
@@ -281,7 +281,12 @@ export default {
         headers: { "Authorization": "token " + userData.token },
         data: { "student": "any" }
       }).then((response) => {
-        this.received = response.data.data.length;
+        this.received = 0;
+        const data = response.data.data;
+        for (let i = 0; i < data.length; i++) {
+          if (!data[i].Read)
+            this.received++;
+        }
         return this.axios({
           method: "get",
           url: "/campusTalk/lookupForSelf",
@@ -289,7 +294,11 @@ export default {
           data: { "StaffID": userData.staffID }
         });
       }).then((response) => {
-        this.received += response.data.data.length;
+        const data = response.data.data;
+        for (let i = 0; i < data.length; i++) {
+          if (!data[i].Read)
+            this.received++;
+        }
         this.loading = false;
       }).catch(() => {
         this.$message.error("获取站内信息出错啦,请稍后再试");

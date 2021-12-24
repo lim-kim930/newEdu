@@ -36,10 +36,13 @@
               <el-form-item label="创建时间">
                 <span>{{ props.row.CreatedAt }}</span>
               </el-form-item>
-              <el-form-item label="最低薪资">
+              <el-form-item label="薪资类型">
+                <span>{{ props.row.SalaryMode + (props.row.SalaryCount?(" - " + props.row.SalaryCount + "薪"):"") }}</span>
+              </el-form-item>
+              <el-form-item label="最低薪资" v-if="props.row.SalaryMode !== '面议'">
                 <span>{{ props.row.MinSalary }}</span>
               </el-form-item>
-              <el-form-item label="最高薪资">
+              <el-form-item label="最高薪资" v-if="props.row.SalaryMode !== '面议'">
                 <span>{{ props.row.MaxSalary }}</span>
               </el-form-item>
               <el-form-item label="岗位描述">
@@ -67,7 +70,7 @@
       <el-form
         class="form"
         :model="form"
-        label-width="100px"
+        label-width="90px"
         :style="{'max-height': this.wh - 105 + 'px'}"
       >
         <span
@@ -131,8 +134,46 @@
         <el-form-item label="工作地点">
           <el-cascader v-model="form.location" :options="locations"></el-cascader>
         </el-form-item>
-        <el-form-item label="月薪资范围">
-          <el-slider v-model="form.salary" range :max="50" :marks="marks"></el-slider>
+        <el-form-item label="薪资类型">
+          <el-select
+            style="width: 150px; margin-right: 20px"
+            v-model="form.SalaryMode"
+            placeholder="请选择"
+          >
+            <el-option
+              v-for="item in options"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            ></el-option>
+          </el-select>
+          <el-select
+            style="width: 120px"
+            v-show="form.SalaryMode === '年薪' || form.SalaryMode === '月薪'"
+            v-model="form.SalaryCount"
+            placeholder="请选择"
+          >
+            <el-option
+              v-for="item in options2"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="薪资范围" v-show="form.SalaryMode === '年薪' || form.SalaryMode === '月薪'">
+          <el-input
+            style="width: 80px"
+            type="number"
+            v-model.number="form.salary[0]"
+            placeholder="请填写"
+          ></el-input>k ~
+          <el-input
+            style="width: 80px"
+            type="number"
+            v-model.number="form.salary[1]"
+            placeholder="请填写"
+          ></el-input>k
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="onSubmit" style="margin-top: 20px">点击录入</el-button>
@@ -154,11 +195,50 @@ export default {
         name: "",
         type: "",
         salary: [10, 20],
+        SalaryMode: "",
         location: [],
         jobDesc: "",
         num: "",
         jobReq: ""
       },
+      options: [{
+        value: '年薪',
+        label: '年薪'
+      }, {
+        value: '月薪',
+        label: '月薪'
+      }, {
+        value: '面议',
+        label: '面议'
+      }],
+      options2: [{
+        value: 12,
+        label: '12'
+      }, {
+        value: 13,
+        label: '13薪'
+      }, {
+        value: 14,
+        label: '14薪'
+      }, {
+        value: 15,
+        label: '15薪'
+      }, {
+        value: 16,
+        label: '16薪'
+      }, {
+        value: 17,
+        label: '17薪'
+      }, {
+        value: 18,
+        label: '18薪'
+      }, {
+        value: 19,
+        label: '19薪'
+      }, {
+        value: 20,
+        label: '20薪'
+      }],
       translation: [{
         name: "不限",
         value: ["不限"]
@@ -176,7 +256,7 @@ export default {
         value: ["法务", "科研", "教师", "翻译", "编辑/文案", "培训", "其他"]
       }],
       jobList: [],// 发布的岗位数据
-      locations: provinceAndCityData,
+      locations: [],
       typeOptions: [[], [], [], [], []],// 职位类别选项
       marks: {
         0: "0k",
@@ -232,8 +312,10 @@ export default {
       }).then(response => {
         const type = Object.keys(response.data.data);
         for (let i = 0; i < type.length; i++)
-          for (let j = 0; j < response.data.data[type[i]].length; j++)
+          for (let j = 0; j < response.data.data[type[i]].length; j++) {
+            response.data.data[type[i]][j].CreatedAt = new Date(+new Date(response.data.data[type[i]][j].CreatedAt) + 8 * 3600 * 1000).toISOString().replace(/T/g, " ").replace(/\.[\d]{3}Z/, "");
             this.jobList.push(response.data.data[type[i]][j]);
+          }
         this.step = 0;
         this.loading = false;
       }).catch(() => {
@@ -293,6 +375,8 @@ export default {
         type: "warning"
       }).then(() => {
         this.loading = true;
+        if (this.form.location[0] === "全国" || this.form.location[0] === "海外" || this.form.location[0] === "不限")
+          this.form.location = ["null", this.form.location[0]];
         this.axios({
           method: "post",
           url: "/job/publish",
@@ -300,12 +384,14 @@ export default {
           data: {
             "Name": this.form.name,
             "JobTypeCode": this.form.type,
-            "WorkLocation": CodeToText[this.form.location[0]] + (CodeToText[this.form.location[1]] === "市辖区" ? "" : CodeToText[this.form.location[1]]),
+            "WorkLocation": this.form.location[0] !== "null" ? (CodeToText[this.form.location[0]] + (CodeToText[this.form.location[1]] === "市辖区" ? "" : CodeToText[this.form.location[1]])) : this.form.location[1],
             "MinSalary": this.form.salary[0] * 1000,
             "MaxSalary": this.form.salary[1] * 1000,
             "Description": this.form.jobDesc,
             "requirement": this.form.jobReq,
-            "RecruitCount": +this.form.num
+            "RecruitCount": +this.form.num,
+            "SalaryCount": this.form.SalaryCount,
+            "SalaryMode": this.form.SalaryMode
           }
         }).then(() => {
           this.$message.success("录入成功");
@@ -321,6 +407,17 @@ export default {
     }
   },
   mounted() {
+    provinceAndCityData.unshift({
+      "value": "全国",
+      "label": "全国"
+    }, {
+      "value": "海外",
+      "label": "海外"
+    }, {
+      "value": "不限",
+      "label": "不限"
+    });
+    this.locations = provinceAndCityData;
     this.getJobInfo();
   }
 };
@@ -366,5 +463,9 @@ export default {
   height: 20px;
   margin-right: 10px;
   background-color: rgba(255, 255, 255, 0);
+}
+.type .el-form-item__label {
+  font-size: 16px;
+  text-align: center;
 }
 </style>
