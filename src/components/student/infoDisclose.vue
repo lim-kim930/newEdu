@@ -78,8 +78,10 @@
           >{{item.name}}</el-checkbox>
         </el-checkbox-group>
       </el-form-item>
-      <el-form-item label="gpa信息">
+      <el-form-item label="GPA信息">
+        <h4 v-if="rankData.length === 0">暂无信息</h4>
         <el-table
+          v-if="rankData.length !== 0"
           :data="rankData"
           tooltip-effect="dark"
           style="width: 100%"
@@ -93,8 +95,9 @@
         </el-table>
       </el-form-item>
       <el-form-item label="综合素质信息">
+        <h4 v-if="rewardDataValue.length === 0 && raceDataValue.length === 0">暂无信息</h4>
         <el-checkbox-group
-          v-show="rewardDataValue.length !== 0 || raceDataValue.length !== 0"
+          v-if="rewardDataValue.length !== 0 || raceDataValue.length !== 0"
           v-model="ruleForm.rewardType"
           style="margin-left: 30px; width: 960px"
         >
@@ -103,7 +106,13 @@
         </el-checkbox-group>
       </el-form-item>
       <el-form-item label="个人填写信息">
-        <el-checkbox-group v-model="ruleForm.intType" style="margin-left: 30px; width: 960px">
+        <h4
+          v-if="intentData.length === 0 || clubData.length === 0 || internshipData.length === 0"
+        >暂无信息</h4>
+        <el-checkbox-group
+          v-if="intentData.length !== 0 || clubData.length !== 0 || internshipData.length !== 0"
+          style="margin-left: 30px; width: 960px"
+        >
           <el-checkbox label="career_intent" v-show="intentData.length !== 0">就职意向</el-checkbox>
           <el-checkbox label="org_experience" v-show="clubData.length !== 0">班团经历情况</el-checkbox>
           <el-checkbox label="internship_experience" v-show="internshipData.length !== 0">实习经历</el-checkbox>
@@ -211,8 +220,6 @@ export default {
       dataFile: "",//文件
       tableData: [],
       ruleForm: {//表单选中数据
-        date: "",
-        hr: "",
         profileType: [],
         intType: [],
         scoreType: [],
@@ -289,8 +296,6 @@ export default {
     //重置
     resetForm() {
       this.ruleForm = {
-        date: "",
-        hr: "",
         profileType: [],
         scoreType: [],
         levelType: [],
@@ -342,21 +347,33 @@ export default {
             const translation = {
               ClassName: "班级名称",
               SchoolCode: "学校代码",
-              StaffID: "学号",
               UnitName: "学院名称",
               MajorName: "专业名称",
               Sex: "性别",
               Name: "姓名",
               Nation: "民族",
             };
-            let profile = Object.keys(content.profile[Object.keys(content.profile)]);
+            const profile = Object.keys(content.profile[Object.keys(content.profile)]);
+            const data = content.profile[Object.keys(content["profile"])];
             for (let j = 0; j < profile.length; j++) {
-              if (translation[profile[j]])
+              if (translation[profile[j]]) {
+                if (profile[j] === "Name") {
+                  if (data[profile[j]].length === 2)
+                    data[profile[j]] = data[profile[j]].substr(0, 1) + "*";
+                  else {
+                    let name = data[profile[j]].substr(0, 1);
+                    for (let i = 0; i < (data[profile[j]].length - 2); i++)
+                      name += "*";
+                    data[profile[j]] = name + data[profile[j]].substr(data[profile[j]].length - 1);
+                  }
+                  data[profile[j]] += "(脱敏处理)";
+                }
                 profileData.push({
-                  content: content.profile[Object.keys(content["profile"])][profile[j]] + (profile[j] === "Name" ? " (脱敏处理)" : ""),
+                  content: data[profile[j]],
                   name: translation[profile[j]],
                   type: "学籍信息"
                 });
+              }
             }
           }
           else if (range[i] === "rank") {
@@ -568,15 +585,23 @@ export default {
     },
     // 提交按钮
     submitForm(id) {
-      this.$confirm("请确认信息选填无误,是否继续?", "警告", {
+      let isNull = true;
+      const keys = Object.keys(this.ruleForm);
+      for (let i = 0; i < keys.length; i++) {
+        if (this.ruleForm[keys[i]].length !== 0) {
+          isNull = false;
+          break;
+        }
+      }
+      this.$confirm((isNull ? "当前未选择任何信息" : "请确认信息选填无误") + ",是否继续?", "警告", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
       }).then(() => {
         this.loading = true;
-        var ShareItems = [{ "Path": ["profile", Object.keys(this.content.profile)[0], "StaffID"] }, { "Path": ["profile", Object.keys(this.content.profile)[0], "ClassCode"] }];
-        var Path = [];
-        var data = new FormData();
+        let ShareItems = [{ "Path": ["profile", Object.keys(this.content.profile)[0], "StaffID"] }, { "Path": ["profile", Object.keys(this.content.profile)[0], "ClassCode"] }];
+        let Path = [];
+        let data = new FormData();
         data.append("dataFile", this.dataFile);
         if (this.ruleForm.profileType.length != 0) {
           // if (this.checkAll1 === true)
@@ -597,11 +622,10 @@ export default {
         if (this.ruleForm.intType.indexOf("org_experience") !== -1)
           for (let i = 0; i < this.clubData.length; i++)
             ShareItems.push({ "Path": ["org_experience", this.clubData[i].title] });
-        if (this.ruleForm.intType.indexOf("career_intent") !== -1)
-          for (let i = 0; i < this.intentData.length; i++) {
-            ShareItems.push({ "Path": ["career_intent", this.intentData[i], "JobTypeIntent"] });
-            ShareItems.push({ "Path": ["career_intent", this.intentData[i], "LocationIntent"] });
-          }
+        if (this.ruleForm.intType.indexOf("career_intent") !== -1) {
+          ShareItems.push({ "Path": ["career_intent", this.intentData[0], "JobTypeIntent"] });
+          ShareItems.push({ "Path": ["career_intent", this.intentData[0], "LocationIntent"] });
+        }
         if (this.ruleForm.intType.indexOf("internship_experience") !== -1)
           for (let i = 0; i < this.internshipData.length; i++)
             ShareItems.push({ "Path": ["internship_experience", this.internshipData[i].title] });
@@ -618,7 +642,7 @@ export default {
           headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
           data,
         }).then(() => {
-          this.$confirm("信息已经成功公开，你也可以随时更改", "提示", {
+          this.$confirm((isNull ? "更改成功! 当前没有信息被公开" : "信息已经成功公开") + ", 你也可以随时更改", "提示", {
             confirmButtonText: "确定",
             showCancelButton: false,
             type: "warning",

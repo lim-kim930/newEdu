@@ -1,7 +1,7 @@
 <template>
   <el-form ref="form" class="form1" v-loading="loading" element-loading-text="拼命加载中">
     <el-tag
-      style="margin: 10px 0 0 0"
+      style="margin: 10px 0 10px 0"
       type="success"
       v-show="file != ''"
       :disable-transitions="true"
@@ -25,14 +25,14 @@
       点击上传学业文件
       <i class="el-icon-upload"></i>
     </el-upload>
-    <el-button
+    <!-- <el-button
       type="primary"
       plain
       icon="el-icon-download"
       @click="downloadFile('学业文件.enc')"
       v-show="file != ''"
       style="margin: 0 0 10px 10px;"
-    >下载文件</el-button>
+    >下载文件</el-button>-->
     <el-button
       type="primary"
       @click="submit()"
@@ -157,6 +157,7 @@ export default {
       eleLink.click();
       document.body.removeChild(eleLink);
       setTimeout(() => {
+        this.$emit("func4", true);
         this.$confirm("学业文件已经下载至浏览器默认下载位置,如未设置,请手动选择下载路径并妥善保存", "提示", {
           confirmButtonText: "确定",
           showCancelButton: false,

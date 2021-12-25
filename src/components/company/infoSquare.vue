@@ -40,12 +40,13 @@
         :value="item.value"
       ></el-option>
     </el-select>-->
-    <el-collapse value="1">
+    <el-collapse @change="collapse" value="1">
       <el-collapse-item name="1">
         <template slot="title">
           <span style="font-size: 16px">请选择筛选条件:</span>
           <el-button type="primary" @click.stop="getInfo()" style="margin: 0 0 0 10px">点击筛选</el-button>
           <el-button type="primary" plain @click.stop="resetConditions()" style>清空</el-button>
+          <span style="width: 50%; text-align: center">{{"点击" + title + "条件"}}</span>
         </template>
         <el-form class="coditions" label-width="110px" style="user-select: none;">
           <el-form-item label="匹配规则">
@@ -168,16 +169,22 @@
     >批量发送通知</el-button>
     <el-table
       v-show="exposeData.length !== 0"
-      :data="exposeData"
       style="width: 100%; margin-top: 20px"
       border
+      :data="exposeData.slice(page*parseInt((wh - 440)/53), (page+1)*parseInt((wh - 440)/53))"
       :default-sort="{prop: 'id', order: 'descending'}"
       :max-height="this.wh - 270"
       @selection-change="selectionChange"
     >
       <el-table-column type="selection" width="55"></el-table-column>
       <el-table-column label="姓名" prop="Name" width="120px"></el-table-column>
-      <el-table-column label="年级" prop="Grade" width="150px" sortable></el-table-column>
+      <el-table-column
+        label="年级"
+        prop="Grade"
+        width="150px"
+        :filters="[{text: '2017', value: '2017'},{text: '2018', value: '2018'},{text: '2019', value: '2019'},{text: '2020', value: '2020'},{text: '2021', value: '2021'},{text: '2022', value: '2022'}]"
+        :filter-method="filterHandler"
+      ></el-table-column>
       <el-table-column label="学院" prop="UnitName"></el-table-column>
       <el-table-column label="专业" prop="MajorName"></el-table-column>
       <el-table-column label="发送">
@@ -187,6 +194,15 @@
         </template>
       </el-table-column>
     </el-table>
+    <el-pagination
+      background
+      @current-change="currentChange"
+      :page-size="parseInt((this.wh - 440)/53)"
+      :pager-count="9"
+      layout="prev, pager, next"
+      :total="total"
+      style="margin: 10px 0"
+    ></el-pagination>
     <el-empty :image-size="200" v-show="exposeData.length === 0"></el-empty>
     <el-dialog title="请填写您想详细了解的内容" :visible.sync="reqDialogVisible" style="width: 100%;">
       <el-form label-width="100px">
@@ -298,6 +314,8 @@
 export default {
   data() {
     return {
+      total: 0,
+      page: 0,
       template: true,
       exposeData: [],
       uname: "",
@@ -402,6 +420,7 @@ export default {
         RewardLevel: "",
         RaceLevel: "",
       },// 选择的条件
+      title: "收起",
       translation: [{
         name: "不限",
         value: ["不限"]
@@ -416,7 +435,7 @@ export default {
         value: ["工业设计", "工程设计", "平面设计", "室内设计", "生产/制造"]
       }, {
         name: "其他",
-        value: ["法务", "科研", "教师", "翻译", "编辑/文案", "培训", "其他"]
+        value: ["法务", "科研", "销售", "教师", "翻译", "编辑/文案", "培训", "其他"]
       }],
       method: "must",
       Predicates: [],// 要传给后端的筛选条件
@@ -446,6 +465,16 @@ export default {
   },
   props: ["wh"],
   methods: {
+    filterHandler(value, row, column) {
+      const property = column['property'];
+      return row[property] === value;
+    },
+    currentChange(v) {
+      this.page = v - 1;
+    },
+    collapse(v) {
+      this.title = v.length === 0 ? "展开" : "收起";
+    },
     resetConditions() {
       this.conditions = {
         GPA: [],
@@ -556,10 +585,12 @@ export default {
         url: "/expose/search",
         data: { "Predicates": this.Predicates }
       }).then((response) => {
+        this.total = 0;
         if (response.data.data.Results.length === 0)
           return this.loading = false;
         const result = response.data.data.Results;
         for (let i = 0; i < result.length; i++) {
+          this.total++;
           // 把FileID也放进去
           let data = result[i].Source.data_map.profile[result[i].FileID];
           if (data.Name) {

@@ -139,6 +139,7 @@ export default {
     },
     freChange(v) {
       this.$emit("func3", v);
+      localStorage.setItem("jw_student_msg", v);
     },
     sortSwitch(command) {
       if (command !== this.sort) {
@@ -188,6 +189,9 @@ export default {
   },
   created() {
     this.$emit("func2", true);
+    if (!JSON.parse(localStorage.getItem("jw_student_msg")))
+        localStorage.setItem("jw_student_msg", 300);
+    this.reqFrequency = JSON.parse(localStorage.getItem("jw_student_msg"));
     this.axios({
       method: "post",
       url: "/share/listFurtherShareRequestForReceiver",

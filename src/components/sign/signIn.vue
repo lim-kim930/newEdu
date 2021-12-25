@@ -35,7 +35,7 @@
         type="info"
         :underline="false"
         target="_blank"
-        href="http://wpa.qq.com/msgrd?v=3&uin=1625753207&site=qq&menu=yes&hm"
+        href="https://qm.qq.com/cgi-bin/qm/qr?k=Ci04wLsNSUcKO6UpX61kBoypUmHYzkWJ&jump_from=webapi"
       >遇到问题?</el-link>
       <el-link
         type="info"

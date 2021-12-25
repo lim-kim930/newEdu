@@ -15,7 +15,7 @@
     >{{step===0?"添加企业":"返回"}}</el-button>
     <el-table
       v-show="step === 0"
-      :data="companyListData.slice(page*parseInt((wh - 360)/55), (page+1)*parseInt((wh - 360)/55))"
+      :data="companyListData.slice(page*parseInt((wh - 360)/53), (page+1)*parseInt((wh - 360)/53))"
       style="width: 100%"
       :max-height="this.wh - 240"
       border
@@ -31,15 +31,15 @@
               <span>{{ props.row.CompanyCode }}</span>
             </el-form-item>
             <el-form-item label="公司简介">
-              <span>{{ props.row.Description }}</span>
+              <span style="display: inline-block;">{{ props.row.Description }}</span>
             </el-form-item>
           </el-form>
         </template>
       </el-table-column>
-      <el-table-column label="公司名称" prop="Name"></el-table-column>
-      <el-table-column label="公司账号" prop="CompanyCode"></el-table-column>
+      <el-table-column label="公司名称" prop="Name" width="400"></el-table-column>
+      <el-table-column label="公司账号" prop="CompanyCode" width="250"></el-table-column>
       <el-table-column label="创建时间" prop="CreatedAt" sortable></el-table-column>
-      <el-table-column label="操作">
+      <el-table-column label="操作" width="80px">
         <template slot-scope="scope">
           <el-button size="mini" type="danger" plain @click="handleEdit(scope.$index, scope.row)">删除</el-button>
         </template>
@@ -49,7 +49,7 @@
       v-show="step === 0"
       background
       @current-change="currentChange"
-      :page-size="parseInt((this.wh - 360)/52)"
+      :page-size="parseInt((this.wh - 360)/53)"
       :pager-count="9"
       layout="prev, pager, next"
       :total="total"
@@ -235,5 +235,9 @@ export default {
   height: 20px;
   margin-right: 10px;
   background-color: rgba(255, 255, 255, 0);
+}
+.form .el-form--inline .el-form-item__content {
+  text-indent: 2em;
+  padding-left: 20px;
 }
 </style>

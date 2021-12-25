@@ -105,7 +105,7 @@ export default {
       this.loading = true;
       this.axios({
         method: "put",
-        url: "company/updatePassphraseForAdmin",
+        url: "/company/putForCompany",
         headers: { "Authorization": JSON.parse(localStorage.getItem("jw_ent_file")).authorization },
         data: { "Description": this.form.Description }
       }).then(() => {

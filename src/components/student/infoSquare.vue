@@ -53,61 +53,63 @@
       prefix-icon="el-icon-search"
       :fetch-suggestions="querySearch"
       @select="companySelect"
-      @change="ddd"
+      @change="removeCode"
       placeholder="公司(请输入后选择)"
       :trigger-on-focus="false"
       style="margin-left: 10px"
     ></el-autocomplete>
     <el-button type="primary" @click="getInfo()" style="margin: 20px" icon="el-icon-search">点击查询</el-button>
     <el-table
-      v-show="tableData.length !== 0"
-      :data="tableData.slice(page*parseInt((wh - 360)/55), (page+1)*parseInt((wh - 360)/55))"
+      :data="tableData.slice(page*parseInt((wh - 360)/53), (page+1)*parseInt((wh - 360)/53))"
       style="width: 100%"
       border
       @sort-change="sortChange"
+      @filter-change="filterHandler"
     >
       <el-table-column type="expand">
         <template slot-scope="props">
           <el-form label-position="left" inline class="demo-table-expand" label-width="80px">
-            <el-form-item label="公司名称">
-              <span>{{ props.row.Company.Name }}</span>
+            <el-form-item label="公司简介:" class="companyDesc">
+              <span style="display: inline-block;">{{ props.row.Company.Description.replace(//g, "") }}</span>
             </el-form-item>
-            <el-form-item label="公司简介">
-              <span>{{ props.row.Company.Description }}</span>
-            </el-form-item>
-            <el-form-item label="岗位名称">
+            <el-form-item label="岗位名称:">
               <span>{{ props.row.Name }}</span>
             </el-form-item>
-            <el-form-item label="薪资类型">
+            <el-form-item label="薪资类型:">
               <span>{{ props.row.SalaryMode + (props.row.SalaryCount?(" - " + props.row.SalaryCount + "薪"):"") }}</span>
             </el-form-item>
-            <el-form-item label="最低薪资" v-if="props.row.SalaryMode !== '面议'">
+            <el-form-item label="最低薪资:" v-if="props.row.SalaryMode !== '面议'">
               <span>{{ props.row.MinSalary }}</span>
             </el-form-item>
-            <el-form-item label="最高薪资" v-if="props.row.SalaryMode !== '面议'">
+            <el-form-item label="最高薪资:" v-if="props.row.SalaryMode !== '面议'">
               <span>{{ props.row.MaxSalary }}</span>
             </el-form-item>
-            <el-form-item label="发布时间">
+            <el-form-item label="发布时间:">
               <span>{{ new Date(+new Date(props.row.CreatedAt) + 8 * 3600 * 1000).toISOString().replace(/T/g, " ").replace(/\.[\d]{3}Z/, "")}}</span>
             </el-form-item>
-            <el-form-item label="工作地点">
+            <el-form-item label="工作地点:">
               <span>{{ props.row.WorkLocation }}</span>
             </el-form-item>
-            <el-form-item label="岗位描述">
-              <span style="display: inline-block; width: 500px;">{{ props.row.Description }}</span>
+            <el-form-item label="岗位描述:">
+              <span style="display: inline-block;">{{ props.row.Description.replace(//g, "") }}</span>
             </el-form-item>
-            <el-form-item label="岗位要求">
-              <span style="display: inline-block; width: 500px;">{{ props.row.Requirement }}</span>
+            <el-form-item label="岗位要求:">
+              <span style="display: inline-block;">{{ props.row.Requirement.replace(//g, "") }}</span>
             </el-form-item>
           </el-form>
         </template>
       </el-table-column>
-      <el-table-column label="公司" prop="Company.Name"></el-table-column>
-      <el-table-column label="岗位" prop="Name"></el-table-column>
-      <el-table-column label="最低薪资" prop="MinSalary" sortable></el-table-column>
+      <el-table-column label="公司" prop="Company.Name" width="320"></el-table-column>
+      <el-table-column label="岗位" width="450">
+        <template slot-scope="scope">
+          {{scope.row.Name}}
+          <el-badge v-if="scope.row.Name.indexOf('2022年海康威视校园大使') !==  -1" value="hot" class="job"></el-badge>
+        </template>
+      </el-table-column>
       <el-table-column label="最高薪资" prop="MaxSalary" sortable></el-table-column>
-      <el-table-column label="工作地点" prop="WorkLocation"></el-table-column>
-      <el-table-column label="操作">
+      <el-table-column label="薪资类型" prop="SalaryMode" :filters="salaryFilter"></el-table-column>
+      <el-table-column label="工作地点" width="160" prop="WorkLocation"></el-table-column>
+      <el-table-column label="操作" width="110">
         <template slot-scope="scope">
           <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">投递简历</el-button>
         </template>
@@ -116,13 +118,12 @@
     <el-pagination
       background
       @current-change="currentChange"
-      :page-size="parseInt((this.wh - 360)/52)"
+      :page-size="parseInt((this.wh - 360)/53)"
       :pager-count="9"
       layout="prev, pager, next"
       :total="total"
       style="margin: 10px 0"
     ></el-pagination>
-    <el-empty :image-size="200" v-show="tableData.length === 0" description="没有找到符合条件的招聘信息"></el-empty>
   </el-form>
 </template>
 <script>
@@ -133,6 +134,7 @@ export default {
       total: 0,
       page: 0,
       tableData: [],
+      originalData: [],
       loading: false,
       locations: provinceAndCityData,
       options: [{
@@ -162,6 +164,7 @@ export default {
           { value: 15000, label: "15K" }
         ]
       }],
+      salaryFilter: [{ text: "日薪", value: "日薪" }, { text: "年薪", value: "年薪" }, { text: "月薪", value: "月薪" }, { text: "面议", value: "面议" }],
       companies: [],
       location: [],
       Name: null,
@@ -177,7 +180,27 @@ export default {
   },
   props: ["wh"],
   methods: {
-    ddd() {
+    filterHandler(value) {
+      const key = Object.keys(value);
+      const data = value[key];
+      if (data.length === 0) {
+        this.tableData = this.originalData;
+        this.total = this.tableData.length;
+        return;
+      }
+      let newData = [];
+      this.total = 0;
+      for (let i = 0; i < data.length; i++) {
+        const temp = this.originalData.filter((oldData) => {
+          return oldData.SalaryMode == data[i];
+        });
+        console.log(temp);
+        newData = [...newData, ...temp];
+      }
+      this.tableData = newData;
+      this.total = this.tableData.length;
+    },
+    removeCode() {
       this.CompanyCode = "";
       if (this.CompanyCode === "")
         this.CompanyName = "";
@@ -213,10 +236,22 @@ export default {
       if (sort.order)
         if (sort.order === "ascending")
           this.tableData = this.tableData.sort((a, b) => {
+            if (a[sort.prop] === "/" && b[sort.prop] === "/")
+              return 0;
+            else if (a[sort.prop] !== "/" && b[sort.prop] === "/")
+              return 1;
+            else if (a[sort.prop] === "/" && b[sort.prop] !== "/")
+              return -1;
             return a[sort.prop] - b[sort.prop];
           });
         else if (sort.order === "descending")
           this.tableData = this.tableData.sort((a, b) => {
+            if (a[sort.prop] === "/" && b[sort.prop] === "/")
+              return 0;
+            else if (a[sort.prop] !== "/" && b[sort.prop] === "/")
+              return -1;
+            else if (a[sort.prop] === "/" && b[sort.prop] !== "/")
+              return 1;
             return b[sort.prop] - a[sort.prop];
           });
     },
@@ -256,6 +291,7 @@ export default {
           return;
         }
         const type = Object.keys(response.data.data);
+        let hkws = null;
         for (let i = 0; i < type.length; i++)
           for (let j = 0; j < response.data.data[type[i]].length; j++) {
             this.total++;
@@ -263,8 +299,14 @@ export default {
               response.data.data[type[i]][j].MinSalary = "/";
               response.data.data[type[i]][j].MaxSalary = "/";
             }
-            this.tableData.push(response.data.data[type[i]][j]);
+            if (response.data.data[type[i]][j].Name.indexOf("2022年海康威视校园大使") !== -1)
+              hkws = response.data.data[type[i]][j];
+            else
+              this.tableData.push(response.data.data[type[i]][j]);
           }
+        if (hkws)
+          this.tableData.unshift(hkws);
+        this.originalData = this.tableData;
         this.loading = false;
       }).catch(() => {
         this.$message.error("获取岗位信息出错啦,请稍后再试");
@@ -287,6 +329,7 @@ export default {
           let job = [];
           this.tableData = [];
           const type = Object.keys(response.data.data);
+          let hkws = null;
           for (let i = 0; i < type.length; i++)
             for (let j = 0; j < response.data.data[type[i]].length; j++) {
               this.total++;
@@ -294,10 +337,15 @@ export default {
                 response.data.data[type[i]][j].MinSalary = "/";
                 response.data.data[type[i]][j].MaxSalary = "/";
               }
-              this.tableData.push(response.data.data[type[i]][j]);
+              if (response.data.data[type[i]][j].Name.indexOf("2022年海康威视校园大使") !== -1)
+                hkws = response.data.data[type[i]][j];
+              else
+                this.tableData.push(response.data.data[type[i]][j]);
               if (job.indexOf(response.data.data[type[i]][j].Name) === -1)
                 job.push(response.data.data[type[i]][j].Name);
             }
+          if (hkws)
+            this.tableData.unshift(hkws);
           for (let i = 0; i < job.length; i++) {
             this.options[0].children.push({
               label: job[i],
@@ -311,6 +359,7 @@ export default {
             value: response2.data.data[i].JobTypeCode
           });
         }
+        this.originalData = this.tableData;
         this.loading = false;
       }).catch(() => {
         this.$message.error("获取岗位大类信息出错啦,请稍后再试");
@@ -357,5 +406,26 @@ export default {
 }
 .el-form--inline .el-form-item {
   margin-right: 0;
+}
+.form .el-form--inline .el-form-item__content {
+  text-indent: 2em;
+  padding-left: 20px;
+}
+.el-table .job {
+  margin-top: -2px;
+  margin-right: 3px;
+  padding-top: 4px;
+  height: 25px;
+}
+.companyDesc {
+  width: 100% !important;
+}
+</style>
+<style>
+.job {
+  width: 50px;
+}
+.job .el-badge__content {
+  line-height: 15px;
 }
 </style>

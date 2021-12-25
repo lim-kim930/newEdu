@@ -44,6 +44,7 @@
       @func="getFile"
       @func2="getConfirmed"
       @func3="getRoute"
+      @func4="getDownloaded"
       :globalFile="file"
       :xjConfirmed="xjConfirmed"
       :wh="wh"
@@ -71,6 +72,9 @@ export default {
     getConfirmed(confirmed) {
       this.confirmed = confirmed;
       this.$emit("func2", confirmed);
+    },
+    getDownloaded(downloaded) {
+      this.$emit("func5", downloaded);
     },
     indexRouteSwitch(key) {
       switch (key) {

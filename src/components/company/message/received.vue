@@ -170,20 +170,25 @@ export default {
       });
     }).then((response) => {
       const data = response.data.data;
-      for (let i = 0; i < data.length; i++) {
-        if (!data[i].Read)
-          this.received++;
-        data[i].TargetJob = jobTranslation[data[i].TargetJobID];
-        data[i].MajorName = majorTranslation[data[i].MetaData.MajorCode];
-        data[i].index = i;
-        data[i].date = new Date(+new Date(data[i].ExpireAt) + 8 * 3600 * 1000).toISOString().replace(/T/g, " ").replace(/\.[\d]{3}Z/, "");
-        data[i].url = "/share/verify?fileID=" + data[i].FileID + "&encryptedK1S=" + data[i].EncryptedK1S;
-      }
-      this.$emit("func", this.received);
-      const newData = response.data.data.sort((a, b) => {
+      const newData = data.sort((a, b) => {
         return new Date(a.ExpireAt) - new Date(b.ExpireAt);
       });
-      this.receivedMsgData = newData;
+      let readed = [], unReaded = [];
+      for (let i = 0; i < newData.length; i++) {
+        if (!newData[i].Read) {
+          this.received++;
+          unReaded.push(newData[i]);
+        }
+        else
+          readed.push(newData[i]);
+        newData[i].TargetJob = jobTranslation[newData[i].TargetJobID];
+        newData[i].MajorName = majorTranslation[newData[i].MetaData.MajorCode];
+        newData[i].index = i;
+        newData[i].date = new Date(+new Date(newData[i].ExpireAt) + 8 * 3600 * 1000).toISOString().replace(/T/g, " ").replace(/\.[\d]{3}Z/, "");
+        newData[i].url = "/share/verify?fileID=" + newData[i].FileID + "&encryptedK1S=" + newData[i].EncryptedK1S;
+      }
+      this.$emit("func", this.received);
+      this.receivedMsgData = [...unReaded, ...readed];
       this.$emit("func2", false);
     }).catch(() => {
       this.$message.error("获取站内信息出错啦,请稍后再试");

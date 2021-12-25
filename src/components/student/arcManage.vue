@@ -23,7 +23,7 @@
         type="primary"
         target="_blank"
         href="https://qm.qq.com/cgi-bin/qm/qr?k=Ci04wLsNSUcKO6UpX61kBoypUmHYzkWJ&jump_from=webapi"
-      >加入QQ答疑群</el-link>
+      >点击加入QQ答疑群: 346258287</el-link>
       <!-- <el-form-item>
         <el-button type="primary" @click="submitForm()">确认提交</el-button>
       </el-form-item> -->

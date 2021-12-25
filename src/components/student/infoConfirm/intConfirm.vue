@@ -38,14 +38,14 @@
       v-show="file != ''"
       style="margin-left: 10px;"
     >删除文件</el-button>-->
-    <el-button
+    <!-- <el-button
       type="primary"
       plain
       icon="el-icon-download"
       @click="downloadFile('学业文件.enc')"
       v-show="file != ''"
       style="margin-left: 10px;"
-    >下载文件</el-button>
+    >下载文件</el-button> -->
     <span style="margin-left: 10px">请选择类型:</span>
     <el-select
       v-model="typeValue"
@@ -222,10 +222,10 @@
       <h3 style="margin: 0 0 15px 20px; color: #F56C6C">注: 由于信息用于应聘岗位,所以请确保以下填写的信息真实可靠,否则后果自负</h3>
       <el-form v-show="typeValue==='club'" label-width="110px">
         <el-form-item label="工作名称:" style="width: 300px">
-          <el-input v-model="clubAddData.JobName" placeholder="请填写"></el-input>
+          <el-input maxlength="50" v-model="clubAddData.JobName" placeholder="请填写"></el-input>
         </el-form-item>
         <el-form-item label="组织名称:" style="width: 300px">
-          <el-input v-model="clubAddData.OrgName" placeholder="请填写"></el-input>
+          <el-input maxlength="50" v-model="clubAddData.OrgName" placeholder="请填写"></el-input>
         </el-form-item>
         <el-form-item label="组织等级:">
           <el-select v-model="clubAddData.OrgLevel" placeholder="请选择">
@@ -257,13 +257,13 @@
       </el-form>
       <el-form v-show="typeValue==='social'" label-width="110px">
         <el-form-item label="岗位名称:" style="width: 300px">
-          <el-input v-model="socialAddData.JobName" placeholder="请填写"></el-input>
+          <el-input maxlength="50" v-model="socialAddData.JobName" placeholder="请填写"></el-input>
         </el-form-item>
         <el-form-item label="公司名称:" style="width: 300px">
-          <el-input v-model="socialAddData.CompanyName" placeholder="请填写"></el-input>
+          <el-input maxlength="50" v-model="socialAddData.CompanyName" placeholder="请填写"></el-input>
         </el-form-item>
         <el-form-item label="实习地点:" style="width: 300px">
-          <el-input v-model="socialAddData.WorkLocation" placeholder="请填写"></el-input>
+          <el-input maxlength="50" v-model="socialAddData.WorkLocation" placeholder="请填写"></el-input>
         </el-form-item>
         <el-form-item label="实习时间:">
           <el-date-picker
@@ -296,9 +296,9 @@
           <el-button @click="resetDialogForm()">重置</el-button>
         </el-form-item>
       </el-form>
-      <el-form v-show="typeValue==='volun'" label-width="140px">
+      <el-form v-show="typeValue==='volun'" label-width="140px" :model="volunAddData" :rules="rules">
         <el-form-item label="活动名称:" style="width: 300px">
-          <el-input v-model="volunAddData.ActName" placeholder="请填写"></el-input>
+          <el-input maxlength="50" v-model="volunAddData.ActName" placeholder="请填写"></el-input>
         </el-form-item>
         <el-form-item label="工作时间:">
           <el-col :span="11">
@@ -310,8 +310,14 @@
             ></el-date-picker>
           </el-col>
         </el-form-item>
-        <el-form-item label="志愿时长(小时):" style="width: 300px">
-          <el-input type="number" v-model.number="volunAddData.ActLength" placeholder="请填写"></el-input>
+        <el-form-item label="志愿时长(小时):" style="width: 300px" prop="ActLength">
+          <el-input
+            type="number"
+            min="0"
+            max="10000"
+            v-model.number="volunAddData.ActLength"
+            placeholder="请填写"
+          ></el-input>
         </el-form-item>
         <el-form-item label="活动内容" style="width: 500px">
           <el-input
@@ -348,6 +354,12 @@ let FormData = require("form-data");
 import { provinceAndCityData, CodeToText } from "element-china-area-data";
 export default {
   data() {
+    const validateNum = (rule, value, callback) => {
+      if (isNaN(value) || value <= 0 || value > 1000) {
+        this.volunAddData.ActLength = 0;
+        callback(new Error('请输入合法数字'));
+      }
+    };
     return {
       holder: "请输入您的自我介绍，同样可以自由编辑样式(Markdown)",
       typeOptions: [{
@@ -377,6 +389,11 @@ export default {
       intentionAddData: {
         jobFormated: [],
         locationFormated: []
+      },
+      rules: {
+        ActLength: [
+          { validator: validateNum, trigger: 'blur' }
+        ]
       },
       clubAddData: {
         JobName: "",
@@ -441,7 +458,7 @@ export default {
         value: ["工业设计", "工程设计", "平面设计", "室内设计", "生产/制造"]
       }, {
         name: "其他",
-        value: ["法务", "科研", "教师", "翻译", "编辑/文案", "培训", "其他"]
+        value: ["法务", "科研", "销售", "教师", "翻译", "编辑/文案", "培训", "其他"]
       }],
       file: "",//学业文件
       loading: false,
@@ -557,6 +574,7 @@ export default {
       eleLink.click();
       document.body.removeChild(eleLink);
       setTimeout(() => {
+        this.$emit("func4", true);
         this.$confirm("学业文件已经下载至浏览器默认下载位置,如未设置,请手动选择下载路径并妥善保存", "提示", {
           confirmButtonText: "确定",
           showCancelButton: false,

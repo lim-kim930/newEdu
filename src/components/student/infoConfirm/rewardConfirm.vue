@@ -32,14 +32,14 @@
       v-show="file != ''"
       style="margin-left: 10px;"
     >删除文件</el-button>-->
-    <el-button
+    <!-- <el-button
       type="primary"
       plain
       icon="el-icon-download"
       @click="downloadFile('学业文件.enc')"
       v-show="file != ''"
       style="margin-left: 10px;"
-    >下载文件</el-button>
+    >下载文件</el-button> -->
     <span style="margin-left: calc(100% - 800px)">请选择类型:</span>
     <el-select
       v-model="typeValue"
@@ -198,8 +198,8 @@ export default {
       sessionStorage.removeItem("score");
       sessionStorage.removeItem("level_exam");
       sessionStorage.removeItem("hj");
-      this.honorConfirmed = false
-      this.innovConfirmed = false
+      this.honorConfirmed = false;
+      this.innovConfirmed = false;
     },
     dataURLtoFile(dataurl, filename) {
       let arr = dataurl.split(","),
@@ -213,43 +213,44 @@ export default {
     },
     downloadFile(filename) {
       var Url = URL.createObjectURL(this.file);
-      const eleLink = document.createElement("a")
-      eleLink.download = filename
-      eleLink.style.display = "none"
-      eleLink.href = Url
-      document.body.appendChild(eleLink)
-      eleLink.click()
-      document.body.removeChild(eleLink)
+      const eleLink = document.createElement("a");
+      eleLink.download = filename;
+      eleLink.style.display = "none";
+      eleLink.href = Url;
+      document.body.appendChild(eleLink);
+      eleLink.click();
+      document.body.removeChild(eleLink);
       setTimeout(() => {
+        this.$emit("func4", true);
         this.$confirm("学业文件已经下载至浏览器默认下载位置,如未设置,请手动选择下载路径并妥善保存", "提示", {
           confirmButtonText: "确定",
           showCancelButton: false,
           type: "success"
-        })
-      }, 400)
+        });
+      }, 400);
     },
     //根据存的项目名判断确认状态
     checkConfirm() {
       if (this.file === "") {
-        this.honorConfirmed = false
-        this.innovConfirmed = false
-        return
+        this.honorConfirmed = false;
+        this.innovConfirmed = false;
+        return;
       }
       if (sessionStorage.getItem("hj") === null) {
-        this.getFileInfo()
-        return
+        this.getFileInfo();
+        return;
       }
       if (JSON.parse(sessionStorage.getItem("hj")).indexOf(this.typeValue) === -1) {
         if (this.typeValue === "reward")
-          this.honorConfirmed = false
+          this.honorConfirmed = false;
         else
-          this.innovConfirmed = false
+          this.innovConfirmed = false;
       }
       else {
         if (this.typeValue === "reward")
-          this.honorConfirmed = true
+          this.honorConfirmed = true;
         else
-          this.innovConfirmed = true
+          this.innovConfirmed = true;
       }
     },
     //拿到文件明文
@@ -264,31 +265,32 @@ export default {
         headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
         data,
       }).then((response) => {
+        sessionStorage.removeItem("hj");
         //存储学业文件内有的项目名称,避免每次查询都要请求一次文件明文
-        var data = response.data.data.Body.data_map
+        var data = response.data.data.Body.data_map;
         if (data.reward !== undefined && data.race_reward !== undefined)
-          sessionStorage.setItem("hj", JSON.stringify(["reward", "race_reward"]))
+          sessionStorage.setItem("hj", JSON.stringify(["reward", "race_reward"]));
         else if (data.reward !== undefined && data.race_reward === undefined)
-          sessionStorage.setItem("hj", JSON.stringify(["reward"]))
+          sessionStorage.setItem("hj", JSON.stringify(["reward"]));
         else if (data.reward === undefined && data.race_reward !== undefined)
-          sessionStorage.setItem("hj", JSON.stringify(["race_reward"]))
+          sessionStorage.setItem("hj", JSON.stringify(["race_reward"]));
         else if (data.reward === undefined && data.race_reward === undefined)
-          sessionStorage.setItem("hj", JSON.stringify([]))
-        this.loading = false
-        this.checkConfirm()//判断确认状态
+          sessionStorage.setItem("hj", JSON.stringify([]));
+        this.loading = false;
+        this.checkConfirm();//判断确认状态
       }).catch((err) => {
         if (err.response.data.msg === "file hash does not equal to chain") {
-          this.$message.error("学业文件错误或者过期,请检查后再试")
-          this.reupload()
+          this.$message.error("学业文件错误或者过期,请检查后再试");
+          this.reupload();
         }
         else
-          this.$message.error("获取学业文件信息出错啦,请稍后再试")
-        this.loading = false
-        this.reupload()
+          this.$message.error("获取学业文件信息出错啦,请稍后再试");
+        this.loading = false;
+        this.reupload();
         if (this.typeValue === "reward")
-          this.honorConfirmed = false
+          this.honorConfirmed = false;
         else
-          this.innovConfirmed = false
+          this.innovConfirmed = false;
       });
     },
     //根据typeValue拿信息
@@ -313,7 +315,7 @@ export default {
         .then((response) => {
           response.data.data.forEach(item => {
             if (this.typeValue === "reward") {
-              item.Value.Semester.Value = (item.Value.Semester.Value === 0 ? "第一学期" : "第二学期")//替换Semester为文字描述
+              item.Value.Semester.Value = (item.Value.Semester.Value === 0 ? "第一学期" : "第二学期");//替换Semester为文字描述
               this.honorData.push(item.Value);
             } else
               this.innovData.push(item.Value);
@@ -325,9 +327,9 @@ export default {
           this.$message.error("获取相关信息出错啦,请稍后再试");
           this.loading = false;
           if (this.typeValue === "reward")
-            this.honorConfirmed = false
+            this.honorConfirmed = false;
           else
-            this.innovConfirmed = false
+            this.innovConfirmed = false;
         });
     },
     submit() {
@@ -339,7 +341,7 @@ export default {
         }
       )
         .then(() => {
-          var data = new FormData()
+          var data = new FormData();
           data.append("dataFile", this.file);
           data.append("condMap", "{\"SchoolCode\": 1,\"StaffID\": " + JSON.parse(localStorage.getItem("jw_student_file")).staffID + "}");
           this.loading = true;
@@ -352,21 +354,21 @@ export default {
             data,
           })
             .then((response) => {
-              var block = response.data.data.TransactionDetail.detail.result[0]
-              var blockName = Object.keys(block)
+              var block = response.data.data.TransactionDetail.detail.result[0];
+              var blockName = Object.keys(block);
               const translation = {
                 blockHash: "区块哈希",
                 blockNumber: "交易号",
                 blockTimestamp: "区块时间戳",
                 blockWriteTime: "写入时间",
                 hash: "交易内容"
-              }
-              this.blockDataInfo = []
+              };
+              this.blockDataInfo = [];
               for (var i = 0; i < blockName.length; i++) {
                 this.blockDataInfo.push({
                   value: block[blockName[i]],
                   name: translation[blockName[i]]
-                })
+                });
               }
               sessionStorage.removeItem("hj");
               this.file = this.dataURLtoFile(response.data.data.DataFile, "学业文件");
@@ -379,14 +381,14 @@ export default {
                 distinguishCancelAndClose: true,
                 beforeClose: (action, instance, done) => {//将左边的按钮改为打开交易详情，且不关闭此弹框
                   if (action === "cancel")
-                    this.dialogTableVisible = true
+                    this.dialogTableVisible = true;
                   if (action === "confirm" || action === "close")
-                    done()
+                    done();
                 },
                 dangerouslyUseHTMLString: true,
                 type: "success"
               }).then(() => {
-                this.downloadFile("学业文件.enc")
+                this.downloadFile("学业文件.enc");
               }).catch(() => {
                 this.$message({
                   type: "info",
@@ -395,9 +397,9 @@ export default {
               });
               this.loading = false;
               if (this.typeValue === "reward")
-                this.honorConfirmed = true
+                this.honorConfirmed = true;
               else
-                this.innovConfirmed = true
+                this.innovConfirmed = true;
             })
             .catch(() => {
               this.$emit("func2", true);
@@ -424,9 +426,9 @@ export default {
         showCancelButton: false,
         type: "warning"
       }).then(() => {
-        window.location.href = "https://edu.limkim.cn/sign"
+        window.location.href = "https://edu.limkim.cn/sign";
       }).catch(() => {
-        window.location.href = "https://edu.limkim.cn/sign"
+        window.location.href = "https://edu.limkim.cn/sign";
       });
   },
 };

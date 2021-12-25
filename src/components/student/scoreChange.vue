@@ -24,7 +24,7 @@
       </el-upload>
       <el-form-item>
         <el-button type="primary" @click="onSubmit" style="width: 150px; margin: 10px 0 0 10px">提交申请</el-button>
-      </el-form-item> -->
+      </el-form-item>-->
       <h3 style="margin-left: 20px">请先联系教务处更改有错误的成绩信息,然后在本系统提交更改申请</h3>
       <h3 style="margin: 10px 0 0 20px">教务处联系方式:</h3>
       <div class="content">
@@ -47,7 +47,7 @@
       <span slot="footer" class="dialog-footer">
         <el-button type="primary" @click="dialogVisible = false">我已经更改</el-button>
       </span>
-    </el-dialog> -->
+    </el-dialog>-->
   </div>
 </template>
 <script>
@@ -69,7 +69,7 @@ export default {
       uploaded: false,
       fileList: [],
       file: "",
-    }
+    };
   },
   methods: {
     getFile(params) {
@@ -80,14 +80,10 @@ export default {
       this.file = "";
       this.uploaded = false;
     },
-    change(response, file, fileList) {
-      // console.log(1111)
+    change(response, file,) {
       console.log(file);
       this.file = file;
       this.uploaded = true;
-      // this.fileList.push({
-      //   name: file.name
-      // })
     },
     onSubmit() {
       var that = this;
@@ -106,18 +102,17 @@ export default {
           }).then(function (response) {
             if (response.data === "OK") {
               that.$message({
-                message: "成绩更改成功！",
+                message: "成绩更改成功!",
                 type: "success",
               });
             }
             that.loading = false;
             that.confirmed = true;
-          })
-            .catch((error) => {
-              that.$message.error("出错啦,请稍后再试");
-              that.loading = false;
-            });
-        })
+          }).catch(() => {
+            that.$message.error("出错啦,请稍后再试");
+            that.loading = false;
+          });
+        });
     }
   },
   mounted() {

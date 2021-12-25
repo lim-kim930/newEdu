@@ -25,14 +25,14 @@
       点击上传学业文件
       <i class="el-icon-upload"></i>
     </el-upload>
-    <el-button
+    <!-- <el-button
       type="primary"
       plain
       icon="el-icon-download"
       @click="downloadFile('学业文件.enc')"
       v-show="file != ''"
       style="margin-left: 10px;"
-    >下载文件</el-button>
+    >下载文件</el-button> -->
     <br />
     <span>请选择类型:</span>
     <el-select
@@ -79,7 +79,7 @@
       @click="levelSubmit()"
       plain
       v-show="typeValue==='level_exam'"
-      :disabled="multipleSelection.length === 0 || levelBtnDisabled"
+      :disabled="levelBtnDisabled"
     >确认信息</el-button>
     <el-button
       type="info"
@@ -117,10 +117,8 @@
       v-show="typeValue==='level_exam'"
       :data="LevelScore[page]"
       border
-      @selection-change="handleSelectionChange"
       style="width: 100%; margin-top: 0;"
     >
-      <el-table-column type="selection" width="55" :selectable="selectable"></el-table-column>
       <el-table-column prop="Value.ExamName.Value" label="考试名称"></el-table-column>
       <el-table-column prop="Value.Score.Value" label="考试成绩"></el-table-column>
       <el-table-column prop="Value.RegID.Value" label="准考证号"></el-table-column>
@@ -275,6 +273,7 @@ export default {
       eleLink.click();
       document.body.removeChild(eleLink);
       setTimeout(() => {
+        this.$emit("func4", true);
         this.$confirm("学业文件已经下载至浏览器默认下载位置,如未设置,请手动选择下载路径并妥善保存", "提示", {
           confirmButtonText: "确定",
           showCancelButton: false,
@@ -396,7 +395,7 @@ export default {
                   };
                   // }
                 }
-                this.levelBtnDisabled = false;
+                this.levelBtnDisabled = scores.length !== 0;
               }
               // var data = response2.data.data.Body.data_map
               // if (data.reward !== undefined && data.race_reward !== undefined)

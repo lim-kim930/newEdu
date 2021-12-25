@@ -7,6 +7,20 @@
       </div>
       <div class="user">
         <el-badge
+          v-show="file !== ''"
+          is-dot
+          :hidden="downloaded"
+          class="item"
+          style="width: 30px; height: 30px; margin-right: 20px; line-height: 30px !important"
+        >
+          <i
+            :title="downloaded?'下载学业文件':'新的学业文件未下载'"
+            class="el-icon-download"
+            style="font-size: 20px; color: #fff; cursor: pointer;"
+            @click="downloadFile('学业文件.enc')"
+          ></i>
+        </el-badge>
+        <el-badge
           :value="received"
           :hidden="received === 0"
           class="item"
@@ -34,12 +48,23 @@
     <!-- 主体 -->
     <el-container>
       <!-- 侧边栏 -->
-      <el-aside width="240px" :style="{ 'height': wh - 100 + 'px' }">
+      <el-aside :style="{ 'height': wh - 100 + 'px', 'width': isCollapse?'64px':'240px' }">
+        <span
+          @click="isCollapse = !isCollapse"
+          :title="isCollapse?'展开':'收起'"
+          class="collapse"
+          :style="{'width': isCollapse?'64px':'240px'}"
+        >
+          <i style="font-size: 14px" :class="isCollapse?'el-icon-arrow-right':'el-icon-arrow-left'">
+            <span :style="{'font-size': isCollapse?'0':'14px'}">{{isCollapse?"":"点击收起"}}</span>
+          </i>
+        </span>
         <el-row class="tac">
           <el-col :span="24">
             <el-menu
               :default-active="activeIndex"
               @select="indexRouteSwitch"
+              :collapse="isCollapse"
               background-color="#fff"
               text-color="#3a4b56"
               active-text-color="#409eff"
@@ -84,7 +109,7 @@
               <!-- <el-menu-item index="6" :disabled="!xjConfirmed">
                 <i class="el-icon-s-custom"></i>
                 <span slot="title" style="font-size: 20px">账号设置</span>
-              </el-menu-item> -->
+              </el-menu-item>-->
             </el-menu>
           </el-col>
         </el-row>
@@ -98,6 +123,7 @@
           @func2="getConfirmed"
           @func3="getReceived"
           @func4="getFrequency"
+          @func5="getDownloaded"
           :frequency="reqFrequency"
           :file="file"
           :xjConfirmed="xjConfirmed"
@@ -105,6 +131,41 @@
           :wh="wh"
         ></router-view>
       </el-main>
+      <el-drawer
+        :show-close="false"
+        :with-header="false"
+        :visible.sync="noticeShow"
+        direction="rtl"
+        size="50%"
+        :before-close="beforeClose"
+      >
+        <h2 style="text-align: center; padding: 10px; user-select: none;">首次使用须知! ! ! !</h2>
+        <el-alert
+          style="font-size: 16px"
+          title="内容不多, 但为了避免影响使用体验, 请仔细阅读哦"
+          type="warning"
+          :wrapperClosable="false"
+          show-icon
+          :closable="false"
+        ></el-alert>
+        <div style="padding: 20px 10px; color: #303133">
+          <h3 style="text-indent: 1em">1.首次进入系统后,也就是在你关闭这个须知以后, 会被强制进入进行第一步————学籍确认</h3>
+          <h3>检查信息无误并点击确认后, 会进入加载状态, 这个过程会有点慢, 但只会进行这一次, 所以还请耐心等待加载完毕</h3>
+          <h3>然后请并务必按照提示下载和保存好一个叫做学业文件.enc的东东, 它存储了你的所有信息</h3>
+          <h3>因此它是你完整使用这个系统的前提, 并且一旦丢失将无法找回, 你写入的信息也将随之丢失</h3>
+          <el-divider>我是分割线</el-divider>
+          <h3 style="text-indent: 1em">2.在每确认/写入一次文件后, 系统内保存的文件内容都会更新, 你可以根据提示选择是否下载新的文件到本地</h3>
+          <h3>如果选择下载, 因为浏览器或设置的不同, 请根据自己的情况保存好新的文件, 旧的文件就失效了, 可以直接替换掉</h3>
+          <h3>如果选择不下载, 可以点击弹框外任意位置来关闭, 然后继续进行其他操作, 但请不要忘记你还有新的文件没有下载, 在页面右上角也会有红点提示</h3>
+          <h3>如果你未下载最新的文件, 但尝试退出登录、刷新、关闭标签页或者浏览器时, 会收到浏览器的提示, 此时请取消退出操作然后点击下载按钮进行下载</h3>
+          <el-divider>我是分割线</el-divider>
+          <h3
+            style="text-indent: 1em"
+          >3.使用2k等高分辨率屏幕的小伙伴往往会调大显示的缩放比例, 而这样你就会发现页面出奇的'大'和'怪', 有各种各样的滚动条</h3>
+          <h3>所以为了不影响使用, 请使用 ctrl(command)+鼠标滚轮下滑 或 运算符'-', 缩小浏览器页面的缩放比例, 使得当前这个页面不出现滚动条为最佳</h3>
+        </div>
+        <el-button style="margin: 20px 0 20px 20px" plain type="primary" @click="closeDrawer">我知道啦</el-button>
+      </el-drawer>
     </el-container>
   </el-container>
 </template>
@@ -121,10 +182,22 @@ export default {
       xjConfirmed: "",// 学籍确认状态
       reqFrequency: 300,
       msgTimer: "",
+      known: false,
+      isCollapse: false,
+      noticeShow: false,
+      downloaded: true,
       wh: ""// 屏幕高度
     };
   },
   methods: {
+    beforeClose(done) {
+      if (this.known)
+        done();
+    },
+    closeDrawer() {
+      this.known = true;
+      this.noticeShow = false;
+    },
     msgRouteSwitch(command) {
       if (this.xjConfirmed)
         this.$router.push("/message/" + command);
@@ -140,6 +213,7 @@ export default {
       eleLink.click();
       document.body.removeChild(eleLink);
       setTimeout(() => {
+        this.downloaded = true;
         this.$confirm("学业文件已经下载至浏览器默认下载位置,如未设置,请手动选择下载路径并妥善保存", "提示", {
           confirmButtonText: "确定",
           showCancelButton: false,
@@ -149,6 +223,8 @@ export default {
     },
     //拿到子组件传来的学业文件,全局存储在student页面
     getFile(file) {
+      if (this.file !== "")
+        this.downloaded = false;
       this.file = file;
     },
     //拿到子组件传来的学籍确认状态,全局存储在student页面
@@ -157,6 +233,9 @@ export default {
       this.xjConfirmed = confirmed;
       userData.xjConfirmed = this.xjConfirmed;
       localStorage.setItem("jw_student_file", JSON.stringify(userData));
+    },
+    getDownloaded(downloaded) {
+      this.downloaded = downloaded;
     },
     getReceived(received) {
       this.received = received;
@@ -205,13 +284,14 @@ export default {
         location.href = "https://edu.limkim.cn/sign";
       }
       else {
-        this.$confirm("确定要退出登录吗?" + (this.file === "" ? "" : "请确认您已经将最新的学业文件下载到了本地"), "提示", {
+        this.$confirm("确定要退出登录吗?" + (this.downloaded ? "" : "你好像还没有下载最新的学业文件到本地"), "提示", {
           confirmButtonText: "确定",
           cancelButtonText: this.file === "" ? "取消" : "现在下载",
           type: "warning"
         }).then(() => {
           //清除localStorage里的用户信息,定向到登录
           localStorage.removeItem("jw_student_file");
+          localStorage.removeItem("jw_student_msg");
           window.location.href = "https://edu.limkim.cn/sign";
         }).catch(() => {
           if (this.file === "")
@@ -330,6 +410,9 @@ export default {
     else {
       let userData = JSON.parse(localStorage.getItem("jw_student_file"));
       this.uName = userData.staffID;
+      if (!JSON.parse(localStorage.getItem("jw_student_msg")))
+        localStorage.setItem("jw_student_msg", 300);
+      this.reqFrequency = JSON.parse(localStorage.getItem("jw_student_msg"));
       this.loading = true;
       // 拿学籍确认状态
       this.axios({
@@ -347,8 +430,10 @@ export default {
             this.getMsg(userData);
           }, this.reqFrequency * 1000);
         }
-        else
+        else {
           this.loading = false;
+          this.noticeShow = true;
+        }
       }).catch(() => {
         this.$message.error("获取学业文件状态出错啦,请稍后重试");
         this.redirect();
@@ -359,13 +444,12 @@ export default {
   mounted() {
     // 刷新和关闭标签页提示
     window.onbeforeunload = (e) => {
-      if (this.file !== "") {
-        console.log(e);
+      if (!this.downloaded) {
         e = e || window.event;
         // 兼容IE8和Firefox 4之前的版本
         if (e)
           e.returnValue = "done";
-        return this.$confirm("请确认您已经将最新的学业文件下载到了本地", "提示", {
+        return this.$confirm("你好像还没有下载最新的学业文件到本地", "提示", {
           confirmButtonText: "现在下载",
           cancelButtonText: "已下载",
           type: "warning"
@@ -427,6 +511,23 @@ export default {
   background-color: #fff;
   margin: 10px;
   border-radius: 10px;
+  transition: all 0.5s;
+}
+.el-aside .collapse {
+  cursor: pointer;
+  text-align: center;
+  display: inline-block;
+  height: 30px;
+  line-height: 30px;
+  transition: all 0.5s;
+  color: #909399;
+}
+.el-aside .collapse span {
+  transition: all 0.3s;
+  user-select: none;
+}
+.el-aside .collapse:hover {
+  background-color: #ccc;
 }
 .option-tittle {
   text-align: center;
@@ -443,6 +544,10 @@ export default {
 }
 .el-aside ul {
   border: none;
+}
+.el-drawer h3 {
+  padding: 5px;
+  line-height: 25px;
 }
 </style>
 <style>
@@ -466,5 +571,8 @@ export default {
   font-size: 26px;
   color: #fff;
   font-weight: 700;
+}
+.el-badge .is-dot {
+  border: none;
 }
 </style>
