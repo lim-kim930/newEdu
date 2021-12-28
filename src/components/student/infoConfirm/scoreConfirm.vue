@@ -32,7 +32,7 @@
       @click="downloadFile('学业文件.enc')"
       v-show="file != ''"
       style="margin-left: 10px;"
-    >下载文件</el-button> -->
+    >下载文件</el-button>-->
     <br />
     <span>请选择类型:</span>
     <el-select
@@ -89,21 +89,26 @@
     >错误反馈</el-button>
     <el-table
       v-show="typeValue==='score'"
-      :data="Score[page]"
+      :data="Score.slice(page*parseInt((wh - 470)/53), (page+1)*parseInt((wh - 470)/53))"
       border
       style="width: 100%; margin-top: 0;"
       @selection-change="handleSelectionChange"
-      :default-sort="{prop: 'Term', order: 'ascending'}"
-      :max-height="this.wh - 415"
+      @sort-change="sortChange"
+      @filter-change="filterHandler"
     >
       <el-table-column type="selection" width="55" :selectable="selectable"></el-table-column>
       <el-table-column prop="Value.CourseName.Value" label="课程"></el-table-column>
-      <el-table-column prop="Term" label="学期" width="150" sortable></el-table-column>
+      <el-table-column prop="Term" label="学期" width="150"></el-table-column>
       <el-table-column prop="Value.CourseCode.Value" label="课程号"></el-table-column>
       <el-table-column prop="Value.ScoreFinal.Value" label="期末成绩" width="120"></el-table-column>
       <el-table-column prop="ScoreMakeup" label="补考成绩" width="120"></el-table-column>
-      <el-table-column prop="Value.GP.Value" label="绩点" width="120"></el-table-column>
-      <el-table-column prop="Confirmed.value" label="确认状态" width="130">
+      <el-table-column prop="GP" label="绩点" width="120" sortable></el-table-column>
+      <el-table-column
+        prop="Confirmed.value"
+        label="确认状态"
+        width="130"
+        :filters="[{'text':'未确认', 'value': 'warning'}, {'text':'已确认', 'value': 'success'}]"
+      >
         <template slot-scope="scope">
           <el-tag
             style="height: 30px;line-height: 30px"
@@ -136,7 +141,7 @@
     <el-pagination
       background
       @current-change="currentChange"
-      :page-size="10"
+      :page-size="parseInt((this.wh - 470)/53)"
       :pager-count="9"
       layout="prev, pager, next"
       :total="total"
@@ -178,7 +183,8 @@ export default {
     return {
       total: 0,// 分页用的总成绩条数
       page: 0,// 当前的页数
-      Score: [[]],// 学期成绩数据
+      Score: [],// 学期成绩数据
+      originalScore: [],
       LevelScore: [[]],// 等级考试信息数据
       typeOptions: [{
         value: "score",
@@ -225,11 +231,44 @@ export default {
     currentChange(v) {
       this.page = v - 1;
     },
+    sortChange(sort) {
+      if (sort.order) {
+        if (sort.order === "ascending")
+          this.Score = this.Score.sort((a, b) => {
+            return a[sort.prop] - b[sort.prop];
+          });
+        else if (sort.order === "descending")
+          this.Score = this.Score.sort((a, b) => {
+            return b[sort.prop] - a[sort.prop];
+          });
+      }
+      else
+        this.Score = [...this.originalScore];
+    },
     filterTag(value, row) {
       return row.tag === value;
     },
     handleSelectionChange(val) {
       this.multipleSelection = val;
+    },
+    filterHandler(value) {
+      const key = Object.keys(value);
+      const data = value[key];
+      if (data.length === 0) {
+        this.Score = [...this.originalScore];
+        this.total = this.Score.length;
+        return;
+      }
+      let newData = [];
+      this.total = 0;
+      for (let i = 0; i < data.length; i++) {
+        const temp = this.originalScore.filter((oldData) => {
+          return oldData.Confirmed.value == data[i];
+        });
+        newData = [...newData, ...temp];
+      }
+      this.Score = newData;
+      this.total = this.Score.length;
     },
     //文件上传成功后
     getFile(params) {
@@ -287,7 +326,7 @@ export default {
         return this.$message({ message: "请选择要查询的学年", type: "warning" });
       this.total = 0;
       this.page = 0;
-      this.Score = [[]];
+      this.Score = [];
       this.loading = true;
       this.secLoading = true;
       this.LevelScore = [[]];//因为填充数据是push,而不是像Score的=,所以需要先清空
@@ -360,21 +399,18 @@ export default {
                     unconfirmed.push(temp[i]);
                 }
                 temp = confirmed.concat(unconfirmed);
-                let count = 0;
                 for (let i = 0; i < temp.length; i++) {
                   this.total++;
-                  if (i !== 0 && i % 10 === 0) {
-                    count++;
-                    this.Score[count] = [];
-                  }
-                  this.Score[count].push(temp[i]);
-                  this.Score[count][i - count * 10].Term = temp[i].Value.SchoolYear.Value + "-" + temp[i].Value.Semester.Value;
-                  this.Score[count][i - count * 10].Confirmed = {
+                  temp[i].Term = temp[i].Value.SchoolYear.Value + "-" + temp[i].Value.Semester.Value;
+                  temp[i].Confirmed = {
                     label: scores.indexOf(temp[i].Key) !== -1 ? "已确认" : "未确认",
                     value: scores.indexOf(temp[i].Key) !== -1 ? "success" : "warning"
                   };
-                  this.Score[count][i - count * 10].ScoreMakeup = temp[i].Value.ScoreMakeup.Value === "" ? "无" : temp[i].Value.ScoreMakeup.Value;
+                  temp[i].ScoreMakeup = temp[i].Value.ScoreMakeup.Value === "" ? "无" : temp[i].Value.ScoreMakeup.Value;
+                  temp[i].GP = temp[i].Value.GP.Value;
+                  this.Score.push(temp[i]);
                 }
+                this.originalScore = [...this.Score];
                 this.scoreBtnDisabled = false;
               }
               else if (this.typeValue === "level_exam") {
@@ -466,21 +502,18 @@ export default {
             if (this.typeValue === "score") {
               this.scoreConfirmed = false;
               let temp = response.data.data;
-              let count = 0;
               for (let i = 0; i < temp.length; i++) {
                 this.total++;
-                if (i !== 0 && i % 10 === 0) {
-                  count++;
-                  this.Score[count] = [];
-                }
-                this.Score[count].push(temp[i]);
-                this.Score[count][i - count * 10].Term = temp[i].Value.SchoolYear.Value + "-" + temp[i].Value.Semester.Value;
-                this.Score[count][i - count * 10].Confirmed = {
+                temp[i].Term = temp[i].Value.SchoolYear.Value + "-" + temp[i].Value.Semester.Value;
+                temp[i].Confirmed = {
                   label: "未知",
                   value: "info"
                 };
-                this.Score[count][i - count * 10].ScoreMakeup = temp[i].Value.ScoreMakeup.Value === "" ? "无" : temp[i].Value.ScoreMakeup.Value;
+                temp[i].ScoreMakeup = temp[i].Value.ScoreMakeup.Value === "" ? "无" : temp[i].Value.ScoreMakeup.Value;
+                temp[i].GP = temp[i].Value.GP.Value;
+                this.Score.push(temp[i]);
               }
+              this.originalScore = [...this.Score];
               this.scoreBtnDisabled = true;
             }
             else if (this.typeValue === "level_exam") {

@@ -925,7 +925,7 @@ export default {
     },
     // 提交按钮
     submitForm() {
-      if (this.ruleForm.hr === "")
+      if (this.ruleForm.hr.length === 0)
         return this.$message.error("请选择要分享的企业");
       if ((!(/(^[1-9]\d*$)/.test(this.ruleForm.date)) && this.ruleForm.date != "") || this.ruleForm.date > 9999)
         return this.$message.error("分享时长填写有误,请检查");

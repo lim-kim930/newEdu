@@ -141,7 +141,7 @@ export default {
           center: true
         }).then(() => {
           localStorage.removeItem("jw_ent_file");
-          window.location.href = "https://edu.limkim.cn/sign";
+          window.location.href = "https://etdla.hduapp.com/sign";
         });
       }
     },
@@ -201,9 +201,9 @@ export default {
         showCancelButton: false,
         type: "warning"
       }).then(() => {
-        window.location.href = "https://edu.limkim.cn/sign";
+        window.location.href = "https://etdla.hduapp.com/sign";
       }).catch(() => {
-        window.location.href = "https://edu.limkim.cn/sign";
+        window.location.href = "https://etdla.hduapp.com/sign";
       });
     else {
       this.uName = JSON.parse(localStorage.getItem("jw_ent_file")).CompanyCode;

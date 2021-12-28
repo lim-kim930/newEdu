@@ -70,7 +70,9 @@
         <template slot-scope="props">
           <el-form label-position="left" inline class="demo-table-expand" label-width="80px">
             <el-form-item label="公司简介:" class="companyDesc">
-              <span style="display: inline-block;">{{ props.row.Company.Description.replace(//g, "") }}</span>
+              <span
+                style="display: inline-block;"
+              >{{ props.row.Company.Description.replace(//g, "") }}</span>
             </el-form-item>
             <el-form-item label="岗位名称:">
               <span>{{ props.row.Name }}</span>
@@ -184,7 +186,7 @@ export default {
       const key = Object.keys(value);
       const data = value[key];
       if (data.length === 0) {
-        this.tableData = this.originalData;
+        this.tableData = [...this.originalData];
         this.total = this.tableData.length;
         return;
       }
@@ -194,7 +196,6 @@ export default {
         const temp = this.originalData.filter((oldData) => {
           return oldData.SalaryMode == data[i];
         });
-        console.log(temp);
         newData = [...newData, ...temp];
       }
       this.tableData = newData;
@@ -233,7 +234,7 @@ export default {
       this.page = v - 1;
     },
     sortChange(sort) {
-      if (sort.order)
+      if (sort.order) {
         if (sort.order === "ascending")
           this.tableData = this.tableData.sort((a, b) => {
             if (a[sort.prop] === "/" && b[sort.prop] === "/")
@@ -254,6 +255,9 @@ export default {
               return 1;
             return b[sort.prop] - a[sort.prop];
           });
+      }
+      else
+        this.tableData = [...this.originalData];
     },
     handleEdit(index, row) {
       sessionStorage.setItem("com", JSON.stringify({
@@ -306,7 +310,7 @@ export default {
           }
         if (hkws)
           this.tableData.unshift(hkws);
-        this.originalData = this.tableData;
+        this.originalData = [...this.tableData];
         this.loading = false;
       }).catch(() => {
         this.$message.error("获取岗位信息出错啦,请稍后再试");
@@ -359,7 +363,7 @@ export default {
             value: response2.data.data[i].JobTypeCode
           });
         }
-        this.originalData = this.tableData;
+        this.originalData = [...this.tableData];
         this.loading = false;
       }).catch(() => {
         this.$message.error("获取岗位大类信息出错啦,请稍后再试");

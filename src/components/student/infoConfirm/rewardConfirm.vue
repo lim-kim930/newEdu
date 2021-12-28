@@ -39,7 +39,7 @@
       @click="downloadFile('学业文件.enc')"
       v-show="file != ''"
       style="margin-left: 10px;"
-    >下载文件</el-button> -->
+    >下载文件</el-button>-->
     <span style="margin-left: calc(100% - 800px)">请选择类型:</span>
     <el-select
       v-model="typeValue"
@@ -426,9 +426,9 @@ export default {
         showCancelButton: false,
         type: "warning"
       }).then(() => {
-        window.location.href = "https://edu.limkim.cn/sign";
+        window.location.href = "https://etdla.hduapp.com/sign";
       }).catch(() => {
-        window.location.href = "https://edu.limkim.cn/sign";
+        window.location.href = "https://etdla.hduapp.com/sign";
       });
   },
 };
