@@ -9,7 +9,7 @@
       <el-input v-model="form.name" style="width: 150px"></el-input>
     </el-form-item>
     <el-form-item label="实习公司">
-      <el-input v-model="form.name" style="width: 150px" disabled placeholder="网易公司"></el-input>
+      <el-input v-model="form.name" style="width: 250px" disabled :placeholder="uName"></el-input>
     </el-form-item>
     <el-form-item label="实习时间">
       <el-col :span="11">
@@ -55,9 +55,9 @@ export default {
         resource: "",
         desc: ""
       }
-    }
+    };
   },
-  props: ["wh"],
+  props: ["wh", "uName"],
   methods: {
     onSubmit() {
     }

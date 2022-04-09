@@ -31,8 +31,8 @@
       <h4>请联系教务处修改后返回系统，检查无误后继续完成学籍确认</h4>
       <h4>教务处联系信息:</h4>
       <div class="content">
-        <span>电话: 0571-86915011</span>
-        <span>邮箱地址: hdujwc@hdu.edu.cn</span>
+        <span>电话: 0571-8691****</span>
+        <span>邮箱地址:***jwc@***.edu.cn</span>
         <span>地址: 行政楼</span>
       </div>
       <el-button @click="$refs.drawer.closeDrawer()" style="margin: 20px 0 0 50px; width: 100px">确 定</el-button>

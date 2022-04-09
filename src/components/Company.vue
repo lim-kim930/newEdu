@@ -82,6 +82,7 @@
           :frequency="reqFrequency"
           :sent="sent"
           :wh="wh"
+          :uName="uName"
         ></router-view>
       </el-main>
     </el-container>
@@ -141,7 +142,7 @@ export default {
           center: true
         }).then(() => {
           localStorage.removeItem("jw_ent_file");
-          window.location.href = "https://etdla.hduapp.com/sign";
+          window.location.href = "https://edu.limkim.cn/sign";
         });
       }
     },
@@ -201,12 +202,20 @@ export default {
         showCancelButton: false,
         type: "warning"
       }).then(() => {
-        window.location.href = "https://etdla.hduapp.com/sign";
+        window.location.href = "https://edu.limkim.cn/sign";
       }).catch(() => {
-        window.location.href = "https://etdla.hduapp.com/sign";
+        window.location.href = "https://edu.limkim.cn/sign";
       });
     else {
-      this.uName = JSON.parse(localStorage.getItem("jw_ent_file")).CompanyCode;
+      this.axios({
+      method: "get",
+      url: "/company/get",
+      params: {
+          companyCode: JSON.parse(localStorage.getItem("jw_ent_file")).CompanyCode
+        }
+    }).then((response) => {
+      this.uName = response.data.data.Name;
+    });
       this.getMsg();
       this.msgTimer = setInterval(() => {
         this.getMsg();

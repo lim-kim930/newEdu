@@ -91,12 +91,13 @@
       v-show="typeValue==='score'"
       :data="Score.slice(page*parseInt((wh - 470)/53), (page+1)*parseInt((wh - 470)/53))"
       border
+      :row-key="selectGetId"
       style="width: 100%; margin-top: 0;"
       @selection-change="handleSelectionChange"
       @sort-change="sortChange"
       @filter-change="filterHandler"
     >
-      <el-table-column type="selection" width="55" :selectable="selectable"></el-table-column>
+      <el-table-column type="selection" width="55" :reserve-selection="true" :selectable="selectable"></el-table-column>
       <el-table-column prop="Value.CourseName.Value" label="课程"></el-table-column>
       <el-table-column prop="Term" label="学期" width="150"></el-table-column>
       <el-table-column prop="Value.CourseCode.Value" label="课程号"></el-table-column>
@@ -159,8 +160,8 @@
       <h4>请联系教务处修改后返回系统，检查无误后继续完成成绩确认</h4>
       <h4>教务处联系信息:</h4>
       <div class="content">
-        <span>电话: 0571-86915011</span>
-        <span>邮箱地址: hdujwc@hdu.edu.cn</span>
+        <span>电话: 0571-8691****</span>
+        <span>邮箱地址:***jwc@***.edu.cn</span>
         <span>地址: 行政楼</span>
       </div>
       <el-button @click="$refs.drawer.closeDrawer()" style="margin: 20px 0 0 50px; width: 100px">确 定</el-button>
@@ -225,6 +226,9 @@ export default {
   },
   props: ["globalFile", "wh"],//拿到infoConfirmed页面file
   methods: {
+    selectGetId(row) {
+      return row.Value.CourseCode.Value;
+    },
     selectable(row) {
       return row.Confirmed.value === "warning" ? true : false;
     },

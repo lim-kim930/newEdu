@@ -69,7 +69,7 @@ export default {
       else {
         localStorage.setItem("jw_manager_file", JSON.stringify({ "name": this.uName }))
       }
-      window.location.href = "https://etdla.hduapp.com/manager"
+      window.location.href = "https://edu.limkim.cn/manager"
     },
   },
 };

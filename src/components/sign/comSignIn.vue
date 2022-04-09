@@ -53,7 +53,7 @@ export default {
   methods: {
     test() {//测试登录，使用指定的学号和token
       // localStorage.setItem("jw_student_file", JSON.stringify({"token":"52bae146-f956-42f5-b3af-b9378710954a","staffID":"18271126"}))
-      // window.location.href = "https://etdla.hduapp.com/student"
+      // window.location.href = "https://edu.limkim.cn/student"
       this.$router.push("/testSignIn");
     },
     byHDU() {

@@ -43,7 +43,7 @@
               style="float: right"
               @click.stop="deleteMsg(item.ShareLinkID, item.index, item.Read)"
             >删除</el-link>
-            <h5>就读学校: {{item.SchoolCode === "1"?"杭州电子科技大学":item.SchoolCode}}</h5>
+            <h5>就读学校: {{item.SchoolCode === "1"?"******大学":item.SchoolCode}}</h5>
             <h5>就读专业: {{item.MajorName}}</h5>
             <h5>应聘岗位: {{item.TargetJob}}</h5>
             <h5>过期时间: {{item.date}}</h5>

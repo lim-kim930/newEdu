@@ -20,6 +20,7 @@
       @func3="getFrequency"
       :frequency="frequency"
       :wh="wh"
+      :uName="uName"
     ></router-view>
   </el-form>
 </template>
@@ -31,7 +32,7 @@ export default {
       loading: false
     };
   },
-  props: ["wh", "received", "frequency"],
+  props: ["wh", "received", "frequency", "uName"],
   methods: {
     getReceived(received) {
       this.$emit("func", received);

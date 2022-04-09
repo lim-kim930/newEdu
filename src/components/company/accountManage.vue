@@ -87,11 +87,11 @@ export default {
           showCancelButton: false,
           type: "success"
         }).then(() => {
-          window.location.href = "https://etdla.hduapp.com/sign";
+          window.location.href = "https://edu.limkim.cn/sign";
         }).catch(() => {
-          window.location.href = "https://etdla.hduapp.com/sign";
+          window.location.href = "https://edu.limkim.cn/sign";
         });
-        window.location.href = "https://etdla.hduapp.com/sign";
+        window.location.href = "https://edu.limkim.cn/sign";
         this.resetForm();
         this.loading = false;
       }).catch(() => {

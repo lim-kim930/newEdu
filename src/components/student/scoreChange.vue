@@ -28,8 +28,8 @@
       <h3 style="margin-left: 20px">请先联系教务处更改有错误的成绩信息,然后在本系统提交更改申请</h3>
       <h3 style="margin: 10px 0 0 20px">教务处联系方式:</h3>
       <div class="content">
-        <span style="dispaly: block">电话: 0571-86915011</span>
-        <span>邮箱地址: hdujwc@hdu.edu.cn</span>
+        <span style="dispaly: block">电话: 0571-8691****</span>
+        <span>邮箱地址:***jwc@***.edu.cn</span>
         <span>地址: 行政楼</span>
       </div>
       <span slot="footer" class="dialog-footer">
@@ -40,8 +40,8 @@
       <h3 style="margin-left: 20px">请先联系教务处更改有错误的成绩信息,然后在本系统提交更改申请</h3>
       <h3 style="margin: 10px 0 0 20px">教务处联系方式:</h3>
       <div class="content">
-        <span>电话: 0571-86915011</span>
-        <span>邮箱地址: hdujwc@hdu.edu.cn</span>
+        <span>电话: 0571-8691****</span>
+        <span>邮箱地址:***jwc@***.edu.cn</span>
         <span>地址: 行政楼</span>
       </div>
       <span slot="footer" class="dialog-footer">

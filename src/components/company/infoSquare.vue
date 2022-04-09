@@ -46,7 +46,7 @@
           <span style="font-size: 16px">请选择筛选条件:</span>
           <el-button type="primary" @click.stop="getInfo()" style="margin: 0 0 0 10px">点击筛选</el-button>
           <el-button type="primary" plain @click.stop="resetConditions()" style>清空</el-button>
-          <span style="width: 50%; text-align: center">{{"点击" + title + "条件"}}</span>
+          <span style="width: 50%; text-align: center; user-select: none;">{{"点击" + title + "条件"}}</span>
         </template>
         <el-form class="coditions" label-width="110px" style="user-select: none;">
           <el-form-item label="匹配规则">
@@ -171,12 +171,13 @@
       v-show="exposeData.length !== 0"
       style="width: 100%; margin-top: 20px"
       border
+      :row-key="selectGetId"
       :data="exposeData.slice(page*parseInt((wh - 440)/53), (page+1)*parseInt((wh - 440)/53))"
       :default-sort="{prop: 'id', order: 'descending'}"
       :max-height="this.wh - 270"
       @selection-change="selectionChange"
     >
-      <el-table-column type="selection" width="55"></el-table-column>
+      <el-table-column type="selection" :reserve-selection="true" width="55"></el-table-column>
       <el-table-column label="姓名" prop="Name" width="120px"></el-table-column>
       <el-table-column
         label="年级"
@@ -465,6 +466,9 @@ export default {
   },
   props: ["wh"],
   methods: {
+    selectGetId(row) {
+      return row.FileID;
+    },
     filterHandler(value, row, column) {
       const property = column['property'];
       return row[property] === value;
@@ -514,6 +518,8 @@ export default {
     batchRequest() {
       this.loading = true;
       let methods = [];
+      if (this.selectedFileID.length > 10)
+        return this.$message.error("选中的人太多啦,减少点试试吧");
       for (let i = 0; i < this.selectedFileID.length; i++) {
         methods.push(this.askRequest(this.selectedFileID[i]));
       }
@@ -564,8 +570,10 @@ export default {
               pre = { "value": this.conditions[index[i]][1] };
               break;
             case "JobTypeIntent":
+              if (this.conditions[index[i]][0] === "不限")
+                continue;
               path = ["data_map", "career_intent", "*", "JobTypeIntent"];
-              pre = { "value": this.conditions[index[i]][1] };
+              pre = { "value": this.conditions[index[i]][0] };
               break;
             default:
               path = ["data_map", "profile", "*", index[i]];
@@ -592,17 +600,21 @@ export default {
         for (let i = 0; i < result.length; i++) {
           this.total++;
           // 把FileID也放进去
-          let data = result[i].Source.data_map.profile[result[i].FileID];
-          if (data.Name) {
-            if (data.Name.length === 2)
-              data.Name = data.Name.substr(0, 1) + "*";
-            else {
-              let name = data.Name.substr(0, 1);
-              for (let i = 0; i < (data.Name.length - 2); i++)
-                name += "*";
-              data.Name = name + data.Name.substr(data.Name.length - 1);
-            }
-          }
+          let data = {};
+          if (result[i].Source.data_map)
+            data = result[i].Source.data_map.profile[result[i].FileID];
+          else if (result[i].Source.profile)
+            data = result[i].Source.profile[result[i].FileID];
+          // if (data.Name) {
+          //   if (data.Name.length === 2)
+          //     data.Name = data.Name.substr(0, 1) + "*";
+          //   else {
+          //     let name = data.Name.substr(0, 1);
+          //     for (let i = 0; i < (data.Name.length - 2); i++)
+          //       name += "*";
+          //     data.Name = name + data.Name.substr(data.Name.length - 1);
+          //   }
+          // }
           if (data.ClassCode)
             data.Grade = "20" + data.ClassCode.substr(0, 2);
           else
@@ -610,9 +622,6 @@ export default {
           data.FileID = result[i].FileID;
           this.exposeData.push(data);
         }
-        this.loading = false;
-      }).catch(() => {
-        this.$message.error("获取公开信息出错啦,请稍后再试");
         this.loading = false;
       });
     },

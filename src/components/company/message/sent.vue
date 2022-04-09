@@ -74,7 +74,7 @@ export default {
       noticeMsgData: []
     };
   },
-  props: ["wh"],
+  props: ["wh", "uName"],
   methods: {
     classifySwitch(command) {
       this.classify = command;
@@ -101,6 +101,8 @@ export default {
       if (data) {
         for (let i = 0; i < data.length; i++) {
           data[i].date = new Date(+new Date(data[i].CreatedAt) + 8 * 3600 * 1000).toISOString().replace(/T/g, " ").replace(/\.[\d]{3}Z/, "");
+          console.log(this.uName);
+          data[i].Text = data[i].Text.replace(JSON.parse(localStorage.getItem("jw_ent_file")).CompanyCode, this.uName);
         }
         const newData = data.sort((a, b) => {
           return new Date(b.CreatedAt) - new Date(a.CreatedAt);

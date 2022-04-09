@@ -33,7 +33,7 @@
       >
         <el-col :span="8" class="card">
           <el-card shadow="hover" style="cursor: pointer;">
-            <h5>请求公司: {{item.TargetCompanyCode}}</h5>
+            <h5>请求公司: {{item.Name}}</h5>
             <h5>应聘岗位: {{item.TargetJobID}}</h5>
             <h5>过期时间: {{new Date(+new Date(item.ExpireAt) + 8 * 3600 * 1000).toISOString().replace(/T/g, " ").replace(/\.[\d]{3}Z/, "")}}</h5>
             <h5>
@@ -74,15 +74,29 @@ export default {
   },
   created() {
     this.$emit("func2", true);
+    let companyLists = {};
     this.axios({
-      method: "post",
-      url: "/share/lookupShareLinkForSelf",
+      method: "get",
+      url: "/company/lookup",
       headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
-      data: { "StaffID": JSON.parse(localStorage.getItem("jw_student_file")).staffID }
+      // data: { "StaffID": JSON.parse(localStorage.getItem("jw_student_file")).staffID }
+    }).then((response) => {
+      const companyList = response.data.data;
+      companyList.forEach(item => {
+        companyLists[item.CompanyCode] = item.Name;
+      });
+      return this.axios({
+        method: "post",
+        url: "/share/lookupShareLinkForSelf",
+        headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token },
+        data: { "StaffID": JSON.parse(localStorage.getItem("jw_student_file")).staffID }
+      });
     }).then((response) => {
       const newData = response.data.data.sort((a, b) => {
         return new Date(a.ExpireAt) - new Date(b.ExpireAt);
       });
+      for (let i = 0; i < newData.length; i++)
+        newData[i].Name = companyLists[newData[i].TargetCompanyCode];
       this.sentMsgData = newData;
       this.$emit("func2", false);
     }).catch(() => {

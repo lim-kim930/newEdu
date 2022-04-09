@@ -580,7 +580,7 @@ export default {
       const div = document.querySelector(".info");
       // 创建使用默认分辨率的画布
       div.appendChild(this.createHiDPICanvas(250, 250));
-      this.createSeal("杭州电子科技大学", this.blockData.hash, "交易号", "※" + this.blockData.blockNumber.split("").reverse().join("") + "※");
+      this.createSeal("******大学", this.blockData.hash, "交易号", "※" + this.blockData.blockNumber.split("").reverse().join("") + "※");
     },
     createHiDPICanvas(w, h, ratio) {// 创建高清画布
       const PIXEL_RATIO = (() => {

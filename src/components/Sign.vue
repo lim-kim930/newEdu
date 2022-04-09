@@ -2,7 +2,7 @@
   <el-container>
     <!-- 头部 -->
     <el-header class="logo">
-      <span class="tittle">教务—学业分享系统 | 高校学业核验系统</span>
+      <span class="tittle">登录</span>
     </el-header>
     <!-- 内容 -->
     <el-main :style="{ 'min-height': wh - 80 + 'px' }">
@@ -12,16 +12,6 @@
         <span style="font-size: 20px">构建安全、可信、高效的新型教务—学业分享系统</span>
       </div>
       <div class="log_content">
-        <div class="method_switch">
-          <div id="signUp" :style="codeIcon" @click="signRouteSwitch(0)">
-            <i class="el-icon-link"></i>
-            <span>企业登录</span>
-          </div>
-          <div id="signIn" :style="psIcon" @click="signRouteSwitch(1)">
-            <i class="el-icon-lock"></i>
-            <span>普通用户登录</span>
-          </div>
-        </div>
         <router-view></router-view>
       </div>
     </el-main>
@@ -97,9 +87,9 @@ export default {
     };
     this.redirect();
     if (localStorage.getItem("jw_student_file") !== null && localStorage.getItem("jw_ent_file") === null)
-      window.location.href = "https://etdla.hduapp.com/student";
+      window.location.href = "https://edu.limkim.cn/student";
     else if (localStorage.getItem("jw_student_file") === null && localStorage.getItem("jw_ent_file") !== null)
-      window.location.href = "https://etdla.hduapp.com/company";
+      window.location.href = "https://edu.limkim.cn/company";
   }
 };
 </script>
@@ -107,8 +97,7 @@ export default {
 <style scoped>
 .el-header {
   background: url(../img/logo2.png) no-repeat;
-  background-size: 90px;
-  background-position: 10px 0;
+  background-position: 10px 10px;
   background-color: #fff;
   box-shadow: 0 2px 4px 1px var(--cb-color-shadow, rgba(0, 0, 0, 0.13));
   z-index: 99;
@@ -124,7 +113,7 @@ export default {
 }
 .tittle {
   height: 80px;
-  margin-left: 100px;
+  margin-left: 200px;
   padding-left: 10px;
   font-size: 24px;
   line-height: 80px;
@@ -146,7 +135,7 @@ export default {
   margin: 110px 0 0 80px;
   width: 30%;
   max-width: 500px;
-  height: 500px;
+  height: 450px;
   background-color: rgba(255, 255, 255, 0.85);
   box-shadow: 0 2px 15px rgb(0 0 0 / 10%);
   border-radius: 10px;

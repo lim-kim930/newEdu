@@ -143,6 +143,11 @@ div {
     margin-top: 200px;
     text-align: center;
 }
+
+.error {
+    display: none;
+}
+
 .div1 p {
     float: left;
     font-size: 20px;

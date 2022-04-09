@@ -333,7 +333,11 @@ export default {
           this.loading = false;
           return;
         }
-        var content = response.data.data.Results[0].Source.data_map;
+        let content = {};
+        if (response.data.data.Results[0].Source.data_map)
+          content = response.data.data.Results[0].Source.data_map;
+        else if (response.data.data.Results[0].Source.profile)
+          content = response.data.data.Results[0].Source;
         let range = Object.keys(content);
         let profileData = [];
         let rewardData = [];
@@ -358,14 +362,14 @@ export default {
             for (let j = 0; j < profile.length; j++) {
               if (translation[profile[j]]) {
                 if (profile[j] === "Name") {
-                  if (data[profile[j]].length === 2)
-                    data[profile[j]] = data[profile[j]].substr(0, 1) + "*";
-                  else {
-                    let name = data[profile[j]].substr(0, 1);
-                    for (let i = 0; i < (data[profile[j]].length - 2); i++)
-                      name += "*";
-                    data[profile[j]] = name + data[profile[j]].substr(data[profile[j]].length - 1);
-                  }
+                  // if (data[profile[j]].length === 2)
+                  //   data[profile[j]] = data[profile[j]].substr(0, 1) + "*";
+                  // else {
+                  //   let name = data[profile[j]].substr(0, 1);
+                  //   for (let i = 0; i < (data[profile[j]].length - 2); i++)
+                  //     name += "*";
+                  //   data[profile[j]] = name + data[profile[j]].substr(data[profile[j]].length - 1);
+                  // }
                   data[profile[j]] += "(脱敏处理)";
                 }
                 profileData.push({
@@ -426,9 +430,6 @@ export default {
           }
         }
         this.tableData = [...profileData, ...rewardData, ...raceData, ...rankData, ...clubData, ...intentData, ...internshipData];
-        this.loading = false;
-      }).catch(() => {
-        this.$message.error("出错啦,请稍后再试");
         this.loading = false;
       });
     },

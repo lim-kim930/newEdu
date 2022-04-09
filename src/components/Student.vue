@@ -281,7 +281,7 @@ export default {
     logOut() {
       if (this.uName === null) {
         //没有用户信息直接定向到登录
-        location.href = "https://etdla.hduapp.com/sign";
+        location.href = "https://edu.limkim.cn/sign";
       }
       else {
         this.$confirm("确定要退出登录吗?" + (this.downloaded ? "" : "你好像还没有下载最新的学业文件到本地"), "提示", {
@@ -292,7 +292,7 @@ export default {
           //清除localStorage里的用户信息,定向到登录
           localStorage.removeItem("jw_student_file");
           localStorage.removeItem("jw_student_msg");
-          window.location.href = "https://etdla.hduapp.com/sign";
+          window.location.href = "https://edu.limkim.cn/sign";
         }).catch(() => {
           if (this.file === "")
             return;
@@ -403,9 +403,9 @@ export default {
         showCancelButton: false,
         type: "warning"
       }).then(() => {
-        window.location.href = "https://etdla.hduapp.com/sign";
+        window.location.href = "https://edu.limkim.cn/sign";
       }).catch(() => {
-        window.location.href = "https://etdla.hduapp.com/sign";
+        window.location.href = "https://edu.limkim.cn/sign";
       });
     else {
       let userData = JSON.parse(localStorage.getItem("jw_student_file"));
@@ -473,9 +473,9 @@ export default {
 
 <style scoped>
 .el-header {
-  background: url(../img/logo.png) no-repeat;
+  background: url(../img/logo2.png) no-repeat;
   background-position: 20px;
-  background-size: 300px;
+  background-size: 100px;
   background-color: #468dba;
   box-shadow: 0 2px 4px 1px var(--cb-color-shadow, rgba(0, 0, 0, 0.13));
   z-index: 99;
@@ -567,7 +567,7 @@ export default {
   width: 240px;
   height: 80px;
   line-height: 80px;
-  margin-left: 330px;
+  margin-left: 100px;
   font-size: 26px;
   color: #fff;
   font-weight: 700;
