@@ -753,7 +753,7 @@ export default {
     next() {
       this.stepActive = 1;
       this.loading = true;
-      var data = new FormData();
+      let data = new FormData();
       data.append("dataFile", this.dataFile);
       this.axios({
         method: "post",
@@ -920,6 +920,7 @@ export default {
         else
           this.$message.error("获取学业文件信息出错啦,请稍后再试");
         this.stepActive = 0;
+        this.remove();
         this.loading = false;
       });
     },

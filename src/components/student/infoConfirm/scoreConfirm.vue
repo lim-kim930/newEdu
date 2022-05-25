@@ -8,7 +8,7 @@
     >
       <i class="el-icon-success"></i> 学业文件已上传
     </el-tag>
-    <el-tag type="info" style="margin: 10px 0 0 0" v-show="file === ''" :disable-transitions="true">
+    <!-- <el-tag type="info" style="margin: 10px 0 0 0" v-show="file === ''" :disable-transitions="true">
       <i class="el-icon-error"></i> 学业文件未上传
     </el-tag>
     <el-upload
@@ -24,7 +24,7 @@
     >
       点击上传学业文件
       <i class="el-icon-upload"></i>
-    </el-upload>
+    </el-upload> -->
     <!-- <el-button
       type="primary"
       plain
@@ -33,7 +33,7 @@
       v-show="file != ''"
       style="margin-left: 10px;"
     >下载文件</el-button>-->
-    <br />
+    <!-- <br /> -->
     <span>请选择类型:</span>
     <el-select
       v-model="typeValue"
@@ -160,8 +160,8 @@
       <h4>请联系教务处修改后返回系统，检查无误后继续完成成绩确认</h4>
       <h4>教务处联系信息:</h4>
       <div class="content">
-        <span>电话: 0571-8691****</span>
-        <span>邮箱地址:***jwc@***.edu.cn</span>
+        <span>电话: 0571-86915011</span>
+        <span>邮箱地址: hdujwc@hdu.edu.cn</span>
         <span>地址: 行政楼</span>
       </div>
       <el-button @click="$refs.drawer.closeDrawer()" style="margin: 20px 0 0 50px; width: 100px">确 定</el-button>
@@ -275,11 +275,11 @@ export default {
       this.total = this.Score.length;
     },
     //文件上传成功后
-    getFile(params) {
-      this.file = params.file;
-      this.$emit("func", params.file);
-      this.getScore();
-    },
+    // getFile(params) {
+    //   this.file = params.file;
+    //   this.$emit("func", params.file);
+    //   this.getScore();
+    // },
     //删除文件
     reupload() {
       this.$refs["file-upload"].clearFiles();
@@ -291,11 +291,11 @@ export default {
       this.levelBtnDisabled = true;
       this.$emit("func", "");
     },
-    change() {
-      sessionStorage.removeItem("score");
-      sessionStorage.removeItem("level_exam");
-      sessionStorage.removeItem("hj");
-    },
+    // change() {
+    //   sessionStorage.removeItem("score");
+    //   sessionStorage.removeItem("level_exam");
+    //   sessionStorage.removeItem("hj");
+    // },
     dataURLtoFile(dataurl, filename) {
       let arr = dataurl.split(","),
         bstr = atob(arr[0]),
@@ -452,7 +452,6 @@ export default {
             }).catch((err) => {
               if (err.response.data.msg === "file hash does not equal to chain") {
                 this.$message.error("学业文件错误或者过期,请检查后再试");
-                this.reupload();
               }
               else
                 this.$message.error("获取学业文件信息出错啦,请稍后再试");

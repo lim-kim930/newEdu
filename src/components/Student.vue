@@ -7,11 +7,11 @@
       </div>
       <div class="user">
         <el-badge
-          v-show="file !== ''"
+          v-if="file !== ''"
           is-dot
           :hidden="downloaded"
           class="item"
-          style="width: 30px; height: 30px; margin-right: 20px; line-height: 30px !important"
+          style="width: 30px; height: 30px; margin-right: 15px; line-height: 30px !important"
         >
           <i
             :title="downloaded?'下载学业文件':'新的学业文件未下载'"
@@ -19,6 +19,24 @@
             style="font-size: 20px; color: #fff; cursor: pointer;"
             @click="downloadFile('学业文件.enc')"
           ></i>
+        </el-badge>
+        <el-badge
+          v-if="file === ''"
+          :hidden="true"
+          class="item"
+          style="width: 30px; height: 30px; margin-right: 15px; line-height: 30px !important"
+        >
+          <el-upload
+            ref="file-upload"
+            class="upload"
+            action="#"
+            :http-request="uploadFile"
+            :limit="1"
+            accept=".enc"
+            :show-file-list="false"
+          >
+            <i class="el-icon-upload2" title="上传学业文件" style="color: #fff; font-size:20px"></i>
+          </el-upload>
         </el-badge>
         <el-badge
           :value="received"
@@ -49,16 +67,6 @@
     <el-container>
       <!-- 侧边栏 -->
       <el-aside :style="{ 'height': wh - 100 + 'px', 'width': isCollapse?'64px':'240px' }">
-        <span
-          @click="isCollapse = !isCollapse"
-          :title="isCollapse?'展开':'收起'"
-          class="collapse"
-          :style="{'width': isCollapse?'64px':'240px'}"
-        >
-          <i style="font-size: 14px" :class="isCollapse?'el-icon-arrow-right':'el-icon-arrow-left'">
-            <span :style="{'font-size': isCollapse?'0':'14px'}">{{isCollapse?"":"点击收起"}}</span>
-          </i>
-        </span>
         <el-row class="tac">
           <el-col :span="24">
             <el-menu
@@ -113,6 +121,16 @@
             </el-menu>
           </el-col>
         </el-row>
+        <span
+          @click="isCollapse = !isCollapse"
+          :title="isCollapse?'展开':'收起'"
+          class="collapse"
+          :style="{'width': isCollapse?'64px':'240px'}"
+        >
+          <i style="font-size: 14px" :class="isCollapse?'el-icon-arrow-right':'el-icon-arrow-left'">
+            <span :style="{'font-size': isCollapse?'0':'14px'}">{{isCollapse?"":"点击收起"}}</span>
+          </i>
+        </span>
       </el-aside>
       <!-- 内容 -->
       <el-main :style="{'height': this.wh - 80 + 'px'}">
@@ -151,7 +169,7 @@
         <div style="padding: 20px 10px; color: #303133">
           <h3 style="text-indent: 1em">1.首次进入系统后,也就是在你关闭这个须知以后, 会被强制进入进行第一步————学籍确认</h3>
           <h3>检查信息无误并点击确认后, 会进入加载状态, 这个过程会有点慢, 但只会进行这一次, 所以还请耐心等待加载完毕</h3>
-          <h3>然后请并务必按照提示下载和保存好一个叫做学业文件.enc的东东, 它存储了你的所有信息</h3>
+          <h3>然后请并务必按照提示下载和保存好一个叫做学业文件.enc的文件, 它存储了你的所有信息</h3>
           <h3>因此它是你完整使用这个系统的前提, 并且一旦丢失将无法找回, 你写入的信息也将随之丢失</h3>
           <el-divider>我是分割线</el-divider>
           <h3 style="text-indent: 1em">2.在每确认/写入一次文件后, 系统内保存的文件内容都会更新, 你可以根据提示选择是否下载新的文件到本地</h3>
@@ -226,6 +244,28 @@ export default {
       if (this.file !== "")
         this.downloaded = false;
       this.file = file;
+    },
+    uploadFile(params) {
+      this.loading = true;
+      let data = new FormData();
+      data.append("dataFile", params.file);
+      this.axios({
+        method: "post",
+        url: "/dataFile/get?staffID=" + JSON.parse(localStorage.getItem("jw_student_file")).staffID,
+        headers: { "Authorization": "token " + JSON.parse(localStorage.getItem("jw_student_file")).token, 'Content-Type': 'multipart/form-data' },
+        data
+      }).then(() => {
+        this.loading = false;
+        this.file = params.file;
+      }).catch((err) => {
+        if (err.response.data.msg === "file hash does not equal to chain")
+          this.$message.error("学业文件错误或者过期,请检查后再试");
+        else
+          this.$message.error("获取学业文件信息出错啦,请稍后再试");
+        this.loading = false;
+        this.$refs["file-upload"].clearFiles();
+        this.file = "";
+      });
     },
     //拿到子组件传来的学籍确认状态,全局存储在student页面
     getConfirmed(confirmed) {
@@ -388,6 +428,9 @@ export default {
     windowHeight() {
       const de = document.documentElement;
       return self.innerHeight || (de && de.clientHeight) || document.body.clientHeight;
+    },
+    ddd() {
+      console.log(666);
     }
   },
   watch: {
@@ -425,6 +468,16 @@ export default {
         localStorage.setItem("jw_student_file", JSON.stringify(userData));
         this.redirect();
         if (this.xjConfirmed) {
+          if(localStorage.getItem("new_upload_notice") === null){
+            this.$notify({
+              type: "warning",
+              title: '提示',
+              message: '学业文件上传按钮已统一移至右上角',
+              duration: 0,
+              offset: 100,
+              onClose: ()=>{localStorage.setItem("new_upload_notice", true);}
+            });
+          }
           this.getMsg(userData);
           this.msgTimer = setInterval(() => {
             this.getMsg(userData);
@@ -472,10 +525,20 @@ export default {
 </script>
 
 <style scoped>
+.title {
+  float: left;
+  width: 240px;
+  height: 80px;
+  line-height: 80px;
+  margin-left: 330px;
+  font-size: 26px;
+  color: #fff;
+  font-weight: 700;
+}
 .el-header {
-  background: url(../img/logo2.png) no-repeat;
+  background: url(../img/logo.png) no-repeat;
   background-position: 20px;
-  background-size: 100px;
+  background-size: 300px;
   background-color: #468dba;
   box-shadow: 0 2px 4px 1px var(--cb-color-shadow, rgba(0, 0, 0, 0.13));
   z-index: 99;
@@ -512,6 +575,7 @@ export default {
   margin: 10px;
   border-radius: 10px;
   transition: all 0.5s;
+  position: relative;
 }
 .el-aside .collapse {
   cursor: pointer;
@@ -521,6 +585,10 @@ export default {
   line-height: 30px;
   transition: all 0.5s;
   color: #909399;
+  position: absolute;
+  bottom: 0;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
 }
 .el-aside .collapse span {
   transition: all 0.3s;
@@ -538,6 +606,15 @@ export default {
 .aside .el-menu-item {
   height: 60px !important;
   line-height: 60px !important;
+  padding-left: 10px;
+}
+.el-menu--collapse .el-menu .el-submenu, .el-menu--popup {
+  width: 100px !important;
+  min-width: 100px !important;
+}
+.el-menu--popup li {
+  padding-left: 0 !important;
+  text-align: center;
 }
 .el-avatar {
   vertical-align: middle !important;
@@ -561,16 +638,6 @@ export default {
 }
 .item .el-badge__content {
   line-height: 16px;
-}
-.title {
-  float: left;
-  width: 240px;
-  height: 80px;
-  line-height: 80px;
-  margin-left: 100px;
-  font-size: 26px;
-  color: #fff;
-  font-weight: 700;
 }
 .el-badge .is-dot {
   border: none;

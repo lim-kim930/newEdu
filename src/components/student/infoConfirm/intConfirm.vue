@@ -6,7 +6,7 @@
     element-loading-text="拼命加载中"
     label-width="80px"
   >
-    <el-tag
+    <!-- <el-tag
       type="success"
       style="margin: 10px 0 0 0"
       v-show="file != ''"
@@ -29,7 +29,7 @@
     >
       点击上传学业文件
       <i class="el-icon-upload"></i>
-    </el-upload>
+    </el-upload> -->
     <!-- <el-button
       type="primary"
       plain
@@ -45,8 +45,8 @@
       @click="downloadFile('学业文件.enc')"
       v-show="file != ''"
       style="margin-left: 10px;"
-    >下载文件</el-button> -->
-    <span style="margin-left: 10px">请选择类型:</span>
+    >下载文件</el-button>-->
+    <span>请选择类型:</span>
     <el-select
       v-model="typeValue"
       placeholder="请选择"
@@ -61,12 +61,12 @@
       ></el-option>
     </el-select>
     <el-button
-      :style="{'margin': '10px 0 0 calc(100% - 840px)'}"
+      style="margin: 10px 0 0 calc(100% - 470px)"
       v-show="typeValue === 'club' || typeValue === 'social'|| typeValue === 'volun'"
       @click="addDialogShow = true;"
     >添加经历</el-button>
     <el-button
-      :style="{'margin': '10px 0 0 calc(100% - 840px)'}"
+      style="margin: 10px 0 0 calc(100% - 470px)"
       v-show="typeValue === 'int' || typeValue === 'intention'"
       @click="save()"
     >暂时保存</el-button>
@@ -80,10 +80,13 @@
       :editable="true"
       :imageFilter="imageFilter"
       @save="save"
+      codeStyle="github-dark"
+      :ishljs="true"
       @change="change"
       v-model="content"
+      @imgAdd="imgAdd"
       :style="{'width': '99%', 'margin-top': '10px', 'height': this.wh - 310 + 'px'}"
-    />
+    ></mavonEditor>
     <el-form-item label="意向岗位" v-show="typeValue==='intention'">
       <el-form-item style="min-height: 50px">
         <h3 style="display: inline-block; padding-left: 10px;">已选择:</h3>
@@ -296,7 +299,12 @@
           <el-button @click="resetDialogForm()">重置</el-button>
         </el-form-item>
       </el-form>
-      <el-form v-show="typeValue==='volun'" label-width="140px" :model="volunAddData" :rules="rules">
+      <el-form
+        v-show="typeValue==='volun'"
+        label-width="140px"
+        :model="volunAddData"
+        :rules="rules"
+      >
         <el-form-item label="活动名称:" style="width: 300px">
           <el-input maxlength="50" v-model="volunAddData.ActName" placeholder="请填写"></el-input>
         </el-form-item>
@@ -423,6 +431,8 @@ export default {
         header: true, // 标题
         underline: false, // 下划线
         mark: true, // 标记
+        imagelink: true,
+        code: true,
         quote: true, // 引用
         ol: true, // 有序列表
         ul: true, // 无序列表
@@ -489,8 +499,29 @@ export default {
         }
       }
     },
-    imageFilter() {
-      return;
+    imageFilter(file) {
+      if (file.size >= 1000000) {
+        this.$message.error("图片文件太大啦!换个试试吧~");
+        return false;
+      }
+      return true;
+    },
+    imgAdd(filename, file) {
+      // 第一步.将图片上传到服务器.
+      let formdata = new FormData();
+      formdata.append('image', file);
+      this.axios({
+          url: 'https://api.limkim.xyz/uploadImg',
+          method: 'post',
+          data: formdata,
+          headers: { 'Content-Type': 'multipart/form-data' },
+      }).then((response) => {
+        // 第二步.将返回的url替换到文本原位置![...](0) -> ![...](url)
+        const oldImg = "![image." + file.type.split("/")[1] + "]" + "(" + filename + ")";
+        const newImg = oldImg.replace("(" + filename + ")", "(" + "https://api.limkim.xyz/data/eduPic/" + response.data.data.fileName + ")");
+        this.content = this.content.replace(oldImg, newImg);
+        // mavonEditor.methods.$img2Url(filename, response.data.data.fileName);
+      });
     },
     resetDialogForm() {
       console.log(this.typeValue);
