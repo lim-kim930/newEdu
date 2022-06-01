@@ -524,7 +524,6 @@ export default {
       });
     },
     resetDialogForm() {
-      console.log(this.typeValue);
       if (this.typeValue === "club")
         this.clubAddData = {
           JobName: "",

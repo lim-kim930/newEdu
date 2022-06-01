@@ -72,16 +72,15 @@ export default {
     };
   },
   methods: {
-    getFile(params) {
-      console.log(params.file);
-    },
+    // getFile(params) {
+    //   console.log(params.file);
+    // },
     reupload() {
       this.$refs["file-upload"].clearFiles();
       this.file = "";
       this.uploaded = false;
     },
     change(response, file,) {
-      console.log(file);
       this.file = file;
       this.uploaded = true;
     },

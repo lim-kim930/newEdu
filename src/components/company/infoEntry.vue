@@ -214,8 +214,6 @@ import { provinceAndCityData, CodeToText } from "element-china-area-data";
 export default {
   data() {
     const validateNum = (rule, value, callback) => {
-      console.log(value);
-      console.log(!isNaN(value));
       if (isNaN(value) || value <= 0 || value > 1000) {
         this.form.num = "";
         callback(new Error('请输入合法数字'));

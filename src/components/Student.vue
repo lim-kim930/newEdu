@@ -428,9 +428,6 @@ export default {
     windowHeight() {
       const de = document.documentElement;
       return self.innerHeight || (de && de.clientHeight) || document.body.clientHeight;
-    },
-    ddd() {
-      console.log(666);
     }
   },
   watch: {

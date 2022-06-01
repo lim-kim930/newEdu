@@ -292,7 +292,7 @@
   </div>
 </template>
 <script>
-import { setWaterMark } from "../../watermark.js";
+import { setWaterMark } from "../../util/watermark";
 import html2canvas from "html2canvas";
 import { Base64 } from "js-base64";
 import { mavonEditor } from "mavon-editor";

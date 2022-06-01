@@ -105,7 +105,6 @@ export default {
       this.page = v - 1;
     },
     sortChange(sort) {
-      console.log(sort);
       if (sort.order)
         if (sort.order === "ascending")
           this.companyListData = this.companyListData.sort((a, b) => {

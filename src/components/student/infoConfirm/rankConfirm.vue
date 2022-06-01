@@ -148,7 +148,7 @@ export default {
       return new File([u8arr], filename, { type: "enc" });
     },
     downloadFile(filename) {
-      var Url = URL.createObjectURL(this.file);
+      const Url = URL.createObjectURL(this.file);
       const eleLink = document.createElement("a");
       eleLink.download = filename;
       eleLink.style.display = "none";

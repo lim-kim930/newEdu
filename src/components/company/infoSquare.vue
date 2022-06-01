@@ -650,7 +650,6 @@ export default {
         return this.$message.error("请选择宣讲时间");
       this.loading = true;
       const date = new Date(+new Date(this.noticeForm.StartAt) + 8 * 3600 * 1000);
-      console.log(date);
       this.noticeForm.StartAt = date.toISOString().split(".")[0] + "+08:00";
       this.axios({
         method: "post",
