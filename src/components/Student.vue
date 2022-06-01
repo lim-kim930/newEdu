@@ -439,12 +439,13 @@ export default {
     // 判断是否登录
     if (localStorage.getItem("jw_student_file") === null)
       this.$confirm("您还未登录,请前往登录", "提示", {
-        confirmButtonText: "确定",
+        confirmButtonText: "去登录",
         showCancelButton: false,
-        type: "warning"
+        type: "warning",
+        showClose: false,
+        closeOnClickModal: false,
+        closeOnPressEscape: false
       }).then(() => {
-        window.location.href = "https://edu.limkim.cn/sign";
-      }).catch(() => {
         window.location.href = "https://edu.limkim.cn/sign";
       });
     else {
@@ -484,7 +485,19 @@ export default {
           this.loading = false;
           this.noticeShow = true;
         }
-      }).catch(() => {
+      }).catch((err) => {
+        if(err.response.data.msg === "unauthorized"){
+          return this.$confirm("您还未登录,请前往登录", "提示", {
+            confirmButtonText: "去登录",
+            showCancelButton: false,
+            type: "warning",
+            showClose: false,
+            closeOnClickModal: false,
+            closeOnPressEscape: false
+          }).then(() => {
+            window.location.href = "https://edu.limkim.cn/sign";
+          });
+        }
         this.$message.error("获取学业文件状态出错啦,请稍后重试");
         this.redirect();
         this.loading = false;

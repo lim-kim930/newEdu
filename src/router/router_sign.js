@@ -1,6 +1,6 @@
 import VueRouter from "vue-router";
-import signIn from "./components/sign/signIn.vue";
-import comSignIn from "./components/sign/comSignIn.vue";
+import signIn from "../components/sign/signIn.vue";
+import comSignIn from "../components/sign/comSignIn.vue";
 // import signUp from "./components/sign/signUp.vue"
 // import testSignIn from "./components/sign/testSignIn.vue"
 
